@@ -40,7 +40,7 @@ public class OpenMenuAction extends WebElementWrapper implements Actionable {
 		
 		Sleep.wait(500);
 		try {
-			WebDriverWait wait = new WebDriverWait(getDriver(),1);
+			WebDriverWait wait = new WebDriverWait(getDriver(),5);
 			WebElement webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//ul//li//a//span[text()='" + getMenuName() + "']")));
 			webElement.click();
 		} catch (TimeoutException e) {
