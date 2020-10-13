@@ -1,0 +1,154 @@
+package com.nusantara.automate;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
+
+public class WebExchange {
+
+	Map<String, Map<String, Object>> holder = new HashMap<String, Map<String,Object>>();
+	LinkedList<Map<String, Object>> listMetaData = new LinkedList<Map<String,Object>>();
+	public static final String LOCAL_VARIABLE = "local_variable";
+	public static final String ALL_LOCAL_VARIABLE = "all_local_variable";
+	LinkedList<String> sessionList = new LinkedList<String>();
+	LinkedList<String> failedSessionList = new LinkedList<String>();
+	Map<String, Map<String, Object>> sessionHolder = new HashMap<String, Map<String,Object>>();
+	String transactionId = UUID.randomUUID().toString();
+	String sessionId = null;
+	boolean retention = false;
+	
+	public void addMetadata(Map<String, Object> metadata) {
+		listMetaData.add(metadata);
+	}
+	
+	public LinkedList<Map<String, Object>> getListMetaData() {
+		return listMetaData;
+	}
+	
+	public void clearMetaData() {
+		listMetaData.clear();
+	}
+	
+	public void clear() {
+		clearMetaData();
+		holder.clear();
+	}
+	
+	public void put(String key, Object value) {
+		if (key.startsWith("@")) {
+			String session = getCurrentSession();
+			if (getCurrentSession() == null)
+				throw new RuntimeException("Session is not created");
+			
+			Map<String, Object> localVariable = sessionHolder.get(session);
+			if (localVariable == null) {
+				localVariable = new HashMap<String, Object>();
+			}
+			localVariable.put(key.replace("@", ""), value);
+			sessionHolder.put(session, localVariable);
+		} else {
+			Map<String, Object> map = new HashMap<String, Object>();
+			if (holder.containsKey(getTransactionId())) {
+				map = holder.get(getTransactionId());
+			}
+			map.put(key, value);
+			holder.put(getTransactionId(), map);
+		}
+	}
+	
+	public Map<String, Object> getAll() {
+		return holder.get(getTransactionId());
+	}
+	
+	public Object get(String key) {
+		if (key.startsWith("@")) {
+			if (getCurrentSession() == null) 
+				throw new RuntimeException("Session is not created");
+			return getLocalVariable(key.replace("@", ""));
+		}
+		Map<String, Object> data = holder.get(getTransactionId());
+		if (data == null) return data;
+		return holder.get(getTransactionId()).get(key);
+	}
+	
+	public List<Map<String, Object>> getAllListLocalMap() {
+		List<Map<String, Object>> localMap = new ArrayList<Map<String, Object>>();		
+		for (Entry<String, Map<String, Object>> entry : sessionHolder.entrySet()) {
+			localMap.add(entry.getValue());
+		}
+		return localMap;
+	}
+	
+	public Map<String, Object> getLocalMap() {
+		return getLocalMap(getCurrentSession());
+	}
+	
+	public LinkedList<String> getSessionList() {
+		return sessionList;
+	}
+	
+	public Map<String, Map<String, Object>> getSessionHolder() {
+		return sessionHolder;
+	}
+	
+	public Map<String, Object> getLocalMap(String session) {
+		if (sessionHolder.get(session) == null)
+			return new HashMap<String, Object>();
+		return sessionHolder.get(session);
+	}
+	
+	public Object getLocalVariable(String key) {
+		return getLocalMap().get(key);
+	}
+
+	public Object getLocalVariable(String session, String key) {
+		return getLocalMap(session).get(key);
+	}
+
+	public void setCurrentSession(String sessionId) {
+		this.sessionId = sessionId;
+	}
+	
+	public String createSession() {
+		sessionId = UUID.randomUUID().toString();
+		sessionList.add(sessionId);
+		return sessionId;
+	}
+	
+	public String getCurrentSession() {
+		return sessionId;
+	}
+	
+	public String getTransactionId() {
+		return transactionId;
+	}
+	
+	public void setRetention(boolean retention) {
+		this.retention = retention;
+	}
+	
+	public void addFailedSession(String sessionId) {
+		failedSessionList.add(sessionId);
+	}
+	
+	public LinkedList<String> getFailedSessionList() {
+		return failedSessionList;
+	}
+	
+	public boolean isSessionFailed(String sessionId) {
+		return failedSessionList.contains(sessionId);
+	}
+	public boolean isRetention() {
+		return retention;
+	}
+	
+	public static void main(String[] args) {
+		WebExchange w = new WebExchange();
+		w.put("@contract", "HELOOO");
+		System.out.println(w.get("@contract"));
+	}
+}
