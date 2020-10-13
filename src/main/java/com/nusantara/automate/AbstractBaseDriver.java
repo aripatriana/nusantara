@@ -12,6 +12,12 @@ import org.springframework.beans.factory.annotation.Value;
 import com.google.common.base.Function;
 import com.nusantara.automate.window.WindowScreen;
 
+/**
+ * Base class for control and access to element of browser page
+ * 
+ * @author ari.patriana
+ *
+ */
 public abstract class AbstractBaseDriver {
 
 	private final int TIMEOUT_IN_SECOND = 15;

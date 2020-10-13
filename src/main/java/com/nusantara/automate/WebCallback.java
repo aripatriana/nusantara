@@ -4,6 +4,12 @@ import org.openqa.selenium.WebElement;
 
 import com.nusantara.automate.exception.FailedTransactionException;
 
+/**
+ * The implementation of callback that support browser manager
+ * 
+ * @author ari.patriana
+ *
+ */
 public abstract class WebCallback extends WebElementWrapper implements Callback {
 
 	private String successId;

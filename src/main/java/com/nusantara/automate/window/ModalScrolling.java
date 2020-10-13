@@ -5,6 +5,12 @@ import java.math.RoundingMode;
 
 import org.openqa.selenium.JavascriptExecutor;
 
+/**
+ * This represent of modal or popup scrolling in browser page
+ * 
+ * @author ari.patriana
+ *
+ */
 public class ModalScrolling implements Scrolling {
 
 	private JavascriptExecutor js;

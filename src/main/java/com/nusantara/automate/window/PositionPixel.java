@@ -1,5 +1,11 @@
 package com.nusantara.automate.window;
 
+/**
+ * Hold the value of pixel coordinate
+ * 
+ * @author ari.patriana
+ *
+ */
 public class PositionPixel {
 
 	private int x;

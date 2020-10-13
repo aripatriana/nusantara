@@ -3,6 +3,11 @@ package com.nusantara.automate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Basic script that represented in y file
+ * @author ari.patriana
+ *
+ */
 public class BasicScript {
 
 	public final static String LOGIN = "login";
@@ -17,15 +22,15 @@ public class BasicScript {
 	
 	public final static String REJECT = "reject";
 	public final static String REJECT_DETAIL = "rejectDetail";
-	public final static String MULTIPLE_REJECT = "multipleReject";
+	public final static String MULTIPLE_REJECT = "rejectMultiple";
 	public final static String APPROVE = "approve";
 	public final static String APPROVE_DETAIL = "approveDetail";
-	public final static String MULTIPLE_APPROVE = "multipleApprove";
+	public final static String MULTIPLE_APPROVE = "approveMultiple";
 	public final static String VALIDATE = "validate";
 	public final static String UPLOAD = "upload";
 	public final static String CHECK = "check";
 	public final static String CHECK_DETAIL = "checkDetail";
-	public final static String MULTIPLE_CHECK = "multipleCheck";
+	public final static String MULTIPLE_CHECK = "checkMultiple";
 	public final static String SEARCH = "search";
 	
 

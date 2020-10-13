@@ -8,6 +8,12 @@ import com.nusantara.automate.WebElementWrapper;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.util.Sleep;
 
+/**
+ * The action for select the product choosen
+ *  
+ * @author ari.patriana
+ *
+ */
 public class ProductSelectorAction extends WebElementWrapper implements Actionable {
 
 	Logger log = LoggerFactory.getLogger(ProductSelectorAction.class);

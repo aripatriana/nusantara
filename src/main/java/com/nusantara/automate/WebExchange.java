@@ -8,6 +8,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+/**
+ * This object like the memory that hold the object which can be accessed for all implementation of actionable class
+ * and this support for the operation of session
+ * 
+ * @author ari.patriana
+ *
+ */
 public class WebExchange {
 
 	Map<String, Map<String, Object>> holder = new HashMap<String, Map<String,Object>>();

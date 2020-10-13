@@ -1,7 +1,15 @@
-package com.nusantara.automate;
+package com.nusantara.automate.util;
 
 import java.util.Map;
 
+/**
+ * The helper for simple entry
+ * 
+ * @author ari.patriana
+ *
+ * @param <K>
+ * @param <V>
+ */
 public class SimpleEntry<K, V> implements Map.Entry<K, V>{
 	    private final K key;
 	    private V value;

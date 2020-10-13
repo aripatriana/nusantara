@@ -14,6 +14,12 @@ import com.nusantara.automate.util.LoginInfo;
 import com.nusantara.automate.util.Sleep;
 
 
+/**
+ * The action for access login
+ * 
+ * @author ari.patriana
+ *
+ */
 public class LoginFormAction extends WebElementWrapper implements Actionable {
 
 	Logger log = LoggerFactory.getLogger(LoginFormAction.class);

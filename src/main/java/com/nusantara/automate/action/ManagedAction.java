@@ -10,6 +10,11 @@ import com.nusantara.automate.DefaultBaseDriver;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.exception.FailedTransactionException;
 
+/**
+ * The action is managed by the session
+ * @author ari.patriana
+ *
+ */
 public class ManagedAction extends DefaultBaseDriver implements Actionable {
 
 	private LinkedList<Actionable> actionableList = new LinkedList<Actionable>();

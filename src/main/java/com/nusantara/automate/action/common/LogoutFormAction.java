@@ -8,6 +8,12 @@ import com.nusantara.automate.WebElementWrapper;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.util.Sleep;
 
+/**
+ * The action for logout
+ * 
+ * @author ari.patriana
+ *
+ */
 public class LogoutFormAction extends WebElementWrapper implements Actionable {
 	Logger log = LoggerFactory.getLogger(LogoutFormAction.class);
 	

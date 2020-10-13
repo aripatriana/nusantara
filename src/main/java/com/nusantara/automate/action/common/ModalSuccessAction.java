@@ -23,6 +23,12 @@ import com.nusantara.automate.exception.FailedTransactionException;
 import com.nusantara.automate.util.Sleep;
 
 
+/**
+ * The action for handling the modal page response 
+ * 
+ * @author ari.patriana
+ *
+ */
 public class ModalSuccessAction extends WebElementWrapper implements Actionable {
 	Logger log = LoggerFactory.getLogger(ModalSuccessAction.class);
 	

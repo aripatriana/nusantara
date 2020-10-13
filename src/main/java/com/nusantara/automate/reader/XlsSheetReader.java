@@ -2,6 +2,13 @@ package com.nusantara.automate.reader;
 
 import java.util.LinkedHashMap;
 
+/**
+ * Base class for read sheet in excel file
+ * 
+ * @author ari.patriana
+ *
+ * @param <T>
+ */
 public class XlsSheetReader<T> {
 
 	XlsRowReader<T> rw;

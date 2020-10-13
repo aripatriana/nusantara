@@ -5,6 +5,12 @@ import java.math.RoundingMode;
 
 import org.openqa.selenium.JavascriptExecutor;
 
+/**
+ * This represent of window scrolling in browser page
+ * 
+ * @author ari.patriana
+ *
+ */
 public class WindowScrolling implements Scrolling {
 	
 	private JavascriptExecutor js;

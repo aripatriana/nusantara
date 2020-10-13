@@ -10,6 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+/**
+ * This used for process data file
+ * 
+ * @author ari.patriana
+ *
+ */
 public class FileRetention implements Retention {
 
 	Logger log = LoggerFactory.getLogger(FileRetention.class);

@@ -1,5 +1,11 @@
 package com.nusantara.automate.window;
 
+/**
+ * Interface class for scrolling in browser page
+ * 
+ * @author ari.patriana
+ *
+ */
 public interface Scrolling {
 
 	public final int MAX_PIXEL_HEIGHT = 5000;

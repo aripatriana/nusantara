@@ -18,9 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.DriverManager;
-import com.nusantara.automate.SimpleEntry;
 import com.nusantara.automate.io.FileImageIO;
 import com.nusantara.automate.util.IDUtils;
+import com.nusantara.automate.util.SimpleEntry;
 
 public class WindowScreen {
 

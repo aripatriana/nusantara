@@ -20,6 +20,12 @@ import com.nusantara.automate.annotation.MapSession;
 import com.nusantara.automate.annotation.MapType;
 import com.nusantara.automate.util.ReflectionUtils;
 
+/**
+ * Manage context of object and it is used for direct injection
+ * 
+ * @author ari.patriana
+ *
+ */
 public class ContextLoader {
 	
 	private static WebExchange webExchange;
@@ -61,7 +67,7 @@ public class ContextLoader {
 			map.put("local_variable", getWebExchange().getLocalMap());		
 			map.putAll(getWebExchange().getLocalMap());
 		}
-		setObject(object, getWebExchange().getAll());
+		setObject(object, map);
 	}
 	
 	public static void setObjectLocal(Object object) {
@@ -109,7 +115,7 @@ public class ContextLoader {
             	 fields.put(field.getName(), field.getAnnotation(Value.class).value());
             } else if (field.isAnnotationPresent(FetchSession.class)) {
             	try {
-                	if (!field.getClass().equals(List.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be List");
+                	if (!field.getType().equals(List.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be List");
                 	ReflectionUtils.setProperty(object, field.getName(), metadata.get("all_local_variable"));
             	} catch (InstantiationException e) {
 					e.printStackTrace();
@@ -166,7 +172,7 @@ public class ContextLoader {
 				}
             } else if (field.isAnnotationPresent(MapSession.class)) {
             	try {
-                	if (!field.getClass().equals(Map.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be Map");
+                	if (!field.getType().equals(Map.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be Map");
                 	ReflectionUtils.setProperty(object, field.getName(), metadata.get("local_variable"));
             	} catch (InstantiationException e) {
 					e.printStackTrace();

@@ -18,6 +18,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.nusantara.automate.FileReader;
 
+/**
+ * Read xls file and process it to the format that known by the system
+ * this support for multiple list in a row
+ * 
+ * @author ari.patriana
+ *
+ */
 public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 
 	private File file;

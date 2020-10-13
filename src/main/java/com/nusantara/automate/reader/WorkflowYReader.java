@@ -7,6 +7,12 @@ import com.nusantara.automate.BasicScript;
 import com.nusantara.automate.exception.ScriptInvalidException;
 import com.nusantara.automate.workflow.WorkflowEntry;
 
+/**
+ * Translate the script inside y file and convert it to the WorkflowEntry that system can read
+ * 
+ * @author ari.patriana
+ *
+ */
 public class WorkflowYReader {
 
 	private SimpleFileReader fileReader;

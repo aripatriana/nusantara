@@ -3,6 +3,12 @@ package com.nusantara.automate;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Hold the configuration properties
+ * 
+ * @author ari.patriana
+ *
+ */
 public class ConfigLoader {
 
 	private static Map<String, Object> configMap = new HashMap<String, Object>();

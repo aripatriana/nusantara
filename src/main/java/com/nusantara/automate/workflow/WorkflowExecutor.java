@@ -8,7 +8,6 @@ import com.nusantara.automate.Actionable;
 import com.nusantara.automate.BasicScript;
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.FileRetention;
-import com.nusantara.automate.SimpleEntry;
 import com.nusantara.automate.action.common.LoginFormAction;
 import com.nusantara.automate.action.common.LogoutFormAction;
 import com.nusantara.automate.action.common.ProductSelectorAction;
@@ -16,8 +15,15 @@ import com.nusantara.automate.handler.ModalType;
 import com.nusantara.automate.reader.MadnessXlsFileReader;
 import com.nusantara.automate.util.LoginInfo;
 import com.nusantara.automate.util.ReflectionUtils;
+import com.nusantara.automate.util.SimpleEntry;
 import com.nusantara.automate.util.Sleep;
 
+/**
+ * The execution of workflow comes from here
+ * 
+ * @author ari.patriana
+ *
+ */
 public class WorkflowExecutor {
 
 	Logger log = LoggerFactory.getLogger(WorkflowExecutor.class);

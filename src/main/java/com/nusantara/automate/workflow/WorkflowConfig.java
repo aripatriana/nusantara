@@ -7,9 +7,15 @@ import java.util.Map;
 
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.Menu;
-import com.nusantara.automate.SimpleEntry;
 import com.nusantara.automate.handler.SubmitHandler;
+import com.nusantara.automate.util.SimpleEntry;
 
+/**
+ * Hold any workflow configuration
+ * 
+ * @author ari.patriana
+ *
+ */
 public class WorkflowConfig {
 
 	private Map<String, SimpleEntry<Class<?>, Object[]>> functionMap = new HashMap<String, SimpleEntry<Class<?>,Object[]>>();

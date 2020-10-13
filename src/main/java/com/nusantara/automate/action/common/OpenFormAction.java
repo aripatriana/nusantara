@@ -15,6 +15,12 @@ import com.nusantara.automate.WebElementWrapper;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.util.Sleep;
 
+/**
+ * The action for open the form page
+ * 
+ * @author ari.patriana
+ *
+ */
 public class OpenFormAction extends WebElementWrapper implements Actionable, MenuAwareness {
 
 	Logger log = LoggerFactory.getLogger(OpenFormAction.class);

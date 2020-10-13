@@ -9,9 +9,15 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-import com.nusantara.automate.SimpleEntry;
+import com.nusantara.automate.util.SimpleEntry;
 import com.nusantara.automate.window.PositionPixel;
 
+/**
+ * The tools for customized image file
+ * 
+ * @author ari.patriana
+ *
+ */
 public class FileImageIO {
 
 	public static BufferedImage createBufferedImage(int width, int height) {

@@ -6,6 +6,12 @@ import java.util.Scanner;
 
 import com.nusantara.automate.FileReader;
 
+/**
+ * Read any file and process it as simple format
+ *  
+ * @author ari.patriana
+ *
+ */
 public class SimpleFileReader implements FileReader<String> {
 
 	private File file;

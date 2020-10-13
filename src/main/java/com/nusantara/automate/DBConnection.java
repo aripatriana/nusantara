@@ -10,6 +10,12 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 
+/**
+ * Used for query to database
+ * 
+ * @author ari.patriana
+ *
+ */
 public class DBConnection {
 
 	@Value(value = "simple.datasource.url")

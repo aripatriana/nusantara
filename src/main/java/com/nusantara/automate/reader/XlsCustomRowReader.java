@@ -10,6 +10,12 @@ import org.apache.poi.ss.usermodel.Sheet;
 import com.nusantara.automate.util.XlsUtils;
 
 
+/**
+ * The implementation for read a row of excel
+ * 
+ * @author ari.patriana
+ *
+ */
 public class XlsCustomRowReader extends XlsRowReader<LinkedHashMap<String, Object>> {
 
 	public XlsCustomRowReader(Sheet sheet) throws FileNotFoundException,

@@ -3,6 +3,12 @@ package com.nusantara.automate.workflow;
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.RunTestWorkflow;
 
+/**
+ * Default implementation of RunTestWorkflow
+ * 
+ * @author ari.patriana
+ *
+ */
 public class RunTestWorkflowExecutable implements RunTestWorkflow, WorkflowConfigAwareness {
 
 	WorkflowConfig workflowConfig;

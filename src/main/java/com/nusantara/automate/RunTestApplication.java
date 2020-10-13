@@ -26,6 +26,12 @@ import com.nusantara.automate.workflow.WorkflowEntry;
 
 import ch.qos.logback.classic.util.ContextInitializer;
 
+/**
+ * The main class for startup all of flow process of the system
+ * 
+ * @author ari.patriana
+ *
+ */
 public class RunTestApplication {
 
 	private static final Logger log = LoggerFactory.getLogger(RunTestApplication.class);

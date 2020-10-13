@@ -5,6 +5,12 @@ import org.openqa.selenium.WebElement;
 
 import com.nusantara.automate.util.Sleep;
 
+/**
+ * Base class for any object that need the browser manager capabilities
+ * 
+ * @author ari.patriana
+ *
+ */
 public abstract class WebElementWrapper extends DefaultBaseDriver {
 	
 	protected void setInputField(String id, String value) {
@@ -93,7 +99,7 @@ public abstract class WebElementWrapper extends DefaultBaseDriver {
 	protected void clickCheckBoxTableSearch(String id, String query) {
 		WebElement webElement = findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']");
 		String index = webElement.getAttribute("data-index");
-		clickCheckBoxTableSearch(id, index);
+		clickCheckBoxTableSearch(id, Integer.valueOf(index));
 	}
 	
 	protected void clickTableSearch(String id) {
@@ -109,6 +115,19 @@ public abstract class WebElementWrapper extends DefaultBaseDriver {
 		findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//span[@class='page-list']//span//button").click();
 		findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//span[@class='page-list']//span//ul//li//a[text()='" + value + "']").click();
 	}
+	
+	protected void clickPageFirst(String formId) {
+		WebElement webElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']/li[contains(@class,'page-first')]/a");
+		if (webElement.isEnabled())
+			webElement.click();
+	}
+	
+	protected void clickPageLast(String formId) {
+		WebElement webElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']/li[contains(@class,'page-last')]/a");
+		if (webElement.isEnabled())
+			webElement.click();		
+	}
+
 	
 	public String getTextById(String id) {
 		return findElementById(id).getText();

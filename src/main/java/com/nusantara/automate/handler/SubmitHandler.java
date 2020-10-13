@@ -3,6 +3,12 @@ package com.nusantara.automate.handler;
 import com.nusantara.automate.exception.MethodNotSupportedException;
 import com.nusantara.automate.workflow.Workflow;
 
+/**
+ * Base class for handle the event of form page
+ * 
+ * @author ari.patrana
+ *
+ */
 public interface SubmitHandler {
 
 	public void validate(Workflow workflow) throws MethodNotSupportedException;

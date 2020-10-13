@@ -8,6 +8,12 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Sleeper;
 
+/**
+ * The custom object for delay the operation of element
+ * 
+ * @author ari.patriana
+ *
+ */
 public class WebElementWait extends FluentWait<WebElement>  {
     public final static long DEFAULT_SLEEP_TIMEOUT = 500;
 

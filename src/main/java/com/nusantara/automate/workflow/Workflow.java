@@ -29,6 +29,12 @@ import com.nusantara.automate.action.common.OpenMenuAction;
 import com.nusantara.automate.exception.FailedTransactionException;
 
 
+/**
+ * Main workflow
+ * 
+ * @author ari.patriana
+ *
+ */
 public class Workflow {
 
 	Logger log = LoggerFactory.getLogger(Workflow.class);
@@ -242,6 +248,7 @@ public class Workflow {
 						ContextLoader.setObjectLocal(actionable);
 						try {
 							executeSafeActionable(actionable);
+							((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 						} catch (FailedTransactionException e) {
 							webExchange.addFailedSession(sessionId);
 							log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
@@ -265,6 +272,7 @@ public class Workflow {
 					
 					try {
 						executeSafeActionable(actionable);
+						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 					} catch (FailedTransactionException e) {
 						log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
 						log.error("ERROR " + e.getMessage());

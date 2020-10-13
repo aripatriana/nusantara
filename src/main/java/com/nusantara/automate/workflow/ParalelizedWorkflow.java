@@ -8,6 +8,12 @@ import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.MenuAwareness;
 import com.nusantara.automate.WebExchange;
 
+/**
+ * Workflow that supports for session operation
+ * 
+ * @author ari.patriana
+ *
+ */
 public class ParalelizedWorkflow extends Workflow {
 
 	

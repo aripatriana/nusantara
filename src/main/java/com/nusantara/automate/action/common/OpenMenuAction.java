@@ -13,6 +13,12 @@ import com.nusantara.automate.WebElementWrapper;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.util.Sleep;
 
+/**
+ * The action for open the menu trees
+ * 
+ * @author ari.patriana
+ *
+ */
 public class OpenMenuAction extends WebElementWrapper implements Actionable {
 
 	Logger log = LoggerFactory.getLogger(OpenMenuAction.class);

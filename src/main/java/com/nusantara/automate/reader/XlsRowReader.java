@@ -7,6 +7,13 @@ import java.util.Iterator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
+/**
+ * Base class for read row in excel file
+ * 
+ * @author ari.patriana
+ *
+ * @param <T>
+ */
 public abstract class XlsRowReader<T> {
 	Iterator<Row> iterator;
 	

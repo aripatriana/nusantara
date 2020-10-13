@@ -1,5 +1,11 @@
 package com.nusantara.automate.workflow;
 
+/**
+ * This class represent a line of script inside y file
+ * 
+ * @author ari.patriana
+ *
+ */
 public class WorkflowEntry {
 
 	private boolean clearSession;

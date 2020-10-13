@@ -3,6 +3,12 @@ package com.nusantara.automate;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
+/**
+ * Manage the browser driver
+ * 
+ * @author ari.patriana
+ *
+ */
 public class DriverManager {
 
 	private static WebDriver wd;
