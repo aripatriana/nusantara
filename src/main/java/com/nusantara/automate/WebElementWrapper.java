@@ -117,15 +117,17 @@ public abstract class WebElementWrapper extends DefaultBaseDriver {
 	}
 	
 	protected void clickPageFirst(String formId) {
-		WebElement webElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']/li[contains(@class,'page-first')]/a");
+		WebElement webElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-first')]//a");
 		if (webElement.isEnabled())
 			webElement.click();
 	}
 	
 	protected void clickPageLast(String formId) {
-		WebElement webElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']/li[contains(@class,'page-last')]/a");
-		if (webElement.isEnabled())
-			webElement.click();		
+		WebElement liElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]");
+		if (!liElement.getAttribute("class").contains("disabled")) {
+			WebElement aElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]//a");
+			aElement.click();		
+		}		
 	}
 
 	

@@ -107,15 +107,15 @@ public class WorkflowExecutor {
 					} else if (BasicScript.REJECT.equals(entry.getActionType())) {
 						ReflectionUtils.invokeMethod(handler, BasicScript.REJECT, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.MAIN});
 					} else if (BasicScript.REJECT_DETAIL.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.REJECT_DETAIL, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.DETAIL});
+						ReflectionUtils.invokeMethod(handler, BasicScript.REJECT, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.DETAIL});
 					} else if (BasicScript.MULTIPLE_REJECT.equals(entry.getActionType())) {
 						ReflectionUtils.invokeMethod(handler, BasicScript.MULTIPLE_REJECT, Workflow.class, workflow);
 					} else if (BasicScript.APPROVE_DETAIL.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.APPROVE_DETAIL, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.DETAIL});
+						ReflectionUtils.invokeMethod(handler, BasicScript.APPROVE, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.DETAIL});
 					} else if (BasicScript.MULTIPLE_APPROVE.equals(entry.getActionType())) {
 						ReflectionUtils.invokeMethod(handler, BasicScript.MULTIPLE_APPROVE, Workflow.class, workflow);
 					} else if (BasicScript.CHECK_DETAIL.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.CHECK_DETAIL, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.DETAIL});
+						ReflectionUtils.invokeMethod(handler, BasicScript.CHECK, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.DETAIL});
 					} else if (BasicScript.MULTIPLE_CHECK.equals(entry.getActionType())) {
 						ReflectionUtils.invokeMethod(handler, BasicScript.MULTIPLE_CHECK, Workflow.class, workflow);
 					}

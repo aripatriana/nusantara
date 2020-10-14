@@ -85,8 +85,12 @@ public class Workflow {
 	
 	private void setMenuAwareness(Menu menu, Actionable actionable) {
 		if (actionable instanceof MenuAwareness)
-			((MenuAwareness) actionable).setMenu(menu);
+			this.activeMenu = menu;
+		
+		if (actionable instanceof MenuAwareness)
+			((MenuAwareness) actionable).setMenu(menu);	
 	}
+	
 	public Workflow openMenu(Menu menu) {
 		OpenMenuAction menuAction = new OpenMenuAction(null, menu.getMenu());
 		setMenuAwareness(menu, menuAction);
@@ -96,7 +100,7 @@ public class Workflow {
 		
 		OpenFormAction formAction = new OpenFormAction(subMenuAction, menu.getMenuId(), menu.getForm());
 		setMenuAwareness(menu, formAction);
-		
+	
 		if (!activeLoop) {
 			menuAction.submit(webExchange);
 			subMenuAction.submit(webExchange);
@@ -253,6 +257,7 @@ public class Workflow {
 							webExchange.addFailedSession(sessionId);
 							log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
 							log.error("ERROR " + e.getMessage());
+							e.printStackTrace();
 						}
 					}
 				}
@@ -276,6 +281,7 @@ public class Workflow {
 					} catch (FailedTransactionException e) {
 						log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
 						log.error("ERROR " + e.getMessage());
+						e.printStackTrace();
 						webExchange.addFailedSession(sessionId);
 						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 					}
@@ -309,6 +315,7 @@ public class Workflow {
 				retryWhenException(actionable, ++retry);
 			} else {
 				log.error("ERROR " + e.getMessage());
+				e.printStackTrace();
 				throw new FailedTransactionException("Failed for transaction");
 			}	
 		}
