@@ -35,14 +35,17 @@ import ch.qos.logback.classic.util.ContextInitializer;
 public class RunTestApplication {
 
 	private static final Logger log = LoggerFactory.getLogger(RunTestApplication.class);
+	private static final String LOGBACK_FILE_PATH = "src/main/resources/logback.xml";
+	private static final String CONFIG_FILE_PATH = "/config/config.properties";
+	private static final String DRIVER_FILE_PATH = "/lib/driver/bin/chromedriver.exe";
 	
 	public static void run(Class<? extends RunTestWorkflow> clazz, String[] args) {
 		WorkflowConfig workflowConfig = null;
 		try {
-			System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "src/main/resources/logback.xml");
+			System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, LOGBACK_FILE_PATH);
 			
-			String driverPathFile = null;
-			String configPathFile = null;
+			String driverPathFile = DRIVER_FILE_PATH;
+			String configPathFile = CONFIG_FILE_PATH;
 			
 			for (String arg : args) {
 				if (arg.startsWith("-Ddriver.path=")) {
@@ -83,7 +86,6 @@ public class RunTestApplication {
 				ConfigLoader.clear();
 				ContextLoader.clear();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}
@@ -210,7 +212,6 @@ public class RunTestApplication {
 		try {
 			RunTestApplication.setWorkflowy(new WorkflowConfig());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
