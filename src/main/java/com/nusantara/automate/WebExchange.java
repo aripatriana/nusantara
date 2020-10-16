@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import com.nusantara.automate.util.MapUtils;
+
 import java.util.UUID;
 
 /**
@@ -19,6 +22,9 @@ public class WebExchange {
 
 	Map<String, Map<String, Object>> holder = new HashMap<String, Map<String,Object>>();
 	LinkedList<Map<String, Object>> listMetaData = new LinkedList<Map<String,Object>>();
+	Map<String, LinkedList<Map<String, Object>>> cachedMetaData = new HashMap<String, LinkedList<Map<String,Object>>>();
+	Map<String, LinkedList<String>> cachedMetaDataKey = new HashMap<String, LinkedList<String>>();
+	List<String> cachedSession = new ArrayList<String>();
 	public static final String LOCAL_VARIABLE = "local_variable";
 	public static final String ALL_LOCAL_VARIABLE = "all_local_variable";
 	LinkedList<String> sessionList = new LinkedList<String>();
@@ -31,9 +37,62 @@ public class WebExchange {
 	public void addMetadata(Map<String, Object> metadata) {
 		listMetaData.add(metadata);
 	}
-	
-	public LinkedList<Map<String, Object>> getListMetaData() {
+
+	public LinkedList<Map<String, Object>> getListMetaData(String menuId) {
+		String mainMenu = menuId.split("\\.")[0].toUpperCase();
+		String cahcedMenuId = mainMenu;
+		boolean emptyCached = false;
+		int indexMenuId = 0;
+		if (cachedSession.contains(getCurrentSession())) {
+			if (cachedMetaDataKey.containsKey(cahcedMenuId)) {
+				return cachedMetaData.get(cachedMetaDataKey.get(cahcedMenuId).getLast());	
+			} else {
+				emptyCached = true;
+			}
+		} else {
+			if (cachedMetaData.containsKey(cahcedMenuId)) {
+				indexMenuId++;
+				cahcedMenuId = menuId.toUpperCase() + "" + indexMenuId;
+				while(true) {
+					if (cachedMetaData.containsKey(cahcedMenuId)) {
+						indexMenuId++;
+						cahcedMenuId = mainMenu  + "" + indexMenuId;		
+					} else {
+						emptyCached = true;
+						break;
+					}
+				}
+			} else {
+				emptyCached = true;
+			}
+		}
+		
+		if (emptyCached) {
+			LinkedList<Map<String, Object>> tempListMetaData = new LinkedList<Map<String,Object>>();
+			LinkedList<Map<String, Object>> bufferListMetaData = new LinkedList<Map<String,Object>>(listMetaData);
+			for (Map<String, Object> map : bufferListMetaData) {
+				if (map.keySet().toArray()[0].toString().toUpperCase().startsWith(cahcedMenuId+".")) {
+					MapUtils.clearMapKey(cahcedMenuId + ".", map);;
+					tempListMetaData.add(map);
+				}
+			}
+			if (!tempListMetaData.isEmpty()) {
+				cachedSession.add(getCurrentSession());
+				cachedMetaData.put(cahcedMenuId, tempListMetaData);
+				LinkedList<String> cachedKey = cachedMetaDataKey.get(menuId);
+				if (cachedKey == null) cachedKey = new LinkedList<String>();
+				cachedKey.add(cahcedMenuId);
+				cachedMetaDataKey.put(mainMenu, cachedKey);
+				return tempListMetaData;	
+			}
+		}
+		
 		return listMetaData;
+	}
+	
+	public Map<String, Object> getMetaData(String menuId, int index) {
+		LinkedList<Map<String, Object>> tempListMetaData = getListMetaData(menuId);
+		return tempListMetaData.get(index);
 	}
 	
 	public void clearMetaData() {
@@ -152,10 +211,5 @@ public class WebExchange {
 	public boolean isRetention() {
 		return retention;
 	}
-	
-	public static void main(String[] args) {
-		WebExchange w = new WebExchange();
-		w.put("@contract", "HELOOO");
-		System.out.println(w.get("@contract"));
-	}
+
 }

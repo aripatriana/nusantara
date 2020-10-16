@@ -1,5 +1,8 @@
 package com.nusantara.automate.workflow;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.RunTestWorkflow;
 
@@ -11,6 +14,8 @@ import com.nusantara.automate.RunTestWorkflow;
  */
 public class RunTestWorkflowExecutable implements RunTestWorkflow, WorkflowConfigAwareness {
 
+	Logger log = LoggerFactory.getLogger(RunTestWorkflowExecutable.class);
+	
 	WorkflowConfig workflowConfig;
 	
 	@Override
@@ -21,12 +26,18 @@ public class RunTestWorkflowExecutable implements RunTestWorkflow, WorkflowConfi
 	@Override
 	public void testWorkflow() {
 		for (String scen : workflowConfig.getWorkflowScens()) {
-			Workflow workflow = ParalelizedWorkflow.configure();
-			ContextLoader.getWebExchange().put("active_scen", scen);
-			
-			WorkflowExecutor executor = new WorkflowExecutor();
-			ContextLoader.setObject(executor);
-			executor.execute(scen, workflow, workflowConfig);			
+			try {
+				Workflow workflow = ParalelizedWorkflow.configure();
+				ContextLoader.getWebExchange().put("active_scen", scen);
+				
+				WorkflowExecutor executor = new WorkflowExecutor();
+				ContextLoader.setObject(executor);
+		
+				executor.execute(scen, workflow, workflowConfig);
+			} catch (Exception e) {
+				log.error("FATAL error " + e.getMessage());
+				e.printStackTrace();
+			}			
 		}
 	}
 }

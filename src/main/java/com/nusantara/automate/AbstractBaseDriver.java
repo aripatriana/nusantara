@@ -31,6 +31,10 @@ public abstract class AbstractBaseDriver {
 	WebDriver wd;
 	WindowScreen ws;
 	
+	public AbstractBaseDriver() {
+		this(DriverManager.getDefaultDriver());
+	}
+	
 	public AbstractBaseDriver(WebDriver wd) {
 		this.wd = wd;
 		this.ws = new WindowScreen(wd);

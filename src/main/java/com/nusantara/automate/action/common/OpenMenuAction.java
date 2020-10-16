@@ -24,6 +24,7 @@ public class OpenMenuAction extends WebElementWrapper implements Actionable {
 	Logger log = LoggerFactory.getLogger(OpenMenuAction.class);
 	OpenMenuAction prevMenu;
 	String menuName;
+	int timeout = 10;
 	
 	public OpenMenuAction(OpenMenuAction prevMenu, String menuName) {
 		this.prevMenu = prevMenu;
@@ -34,17 +35,26 @@ public class OpenMenuAction extends WebElementWrapper implements Actionable {
 		return menuName;
 	}
 	
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
+	
+	public int getTimeout() {
+		return timeout;
+	}
+	
 	@Override
 	public void submit(WebExchange webExchange) {
 		log.info("Open Menu " + menuName);
 		
 		Sleep.wait(500);
 		try {
-			WebDriverWait wait = new WebDriverWait(getDriver(),5);
+			WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
 			WebElement webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//ul//li//a//span[text()='" + getMenuName() + "']")));
 			webElement.click();
 		} catch (TimeoutException e) {
 			if (prevMenu != null) {
+				prevMenu.setTimeout(3);
 				prevMenu.submit(webExchange);
 				this.submit(webExchange);
 			} else {

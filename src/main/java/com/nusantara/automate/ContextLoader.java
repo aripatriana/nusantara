@@ -54,9 +54,23 @@ public class ContextLoader {
 		}
 		return false;
 	}
+	
 	public static boolean isLocalVariable(Object object) {
 		Class<?> clazz = object.getClass();
 		return isLocalVariable(clazz);
+	}
+	
+	public static boolean isCompositeVariable(Class<?> clazz) {
+		if (clazz.isAnnotationPresent(MapSerializable.class)) {
+			MapType type = clazz.getAnnotation(MapSerializable.class).type();
+			return type.equals(MapType.COMPOSITE);					
+		}
+		return false;
+	}
+	
+	public static boolean isCompositeVariable(Object object) {
+		Class<?> clazz = object.getClass();
+		return isCompositeVariable(clazz);
 	}
 	
 	public static void setObject(Object object) {
@@ -64,7 +78,7 @@ public class ContextLoader {
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
 			map.put("all_local_variable", getWebExchange().getAllListLocalMap());
-			map.put("local_variable", getWebExchange().getLocalMap());		
+			//map.put("local_variable", getWebExchange().getLocalMap());		
 			map.putAll(getWebExchange().getLocalMap());
 		}
 		setObject(object, map);

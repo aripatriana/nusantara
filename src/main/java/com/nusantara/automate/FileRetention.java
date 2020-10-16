@@ -9,6 +9,9 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nusantara.automate.exception.XlsSheetStyleException;
+import com.nusantara.automate.reader.MultiLayerXlsFileReader;
+
 
 /**
  * This used for process data file
@@ -20,7 +23,7 @@ public class FileRetention implements Retention {
 
 	Logger log = LoggerFactory.getLogger(FileRetention.class);
 	
-	private FileReader<Map<String, Object>> fileReader;
+	protected FileReader<Map<String, Object>> fileReader;
 	
 	public FileRetention(FileReader<Map<String, Object>> fileReader) {
 		this.fileReader = fileReader;
@@ -35,19 +38,27 @@ public class FileRetention implements Retention {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void setHeaderInfo(Map<String, Object> header, Map<String, Object> data) {
+	protected void setHeaderInfo(Map<String, Object> header, Map<String, Object> data) {
 		Map<String, Object> copied = new LinkedHashMap<String, Object>(data);
 		data.clear();
 		for (Entry<String, Object> entry : copied.entrySet()) {
-			Object title = header.get(entry.getKey());
+			String key[] = entry.getKey().split("\\.");
+			
+			String entryKey = key[0];
+			if (key.length > 1) entryKey = key[1];
+
+			Object title = header.get(entryKey);
 			if (title instanceof Map) {
 				Map<String, Object> h = (Map<String, Object>) title;
 				Collection<Map<String, Object>> d = (Collection<Map<String, Object>>) entry.getValue();
 				for (Map<String, Object> v : d) {
 					setHeaderInfo(h, v);
 				}
+
 				data.put(entry.getKey().toUpperCase(), d);
 			} else {
+				if (key.length > 1)
+					title = key[0].concat(".".concat(title.toString()));
 				data.put(title.toString().toUpperCase().replace(" ", "_"), entry.getValue());	
 			}
 				
@@ -64,7 +75,12 @@ public class FileRetention implements Retention {
 
 			log.info("Read metadata : " + metadata);
 		}
+		
 		fileReader.close();
+	}
+	
+	public static void main(String[] args) throws XlsSheetStyleException {
+		new FileRetention(new MultiLayerXlsFileReader(new File("D:\\tscen-001.xlsx"))).perform(new WebExchange());;
 	}
 
 }

@@ -35,8 +35,8 @@ public class ParalelizedWorkflow extends Workflow {
 			throw new RuntimeException("Loop must be initialized");	
 		}
 		
-		if (webExchange.getListMetaData() != null) {
-			log.info("Total data-row " + webExchange.getListMetaData().size());
+		if (webExchange.getListMetaData(getActiveMenu().getId()) != null) {
+			log.info("Total data-row " + webExchange.getListMetaData(getActiveMenu().getId()).size());
 			try {
 				for (Actionable actionable : actionableForLoop) {
 					
@@ -49,8 +49,6 @@ public class ParalelizedWorkflow extends Workflow {
 				log.info("Transaction interrupted ");
 				e.printStackTrace();
 			}	
-			
-			
 		}
 			
 		webExchange.setRetention(Boolean.FALSE);

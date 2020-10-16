@@ -84,11 +84,10 @@ public class Workflow {
 	}
 	
 	private void setMenuAwareness(Menu menu, Actionable actionable) {
-		if (actionable instanceof MenuAwareness)
+		if (actionable instanceof MenuAwareness) {
 			this.activeMenu = menu;
-		
-		if (actionable instanceof MenuAwareness)
-			((MenuAwareness) actionable).setMenu(menu);	
+			((MenuAwareness) actionable).setMenu(menu);
+		}
 	}
 	
 	public Workflow openMenu(Menu menu) {
@@ -176,13 +175,13 @@ public class Workflow {
 			throw new RuntimeException("Loop must be initialized");	
 		}
 		
-		if (webExchange.getListMetaData() != null) {
-			int length = webExchange.getListMetaData().size();
+		if (webExchange.getListMetaData(getActiveMenu().getId()) != null) {
+			int length = webExchange.getListMetaData(getActiveMenu().getId()).size();
 			
 			log.info("Total data-row " + length);
 			
 			int index = 1;
-			for (Map<String, Object> metadata : webExchange.getListMetaData()) {
+			for (Map<String, Object> metadata : webExchange.getListMetaData(getActiveMenu().getId())) {
 				log.info("Execute data-row index " + index);
 				try {
 					for (Actionable actionable : actionableForLoop) {
@@ -239,17 +238,34 @@ public class Workflow {
 		return ContextLoader.isLocalVariable(object);
 	}
 	
+	private boolean isCompositeVariable(Object object) {
+		if (object instanceof ManagedAction) {
+			return ContextLoader.isCompositeVariable(((ManagedAction) object).getInheritClass());
+		}
+		return ContextLoader.isCompositeVariable(object);
+	}
+	
 	public void executeActionableWithSession(Actionable actionable) throws Exception {
 		if (isPersistentSerializable(actionable)) {
 			// execute map serializable
-			if (isLocalVariable(actionable)) {
-				int i = 1;
+			if (isLocalVariable(actionable) || isCompositeVariable(actionable)) {
+				int i = 0;
 				for (String sessionId : webExchange.getSessionList()) {
 					
 					if (!webExchange.isSessionFailed(sessionId)) {
 						log.info("Execute data-row index " + i + " with session " + sessionId);
 						webExchange.setCurrentSession(sessionId);
-						ContextLoader.setObjectLocal(actionable);
+						
+						if (isCompositeVariable(actionable)) {
+							if (actionable instanceof ManagedAction) {
+								((ManagedAction) actionable).setMetadata(webExchange.getMetaData(getActiveMenu().getId(), i));
+							} else {
+								ContextLoader.setObjectWithCustom(actionable, webExchange.getMetaData(getActiveMenu().getId(), i));	
+							}
+						} else {
+							ContextLoader.setObjectLocal(actionable);	
+						}
+						
 						try {
 							executeSafeActionable(actionable);
 							((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
@@ -260,10 +276,11 @@ public class Workflow {
 							e.printStackTrace();
 						}
 					}
+					i++;
 				}
 			} else {
-				int i = 1;
-				for (Map<String, Object> metadata : webExchange.getListMetaData()) {
+				int i = 0;
+				for (Map<String, Object> metadata : webExchange.getListMetaData(getActiveMenu().getId())) {
 
 					String sessionId = webExchange.createSession();
 

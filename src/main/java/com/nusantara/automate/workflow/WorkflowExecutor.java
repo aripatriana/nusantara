@@ -11,8 +11,10 @@ import com.nusantara.automate.FileRetention;
 import com.nusantara.automate.action.common.LoginFormAction;
 import com.nusantara.automate.action.common.LogoutFormAction;
 import com.nusantara.automate.action.common.ProductSelectorAction;
+import com.nusantara.automate.exception.XlsSheetStyleException;
 import com.nusantara.automate.handler.ModalType;
 import com.nusantara.automate.reader.MadnessXlsFileReader;
+import com.nusantara.automate.reader.MultiLayerXlsFileReader;
 import com.nusantara.automate.util.LoginInfo;
 import com.nusantara.automate.util.ReflectionUtils;
 import com.nusantara.automate.util.SimpleEntry;
@@ -59,7 +61,7 @@ public class WorkflowExecutor {
 	private String keyFileApprove;
 	
 	
-	public void execute(String scen, Workflow workflow, WorkflowConfig config) {
+	public void execute(String scen, Workflow workflow, WorkflowConfig config) throws Exception {
 		String productType = null;
 		for (String workflowKey : config.getWorkflowKey(scen)) {
 			log.info("Execute workflow " + workflowKey);
@@ -67,9 +69,13 @@ public class WorkflowExecutor {
 			
 			for (WorkflowEntry entry : config.getWorkflowEntries(workflowKey)) {
 				if (entry.isLoadFile()) {
-					 workflow
-					 	.load(new FileRetention(new MadnessXlsFileReader(config.getWorkflowData(entry.getVariable()))))
-						.loop();
+					 try {
+						workflow
+						 	.load(new FileRetention(new MultiLayerXlsFileReader(config.getWorkflowData(entry.getVariable()))))
+							.loop();
+					} catch (XlsSheetStyleException e) {
+						throw new Exception(e);
+					}
 				} else if (entry.isLogin()) {
 					 workflow
 						.openPage(loginUrl)

@@ -6,6 +6,7 @@ package com.nusantara.automate;
  * @author ari.patriana
  *
  */
+@Deprecated
 public abstract class DefaultBaseDriver extends AbstractBaseDriver {
 
 	public DefaultBaseDriver() {

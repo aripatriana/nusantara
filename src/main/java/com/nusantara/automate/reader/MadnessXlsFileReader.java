@@ -27,13 +27,17 @@ import com.nusantara.automate.FileReader;
  */
 public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 
-	private File file;
-	private int activeSheet;
-	private Workbook workbook;
-	private Map<Integer, LinkedList<Map<String, Object>>> container;
-	private LinkedHashMap<String, Object> header;
-	private LinkedList<Map<String, Object>> data;
-	private LinkedList<Map<String, Object>> dataCompile;
+	protected File file;
+	protected int activeSheet;
+	protected Workbook workbook;
+	protected Map<Integer, LinkedList<Map<String, Object>>> container;
+	protected LinkedHashMap<String, Object> header;
+	protected LinkedList<Map<String, Object>> data;
+	protected LinkedList<Map<String, Object>> dataCompile;
+	protected Map<String, Object> currentRow;
+	
+	protected MadnessXlsFileReader() {
+	}
 	
 	public MadnessXlsFileReader(File file) {
 		this.file = file;
@@ -45,7 +49,7 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 			for (int index = 0; index<activeSheet; index++) {
 				Sheet sheet = workbook.getSheetAt(index);
 				if (!sheet.getSheetName().equalsIgnoreCase("meta-data")) {
-					XlsSheetReader<LinkedHashMap<String, Object>> dataSheet = new XlsSheetReader<LinkedHashMap<String, Object>>(new XlsCustomRowReader(workbook.getSheetAt(index)));
+					XlsSheetReader<LinkedHashMap<String, Object>> dataSheet = new XlsSheetReader<LinkedHashMap<String, Object>>(new XlsCustomRowReader(sheet));
 					LinkedHashMap<Integer, LinkedHashMap<String, Object>> dataPerSheet = dataSheet.readSheet(skipHeader());
 					
 					
@@ -216,7 +220,8 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 
 	@Override
 	public Map<String, Object> read() {
-		return dataCompile.removeFirst();
+		currentRow = dataCompile.removeFirst();
+		return currentRow;
 	}
 	
 	@Override

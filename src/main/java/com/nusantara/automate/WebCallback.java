@@ -53,7 +53,7 @@ public abstract class WebCallback extends WebElementWrapper implements Callback 
 	
 	public void notOk(WebElement webElement, WebExchange webExchange) throws FailedTransactionException{
 		captureWindow();
-		clickButton("failedOk");
+		clickButton(webElement, "failedOk");
 		throw new FailedTransactionException("Failed for transaction");
 	}
 }
