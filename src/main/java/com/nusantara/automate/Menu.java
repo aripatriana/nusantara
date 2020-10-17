@@ -17,4 +17,6 @@ public interface Menu {
 	public String getSubMenu();
 	
 	public String getId();
+	
+	public String getModuleId();
 }

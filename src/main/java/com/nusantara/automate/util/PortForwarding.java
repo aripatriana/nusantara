@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.nusantara.automate.WebExchange;
 
 public class PortForwarding {
 
@@ -17,7 +18,12 @@ public class PortForwarding {
 	private Session session;
 	private static AtomicInteger count = new AtomicInteger();
 	
-
+	public PortForwarding(WebExchange webExchange) {
+		this(webExchange.get("gateway.address.username").toString(), webExchange.get("gateway.address.password").toString(), 
+				webExchange.get("gateway.address.host").toString(), webExchange.get("gateway.address.remoteHost").toString(), 
+				Integer.valueOf(webExchange.get("gateway.address.remotePort").toString()), 
+				Integer.valueOf(webExchange.get("gateway.address.localPort").toString()));
+	}
 	public PortForwarding(String user, String password, String host, String remoteHost, int remotePort, int localPort) {
 		this.user = user;
 		this.password = password;

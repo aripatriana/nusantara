@@ -22,8 +22,17 @@ public class WebExchange {
 
 	Map<String, Map<String, Object>> holder = new HashMap<String, Map<String,Object>>();
 	LinkedList<Map<String, Object>> listMetaData = new LinkedList<Map<String,Object>>();
+	
+	// moduleid|value
 	Map<String, LinkedList<Map<String, Object>>> cachedMetaData = new HashMap<String, LinkedList<Map<String,Object>>>();
+	
+	// moduleid|moduleidXXX
 	Map<String, LinkedList<String>> cachedMetaDataKey = new HashMap<String, LinkedList<String>>();
+	
+	// moduleid|session
+//	Map<String, String> cachedSessionMetaData = new HashMap<String, String>();
+	
+	// session
 	List<String> cachedSession = new ArrayList<String>();
 	public static final String LOCAL_VARIABLE = "local_variable";
 	public static final String ALL_LOCAL_VARIABLE = "all_local_variable";
@@ -33,14 +42,23 @@ public class WebExchange {
 	String transactionId = UUID.randomUUID().toString();
 	String sessionId = null;
 	boolean retention = false;
+	boolean initSession = true;
 	
 	public void addMetadata(Map<String, Object> metadata) {
 		listMetaData.add(metadata);
 	}
+	
+	public int getMetaDataSize() {
+		return listMetaData.size();
+	}
+	
+	public void clearCachedSession() {
+		cachedSession.clear();
+	}
 
-	public LinkedList<Map<String, Object>> getListMetaData(String menuId) {
-		String mainMenu = menuId.split("\\.")[0].toUpperCase();
-		String cahcedMenuId = mainMenu;
+	public LinkedList<Map<String, Object>> getListMetaData(String moduleId) {
+		String mainMenu = moduleId.toUpperCase();
+		String cahcedMenuId = moduleId.toUpperCase();;
 		boolean emptyCached = false;
 		int indexMenuId = 0;
 		if (cachedSession.contains(getCurrentSession())) {
@@ -52,7 +70,7 @@ public class WebExchange {
 		} else {
 			if (cachedMetaData.containsKey(cahcedMenuId)) {
 				indexMenuId++;
-				cahcedMenuId = menuId.toUpperCase() + "" + indexMenuId;
+				cahcedMenuId = mainMenu + "" + indexMenuId;
 				while(true) {
 					if (cachedMetaData.containsKey(cahcedMenuId)) {
 						indexMenuId++;
@@ -77,16 +95,18 @@ public class WebExchange {
 				}
 			}
 			if (!tempListMetaData.isEmpty()) {
-				cachedSession.add(getCurrentSession());
 				cachedMetaData.put(cahcedMenuId, tempListMetaData);
-				LinkedList<String> cachedKey = cachedMetaDataKey.get(menuId);
+				cachedSession.add(getCurrentSession());
+				LinkedList<String> cachedKey = cachedMetaDataKey.get(mainMenu);
 				if (cachedKey == null) cachedKey = new LinkedList<String>();
 				cachedKey.add(cahcedMenuId);
 				cachedMetaDataKey.put(mainMenu, cachedKey);
 				return tempListMetaData;	
+			} else {
+				LinkedList<Map<String, Object>> data = cachedMetaData.get(cachedMetaDataKey.get(cahcedMenuId).getLast());
+				if (data != null && !data.isEmpty()) return data;
 			}
 		}
-		
 		return listMetaData;
 	}
 	
@@ -180,8 +200,18 @@ public class WebExchange {
 	}
 	
 	public String createSession() {
+		return createSession(99);
+	}
+	public String createSession(int index) {
+		try {
+			return sessionList.get(index);			
+		} catch (IndexOutOfBoundsException e) {
+			// do nothing
+		}
+		
 		sessionId = UUID.randomUUID().toString();
-		sessionList.add(sessionId);
+		sessionList.add(sessionId);		
+
 		return sessionId;
 	}
 	

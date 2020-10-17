@@ -156,4 +156,14 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	public String getTextByXPath(WebElement webElement, String xpath) {
 		return findElementByXpath(webElement, xpath).getText();
 	}
+	
+	public WebElement getModalElement() {
+		return findElementByXpath("//div[@class='modal fade modal-wide in']");
+	}
+	
+	public String getModalId() {
+		return getModalElement().getAttribute("id");
+	}
+	
+	
 }

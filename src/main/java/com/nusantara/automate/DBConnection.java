@@ -10,6 +10,9 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import com.nusantara.automate.exception.ReachTimeoutException;
+import com.nusantara.automate.util.Sleep;
+
 /**
  * Used for query to database
  * 
@@ -88,6 +91,22 @@ public class DBConnection {
 				if (rs != null) try {rs.close();} catch (Exception e) {}
 			}
 		return results;
+	}
+	
+	
+	public static List<String[]> selectSimpleQueryAndWait(String simpleQuery, String[] columns, int timeoutInSecond) throws ReachTimeoutException {
+		List<String[]> resultList = selectSimpleQuery(simpleQuery, columns);
+		long start = System.currentTimeMillis();
+		while(resultList == null || resultList.isEmpty()) {
+			resultList = selectSimpleQuery(simpleQuery, columns);
+			
+			long diff = System.currentTimeMillis() - start;
+			if (diff > (timeoutInSecond * 1000)) {
+				throw new ReachTimeoutException("Reach time out after " + timeoutInSecond + " seconds for " + simpleQuery);
+			}
+			Sleep.wait(1000);
+		}
+		return resultList;
 	}
 	
 	@SuppressWarnings("rawtypes")

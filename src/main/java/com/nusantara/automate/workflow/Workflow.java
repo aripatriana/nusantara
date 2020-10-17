@@ -23,6 +23,7 @@ import com.nusantara.automate.MenuAwareness;
 import com.nusantara.automate.Retention;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.action.ManagedAction;
+import com.nusantara.automate.action.common.LogoutFormAction;
 import com.nusantara.automate.action.common.ModalSuccessAction;
 import com.nusantara.automate.action.common.OpenFormAction;
 import com.nusantara.automate.action.common.OpenMenuAction;
@@ -175,13 +176,13 @@ public class Workflow {
 			throw new RuntimeException("Loop must be initialized");	
 		}
 		
-		if (webExchange.getListMetaData(getActiveMenu().getId()) != null) {
-			int length = webExchange.getListMetaData(getActiveMenu().getId()).size();
+		if (webExchange.getMetaDataSize() > 0) {
+			int length = webExchange.getMetaDataSize();
 			
 			log.info("Total data-row " + length);
 			
 			int index = 1;
-			for (Map<String, Object> metadata : webExchange.getListMetaData(getActiveMenu().getId())) {
+			for (Map<String, Object> metadata : webExchange.getListMetaData(getActiveMenu().getModuleId())) {
 				log.info("Execute data-row index " + index);
 				try {
 					for (Actionable actionable : actionableForLoop) {
@@ -258,9 +259,9 @@ public class Workflow {
 						
 						if (isCompositeVariable(actionable)) {
 							if (actionable instanceof ManagedAction) {
-								((ManagedAction) actionable).setMetadata(webExchange.getMetaData(getActiveMenu().getId(), i));
+								((ManagedAction) actionable).setMetadata(webExchange.getMetaData(getActiveMenu().getModuleId(), i));
 							} else {
-								ContextLoader.setObjectWithCustom(actionable, webExchange.getMetaData(getActiveMenu().getId(), i));	
+								ContextLoader.setObjectWithCustom(actionable, webExchange.getMetaData(getActiveMenu().getModuleId(), i));	
 							}
 						} else {
 							ContextLoader.setObjectLocal(actionable);	
@@ -280,10 +281,11 @@ public class Workflow {
 				}
 			} else {
 				int i = 0;
-				for (Map<String, Object> metadata : webExchange.getListMetaData(getActiveMenu().getId())) {
+				while(true) {
+					String sessionId = webExchange.createSession(i);
 
-					String sessionId = webExchange.createSession();
-
+					Map<String, Object> metadata = webExchange.getMetaData(getActiveMenu().getModuleId(),i);
+					
 					log.info("Execute data-row index " + i + " with session " + sessionId);
 					
 					if (actionable instanceof ManagedAction) {
@@ -303,12 +305,26 @@ public class Workflow {
 						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 					}
 					i++;
-				}	
+					
+					if (webExchange.getListMetaData(getActiveMenu().getModuleId()).size() == i) {
+						webExchange.clearCachedSession();
+						break;
+					}
+				}
 			}
 		} else {
 			// execute common action		
-			ContextLoader.setObject(actionable);
-			executeSafeActionable(actionable);
+			// cek klo sesi gagal semua maka logout saja yg diproses
+			if (webExchange.getSessionList().size() > 0
+					&& (webExchange.getSessionList().size() == webExchange.getFailedSessionList().size())) {
+				if (actionable instanceof LogoutFormAction) {
+					ContextLoader.setObject(actionable);
+					executeSafeActionable(actionable);	
+				}
+			} else {
+				ContextLoader.setObject(actionable);
+				executeSafeActionable(actionable);
+			}
 		}
 	}
 	

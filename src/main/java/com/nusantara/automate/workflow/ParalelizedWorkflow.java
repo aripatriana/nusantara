@@ -35,8 +35,8 @@ public class ParalelizedWorkflow extends Workflow {
 			throw new RuntimeException("Loop must be initialized");	
 		}
 		
-		if (webExchange.getListMetaData(getActiveMenu().getId()) != null) {
-			log.info("Total data-row " + webExchange.getListMetaData(getActiveMenu().getId()).size());
+		if (webExchange.getMetaDataSize() > 0) {
+			log.info("Total data-row " + webExchange.getMetaDataSize());
 			try {
 				for (Actionable actionable : actionableForLoop) {
 					
