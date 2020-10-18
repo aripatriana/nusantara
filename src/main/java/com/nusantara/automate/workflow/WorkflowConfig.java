@@ -27,12 +27,20 @@ public class WorkflowConfig {
 	private LinkedList<String> workflowScens = new LinkedList<String>();
 	private Map<String, LinkedList<String>> workflowMapScens = new HashMap<String, LinkedList<String>>();
 	
+	public Map<String, SimpleEntry<Class<?>, Object[]>> getFunctionMap() {
+		return functionMap;
+	}
+	
 	public void addFunction(String functionKey, Class<? extends Actionable> actionable, Object[] args) {
 		functionMap.put(functionKey, new SimpleEntry<Class<?>, Object[]>(actionable, args));
 	}
 
 	public void addFunction(String functionKey, Class<? extends Actionable> actionable) {
 		functionMap.put(functionKey, new SimpleEntry<Class<?>, Object[]>(actionable, null));
+	}
+	
+	public Map<String, Class<? extends SubmitHandler>> getHandlerMap() {
+		return handlerMap;
 	}
 	
 	public void addHandler(Menu[] menuList, Class<? extends SubmitHandler> actionable) {
@@ -82,6 +90,10 @@ public class WorkflowConfig {
 	
 	public LinkedList<WorkflowEntry> getWorkflowEntries(String workflowKey) {
 		return workflowEntries.get(workflowKey);
+	}
+	
+	public Map<String, LinkedList<WorkflowEntry>> getWorkflowEntries() {
+		return workflowEntries;
 	}
 	
 	public LinkedList<String> getWorkflowKey() {

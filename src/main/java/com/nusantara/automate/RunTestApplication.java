@@ -17,8 +17,10 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nusantara.automate.exception.ScriptInvalidException;
 import com.nusantara.automate.reader.WorkflowYReader;
 import com.nusantara.automate.util.ReflectionUtils;
+import com.nusantara.automate.util.SimpleEntry;
 import com.nusantara.automate.workflow.WorkflowConfig;
 import com.nusantara.automate.workflow.WorkflowConfigAwareness;
 import com.nusantara.automate.workflow.WorkflowConfigInitializer;
@@ -68,6 +70,7 @@ public class RunTestApplication {
 			if (workflow != null) {
 				if (workflow instanceof WorkflowConfigInitializer) {
 					((WorkflowConfigInitializer)workflow).configure(workflowConfig);
+					verifyWorkflowy(workflowConfig);
 				}
 				if (workflow instanceof WorkflowConfigAwareness) {
 					((WorkflowConfigAwareness) workflow).setWorkflowConfig(workflowConfig);
@@ -187,6 +190,27 @@ public class RunTestApplication {
 			}
 			
 		}
+	}
+	
+	private static void verifyWorkflowy(WorkflowConfig workflowConfig) throws ScriptInvalidException {
+		for (LinkedList<WorkflowEntry> entryList : workflowConfig.getWorkflowEntries().values()) {
+			for (WorkflowEntry entry : entryList) {
+				if (entry.isActionMenu()) {
+					Menu menu = workflowConfig.getMenu(entry.getVariable());
+					if (menu == null) {
+						throw new ScriptInvalidException("Menu not found for " + entry.getVariable());
+					}
+				}
+				if (entry.isFunction()) {
+					SimpleEntry<Class<?>, Object[]> function = workflowConfig.getFunction(entry.getVariable());
+					if (function == null) {
+						throw new ScriptInvalidException("Function not found for " + entry.getVariable());
+					}
+				}
+					
+			}
+		}
+		
 	}
 	
 	private static void searchFile(File[] files, String dir, Map<String, LinkedList<File>> mapFiles) {
