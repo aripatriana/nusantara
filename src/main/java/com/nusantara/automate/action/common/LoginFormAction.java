@@ -4,12 +4,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.WebElementWrapper;
 import com.nusantara.automate.WebExchange;
+import com.nusantara.automate.exception.FailedTransactionException;
 import com.nusantara.automate.util.LoginInfo;
 import com.nusantara.automate.util.Sleep;
 
@@ -23,11 +29,14 @@ import com.nusantara.automate.util.Sleep;
 public class LoginFormAction extends WebElementWrapper implements Actionable {
 
 	Logger log = LoggerFactory.getLogger(LoginFormAction.class);
+	
+	private static final int MAX_RETRY_LOGIN = 3;
 	private String memberCode;
 	private String username;
 	private String password;
 	private String keyFile;
 	private String token;
+	private int retry = 0;
 	
 	public LoginFormAction(LoginInfo loginInfo) {
 		this(loginInfo.getMemberCode(), loginInfo.getUsername(), loginInfo.getPassword(), loginInfo.getKeyFile());
@@ -86,7 +95,7 @@ public class LoginFormAction extends WebElementWrapper implements Actionable {
 	}
 	
 	@Override
-	public void submit(WebExchange webExchange) {
+	public void submit(WebExchange webExchange) throws FailedTransactionException {
 		log.info("Open Login Page");
 		
 		Sleep.wait(1000);
@@ -99,6 +108,28 @@ public class LoginFormAction extends WebElementWrapper implements Actionable {
 		captureFullWindow();
 		
 		findElementByXpath("//button[text()='Sign In']").click();		
+		
+		try {
+			findElementByXpath("//form//section[@class='error']", 1);
+			captureFullWindow();
+			
+			try {
+				findElementByXpath("//form//fieldset//section//div//div//p[contains(text(),'Bad credentials')]",1);
+				throw new FailedTransactionException("Bad credentials for memberCode=" + getMemberCode() + " username=" + getUsername() + " password=" + getPassword());
+			} catch (TimeoutException e) {
+				// do nothing
+			}
+			
+			if (retry < MAX_RETRY_LOGIN) {
+				getDriver().navigate().refresh();
+				retry++;
+				this.submit(webExchange);				
+			} else {
+				throw new FailedTransactionException("Exceed maximum login attempt(" + MAX_RETRY_LOGIN+ ") for memberCode=" + getMemberCode() + " username=" + getUsername() + " password=" + getPassword());
+			}
+		} catch (TimeoutException e) {
+			// do nothing
+		}		
 		
 		webExchange.put("username", getUsername());
 		webExchange.put("memberCode", getMemberCode());

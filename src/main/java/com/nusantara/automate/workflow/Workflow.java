@@ -130,7 +130,7 @@ public class Workflow {
 					ContextLoader.setObject(actionable);
 					executeSafeActionable(actionable);
 				}
-			} catch (Exception e) {
+			} catch (FailedTransactionException e) {
 				e.printStackTrace();
 			}
 		} else {
@@ -328,7 +328,7 @@ public class Workflow {
 		}
 	}
 	
-	public void executeSafeActionable(Actionable actionable) throws Exception {
+	public void executeSafeActionable(Actionable actionable) throws FailedTransactionException {
 		int retry = 1;
 		try {
 			actionable.submit(webExchange);
@@ -338,7 +338,7 @@ public class Workflow {
 		
 	}
 	
-	private void retryWhenException(Actionable actionable, int retry) throws Exception {
+	private void retryWhenException(Actionable actionable, int retry) throws FailedTransactionException {
 		try {
 			log.info("Something happened, be calm! we still loving you!");
 			((AbstractBaseDriver) actionable).getDriver().navigate().refresh();

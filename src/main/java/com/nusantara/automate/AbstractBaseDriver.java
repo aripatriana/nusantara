@@ -77,27 +77,48 @@ public abstract class AbstractBaseDriver {
 	}
 	
 	protected WebElement findElementById(String id) {
-		WebDriverWait wait = new WebDriverWait(getDriver(),TIMEOUT_IN_SECOND);
+		return findElementById(id, TIMEOUT_IN_SECOND);
+	}
+	
+	protected WebElement findElementById(String id, int timeout) {
+		WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
 		return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
 	}
 	
 	protected WebElement findElementByXpath(String xpath) {
-		WebDriverWait wait = new WebDriverWait(getDriver(),TIMEOUT_IN_SECOND);
+		return findElementByXpath(xpath, TIMEOUT_IN_SECOND);
+	}
+	
+	protected WebElement findElementByXpath(String xpath, int timeout) {
+		WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
 		return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
 	}
 	
 	protected WebElement findElementByName(String name) {
-		WebDriverWait wait = new WebDriverWait(getDriver(),TIMEOUT_IN_SECOND);
+		return findElementByName(name, TIMEOUT_IN_SECOND);
+	}
+	
+	protected WebElement findElementByName(String name, int timeout) {
+		WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
 		return wait.until(ExpectedConditions.visibilityOfElementLocated(By.name(name)));
 	}
 	
 	protected WebElement findElementByClassName(String className) {
-		WebDriverWait wait = new WebDriverWait(getDriver(),TIMEOUT_IN_SECOND);
+		return findElementByClassName(className, TIMEOUT_IN_SECOND);
+	}
+	
+	protected WebElement findElementByClassName(String className, int timeout) {
+		WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
 		return wait.until(ExpectedConditions.visibilityOfElementLocated(By.className(className)));
 	}
 	
+	
 	protected WebElement findElementById(WebElement webElement, final String id) {
-		WebElementWait wait = new WebElementWait(webElement, TIMEOUT_IN_SECOND);
+		return findElementById(webElement, id, TIMEOUT_IN_SECOND);
+	}
+	
+	protected WebElement findElementById(WebElement webElement, final String id, int timeout) {
+		WebElementWait wait = new WebElementWait(webElement, timeout);
 	    return wait.until(new Function<WebElement, WebElement>() {
                public WebElement apply(WebElement d) {
                    return d.findElement(By.id(id));
@@ -106,7 +127,11 @@ public abstract class AbstractBaseDriver {
 	}
 	
 	protected WebElement findElementByXpath(WebElement webElement, final String xpath) {
-		WebElementWait wait = new WebElementWait(webElement, TIMEOUT_IN_SECOND);
+		return findElementByXpath(webElement, xpath, TIMEOUT_IN_SECOND);
+	}
+	
+	protected WebElement findElementByXpath(WebElement webElement, final String xpath, int timeout) {
+		WebElementWait wait = new WebElementWait(webElement, timeout);
 		return wait.until(new Function<WebElement, WebElement>() {
             public WebElement apply(WebElement d) {
                 return d.findElement(By.xpath(xpath));
@@ -115,7 +140,11 @@ public abstract class AbstractBaseDriver {
 	}
 	
 	protected WebElement findElementByName(WebElement webElement, final String name) {
-		WebElementWait wait = new WebElementWait(webElement, TIMEOUT_IN_SECOND);
+		return findElementByName(webElement, name, TIMEOUT_IN_SECOND);
+	}
+	
+	protected WebElement findElementByName(WebElement webElement, final String name, int timeout) {
+		WebElementWait wait = new WebElementWait(webElement, timeout);
 		return wait.until(new Function<WebElement, WebElement>() {
             public WebElement apply(WebElement d) {
                 return d.findElement(By.name(name));
@@ -124,7 +153,11 @@ public abstract class AbstractBaseDriver {
 	}
 	
 	protected WebElement findElementByClassName(WebElement webElement, final String className) {
-		WebElementWait wait = new WebElementWait(webElement, TIMEOUT_IN_SECOND);
+		return findElementByClassName(webElement, className, TIMEOUT_IN_SECOND);
+	}
+	
+	protected WebElement findElementByClassName(WebElement webElement, final String className, int timeout) {
+		WebElementWait wait = new WebElementWait(webElement, timeout);
 		return wait.until(new Function<WebElement, WebElement>() {
             public WebElement apply(WebElement d) {
                 return d.findElement(By.className(className));

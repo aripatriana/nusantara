@@ -22,6 +22,12 @@ public class LogoutFormAction extends WebElementWrapper implements Actionable {
 		log.info("Logout");
 		
 		Sleep.wait(1000);
-		findElementByXpath("//a[contains(@title,'Sign Out')]").click();		
+		
+		findElementByXpath("//a[contains(@title,'Sign Out')]").click();
+		
+		webExchange.remove("username");
+		webExchange.remove("memberCode");
+		webExchange.remove("password");
+		webExchange.remove("token");
 	}
 }

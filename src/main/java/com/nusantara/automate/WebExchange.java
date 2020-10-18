@@ -124,6 +124,20 @@ public class WebExchange {
 		holder.clear();
 	}
 	
+	public void remove(String key) {
+		if (key.startsWith("@")) {
+			String session = getCurrentSession();
+			if (getCurrentSession() == null)
+				throw new RuntimeException("Session is not created");
+			
+			Map<String, Object> localVariable = sessionHolder.get(session);
+			if (localVariable != null) {
+				localVariable.remove(key);
+			}
+		} else {
+			holder.remove(key);
+		}
+	}
 	public void put(String key, Object value) {
 		if (key.startsWith("@")) {
 			String session = getCurrentSession();

@@ -80,6 +80,8 @@ public class WorkflowExecutor {
 					 workflow
 						.openPage(loginUrl)
 						.action(new LoginFormAction(getLoginInfo(entry.getVariable())));
+					 if (workflow.getWebExchange().get("token") == null)
+						 throw new Exception("Workflow halted caused by login failed");
 				} else if (entry.isLogout()) {
 					workflow.action(new LogoutFormAction());
 				} else if (entry.isRelogin()) {
@@ -87,6 +89,8 @@ public class WorkflowExecutor {
 						.action(new LogoutFormAction())
 						.action(new LoginFormAction(getLoginInfo(entry.getVariable())))
 						.action(new ProductSelectorAction(productType));
+					 if (workflow.getWebExchange().get("token") == null)
+						 throw new Exception("Workflow halted caused by login failed");
 				} else if (entry.isSelectProduct()) {
 					productType = entry.getVariable();
 					workflow
