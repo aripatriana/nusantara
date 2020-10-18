@@ -1,6 +1,7 @@
 package com.nusantara.automate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -39,12 +40,26 @@ public class WebExchange {
 	public static final String LOCAL_VARIABLE = "local_variable";
 	public static final String ALL_LOCAL_VARIABLE = "all_local_variable";
 	LinkedList<String> sessionList = new LinkedList<String>();
-	LinkedList<String> failedSessionList = new LinkedList<String>();
+	Set<String> failedSessionList = new HashSet<String>();
 	Map<String, Map<String, Object>> sessionHolder = new HashMap<String, Map<String,Object>>();
 	String transactionId = UUID.randomUUID().toString();
 	String sessionId = null;
 	boolean retention = false;
-	boolean initSession = true;
+	
+	private void reset() {
+		transactionId = UUID.randomUUID().toString();
+		retention = false;
+		sessionId = null;
+		listMetaData.clear();
+		sessionList.clear();
+		failedSessionList.clear();
+		sessionHolder.clear();
+		cachedMetaData.clear();
+		cachedMetaDataKey.clear();
+		cachedSession.clear();
+		holder.remove(LOCAL_VARIABLE);
+		holder.remove(ALL_LOCAL_VARIABLE);
+	}
 	
 	public void addMetadata(Map<String, Object> metadata) {
 		listMetaData.add(metadata);
@@ -136,8 +151,7 @@ public class WebExchange {
 	}
 	
 	public void clear() {
-		clearMetaData();
-		holder.clear();
+		reset();
 	}
 	
 	public void remove(String key) {
@@ -194,7 +208,8 @@ public class WebExchange {
 	public List<Map<String, Object>> getAllListLocalMap() {
 		List<Map<String, Object>> localMap = new ArrayList<Map<String, Object>>();		
 		for (Entry<String, Map<String, Object>> entry : sessionHolder.entrySet()) {
-			localMap.add(entry.getValue());
+			if (!failedSessionList.contains(entry.getKey()))
+				localMap.add(entry.getValue());
 		}
 		return localMap;
 	}
@@ -230,7 +245,7 @@ public class WebExchange {
 	}
 	
 	public String createSession() {
-		return createSession(99);
+		return createSession(999);
 	}
 	public String createSession(int index) {
 		try {
@@ -257,12 +272,17 @@ public class WebExchange {
 	public void setRetention(boolean retention) {
 		this.retention = retention;
 	}
+
+	public void addListFailedSession(Collection<String> failedSessionId) {
+		failedSessionList.addAll(failedSessionId);
+	}
+
 	
 	public void addFailedSession(String sessionId) {
 		failedSessionList.add(sessionId);
 	}
 	
-	public LinkedList<String> getFailedSessionList() {
+	public Set<String> getFailedSessionList() {
 		return failedSessionList;
 	}
 	

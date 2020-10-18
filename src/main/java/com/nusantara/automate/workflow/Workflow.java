@@ -18,12 +18,13 @@ import com.nusantara.automate.ConfigLoader;
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.DBConnection;
 import com.nusantara.automate.DriverManager;
+import com.nusantara.automate.FormActionable;
 import com.nusantara.automate.Menu;
 import com.nusantara.automate.MenuAwareness;
 import com.nusantara.automate.Retention;
 import com.nusantara.automate.WebExchange;
-import com.nusantara.automate.action.ManagedAction;
-import com.nusantara.automate.action.common.LogoutFormAction;
+import com.nusantara.automate.action.ManagedFormAction;
+import com.nusantara.automate.action.ManagedMultipleFormAction;
 import com.nusantara.automate.action.common.ModalSuccessAction;
 import com.nusantara.automate.action.common.OpenFormAction;
 import com.nusantara.automate.action.common.OpenMenuAction;
@@ -136,12 +137,17 @@ public class Workflow {
 		} else {
 			if (scopedAction) {
 				if (scopedActionIndex == 0) {
-					ManagedAction scoped = new ManagedAction(actionable.getClass());
+					ManagedFormAction scoped = null;
+					if (actionable instanceof FormActionable) {
+						scoped = new ManagedFormAction(actionable.getClass());
+					} else {
+						scoped = new ManagedMultipleFormAction(actionable.getClass());
+					}
 					scoped.addActionable(actionable);
 					actionableForLoop.add(scoped);
 				} else {
 					Actionable act = actionableForLoop.getLast();
-					((ManagedAction) act).addActionable(actionable);		
+					((ManagedFormAction) act).addActionable(actionable);		
 				}
 				scopedActionIndex++;
 			} else {
@@ -226,22 +232,22 @@ public class Workflow {
 	}
 	
 	private boolean isPersistentSerializable(Object object) {
-		if (object instanceof ManagedAction) {
-			return ContextLoader.isPersistentSerializable(((ManagedAction) object).getInheritClass());
+		if (object instanceof ManagedFormAction) {
+			return ContextLoader.isPersistentSerializable(((ManagedFormAction) object).getInheritClass());
 		}
 		return ContextLoader.isPersistentSerializable(object);
 	}
 	
 	private boolean isLocalVariable(Object object) {
-		if (object instanceof ManagedAction) {
-			return ContextLoader.isLocalVariable(((ManagedAction) object).getInheritClass());
+		if (object instanceof ManagedFormAction) {
+			return ContextLoader.isLocalVariable(((ManagedFormAction) object).getInheritClass());
 		}
 		return ContextLoader.isLocalVariable(object);
 	}
 	
 	private boolean isCompositeVariable(Object object) {
-		if (object instanceof ManagedAction) {
-			return ContextLoader.isCompositeVariable(((ManagedAction) object).getInheritClass());
+		if (object instanceof ManagedFormAction) {
+			return ContextLoader.isCompositeVariable(((ManagedFormAction) object).getInheritClass());
 		}
 		return ContextLoader.isCompositeVariable(object);
 	}
@@ -250,36 +256,50 @@ public class Workflow {
 		if (isPersistentSerializable(actionable)) {
 			// execute map serializable
 			if (isLocalVariable(actionable) || isCompositeVariable(actionable)) {
-				int i = 0;
-				for (String sessionId : webExchange.getSessionList()) {
-					
-					if (!webExchange.isSessionFailed(sessionId)) {
-						log.info("Execute data-row index " + i + " with session " + sessionId);
-						webExchange.setCurrentSession(sessionId);
-						
-						if (isCompositeVariable(actionable)) {
-							if (actionable instanceof ManagedAction) {
-								((ManagedAction) actionable).setMetadata(webExchange.getMetaData(getActiveMenu().getModuleId(), i));
-							} else {
-								ContextLoader.setObjectLocalWithCustom(actionable, webExchange.getMetaData(getActiveMenu().getModuleId(), i));	
-							}
-						} else {
-							ContextLoader.setObjectLocal(actionable);	
-						}
-						
-						try {
-							executeSafeActionable(actionable);
-							((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
-						} catch (FailedTransactionException e) {
-							webExchange.addFailedSession(sessionId);
-							log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
-							log.error("ERROR " + e.getMessage());
-							e.printStackTrace();
-						}
+				if (actionable instanceof ManagedMultipleFormAction) {
+					try {
+						ContextLoader.setObjectLocal(actionable);	
+						executeSafeActionable(actionable);
+						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
+					} catch (FailedTransactionException e) {
+						webExchange.addListFailedSession(webExchange.getSessionList());
+						log.info("Transaction is not completed, skipped for further processes");
+						log.error("ERROR " + e.getMessage());
+						e.printStackTrace();
 					}
-					i++;
+				} else {
+					int i = 0;
+					for (String sessionId : webExchange.getSessionList()) {
+						
+						if (!webExchange.isSessionFailed(sessionId)) {
+							log.info("Execute data-row index " + i + " with session " + sessionId);
+							webExchange.setCurrentSession(sessionId);
+							
+							try {
+								if (isCompositeVariable(actionable)) {
+									if (actionable instanceof ManagedFormAction) {
+										((ManagedFormAction) actionable).setMetadata(webExchange.getMetaData(getActiveMenu().getModuleId(), i));
+									} else {
+										ContextLoader.setObjectLocalWithCustom(actionable, webExchange.getMetaData(getActiveMenu().getModuleId(), i));	
+									}
+								} else {
+									ContextLoader.setObjectLocal(actionable);	
+								}
+							
+								executeSafeActionable(actionable);
+								((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
+							} catch (FailedTransactionException e) {
+								webExchange.addFailedSession(sessionId);
+								log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
+								log.error("ERROR " + e.getMessage());
+								e.printStackTrace();
+							}
+						}
+						i++;
+					}
+					webExchange.clearCachedSession();
 				}
-				webExchange.clearCachedSession();
+
 			} else {
 				int i = 0;
 				while(true) {
@@ -288,14 +308,14 @@ public class Workflow {
 					Map<String, Object> metadata = webExchange.getMetaData(getActiveMenu().getModuleId(),i);
 					
 					log.info("Execute data-row index " + i + " with session " + sessionId);
-					
-					if (actionable instanceof ManagedAction) {
-						((ManagedAction) actionable).setMetadata(metadata);
-					} else {
-						ContextLoader.setObjectWithCustom(actionable, metadata);	
-					}
-					
+				
 					try {
+						if (actionable instanceof ManagedFormAction) {
+							((ManagedFormAction) actionable).setMetadata(metadata);
+						} else {
+							ContextLoader.setObjectWithCustom(actionable, metadata);	
+						}
+						
 						executeSafeActionable(actionable);
 						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 					} catch (FailedTransactionException e) {
@@ -314,18 +334,8 @@ public class Workflow {
 				}
 			}
 		} else {
-			// execute common action		
-			// cek klo sesi gagal semua maka logout saja yg diproses
-			if (webExchange.getSessionList().size() > 0
-					&& (webExchange.getSessionList().size() == webExchange.getFailedSessionList().size())) {
-				if (actionable instanceof LogoutFormAction) {
-					ContextLoader.setObject(actionable);
-					executeSafeActionable(actionable);	
-				}
-			} else {
-				ContextLoader.setObject(actionable);
-				executeSafeActionable(actionable);
-			}
+			ContextLoader.setObject(actionable);
+			executeSafeActionable(actionable);
 		}
 	}
 	
@@ -372,12 +382,17 @@ public class Workflow {
 		} else {
 			if (scopedAction) {
 				if (scopedActionIndex == 0) {
-					ManagedAction scoped = new ManagedAction(actionable.getClass());
+					ManagedFormAction scoped = null;
+					if (actionable instanceof FormActionable) {
+						scoped = new ManagedFormAction(actionable.getClass());
+					} else {
+						scoped = new ManagedMultipleFormAction(actionable.getClass());
+					}
 					scoped.addActionable(actionable);
 					actionableForLoop.add(scoped);
 				} else {
 					Actionable act = actionableForLoop.getLast();
-					((ManagedAction) act).addActionable(actionable);		
+					((ManagedFormAction) act).addActionable(actionable);		
 				}
 			} else {
 				actionableForLoop.add(actionable);	
@@ -390,6 +405,7 @@ public class Workflow {
 	public Workflow clearSession() {
 		log.info("Clear session");
 		DBConnection.close();
+		webExchange.clear();
 		Thread.currentThread().interrupt();
 		return this;
 	}

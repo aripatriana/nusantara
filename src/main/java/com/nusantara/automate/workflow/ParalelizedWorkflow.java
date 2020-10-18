@@ -7,6 +7,7 @@ import com.nusantara.automate.ConfigLoader;
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.MenuAwareness;
 import com.nusantara.automate.WebExchange;
+import com.nusantara.automate.action.common.LogoutFormAction;
 
 /**
  * Workflow that supports for session operation
@@ -43,7 +44,19 @@ public class ParalelizedWorkflow extends Workflow {
 					if (actionable instanceof MenuAwareness) {
 						activeMenu = ((MenuAwareness) actionable).getMenu();
 					}
-					executeActionableWithSession(actionable);
+					
+					// execute common action		
+					// cek klo sesi gagal semua maka logout saja yg diproses
+					if (webExchange.getSessionList().size() > 0
+							&& (webExchange.getSessionList().size() == webExchange.getFailedSessionList().size())) {
+						if (actionable instanceof LogoutFormAction 
+								&& (webExchange.get("token") != null || !webExchange.get("token").toString().isEmpty())) {
+							ContextLoader.setObject(actionable);
+							executeSafeActionable(actionable);	
+						}
+					}  else {
+						executeActionableWithSession(actionable);						
+					}
 				}
 			} catch (Exception e) { 
 				log.info("Transaction interrupted ");

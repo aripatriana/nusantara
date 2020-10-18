@@ -205,6 +205,13 @@ public class ContextLoader {
             	}
             } else if (field.isAnnotationPresent(Value.class)) {
             	 fields.put(field.getName(), field.getAnnotation(Value.class).value());
+            } else if (field.isAnnotationPresent(FetchSession.class)) {
+            	try {
+                	if (!field.getType().equals(List.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be List");
+                	ReflectionUtils.setProperty(object, field.getName(), metadata.get("all_local_variable"));
+            	} catch (InstantiationException e) {
+					e.printStackTrace();
+            	}
             }
             
         }

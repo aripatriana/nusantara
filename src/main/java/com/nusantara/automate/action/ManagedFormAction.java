@@ -15,13 +15,13 @@ import com.nusantara.automate.exception.FailedTransactionException;
  * @author ari.patriana
  *
  */
-public class ManagedAction extends AbstractBaseDriver implements Actionable {
+public class ManagedFormAction extends AbstractBaseDriver implements Actionable {
 
 	private LinkedList<Actionable> actionableList = new LinkedList<Actionable>();
 	private Class<?> inheritClass;
 	private Map<String, Object> metadata = new HashMap<String, Object>();
 	
-	public ManagedAction(Class<?> inheritClass) {
+	public ManagedFormAction(Class<?> inheritClass) {
 		this.inheritClass = inheritClass;
 	}
 	
