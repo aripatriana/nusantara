@@ -2,10 +2,12 @@ package com.nusantara.automate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.nusantara.automate.util.MapUtils;
 
@@ -33,7 +35,7 @@ public class WebExchange {
 //	Map<String, String> cachedSessionMetaData = new HashMap<String, String>();
 	
 	// session
-	List<String> cachedSession = new ArrayList<String>();
+	Set<String> cachedSession = new HashSet<String>();
 	public static final String LOCAL_VARIABLE = "local_variable";
 	public static final String ALL_LOCAL_VARIABLE = "all_local_variable";
 	LinkedList<String> sessionList = new LinkedList<String>();
@@ -56,11 +58,21 @@ public class WebExchange {
 		cachedSession.clear();
 	}
 
+	/**
+	 * Sesi dibentuk per row dalam 1 sheet, apabila ada sheet lain maka sesi nya akan mengikuti sesi sebelumnya
+	 * row pertama pada setiap sheet cachedSession akan kosong, tujuannya untuk identifikasi apakah ada module$number
+	 * jika tidak ada maka data yg digunakan adalah data pada sheet tanpa $number
+	 * 
+	 * @param moduleId
+	 * @return
+	 */
 	public LinkedList<Map<String, Object>> getListMetaData(String moduleId) {
 		String mainMenu = moduleId.toUpperCase();
 		String cahcedMenuId = moduleId.toUpperCase();;
 		boolean emptyCached = false;
 		int indexMenuId = 0;
+		
+		// row pertama tiap sheet disini akan selalu kosong
 		if (cachedSession.contains(getCurrentSession())) {
 			if (cachedMetaDataKey.containsKey(cahcedMenuId)) {
 				return cachedMetaData.get(cachedMetaDataKey.get(cahcedMenuId).getLast());	
@@ -68,6 +80,7 @@ public class WebExchange {
 				emptyCached = true;
 			}
 		} else {
+			// cek metadata, klo ada maka cek module$number
 			if (cachedMetaData.containsKey(cahcedMenuId)) {
 				indexMenuId++;
 				cahcedMenuId = mainMenu + "" + indexMenuId;
@@ -96,14 +109,17 @@ public class WebExchange {
 			}
 			if (!tempListMetaData.isEmpty()) {
 				cachedMetaData.put(cahcedMenuId, tempListMetaData);
-				cachedSession.add(getCurrentSession());
+				cachedSession.addAll(getSessionList());
 				LinkedList<String> cachedKey = cachedMetaDataKey.get(mainMenu);
 				if (cachedKey == null) cachedKey = new LinkedList<String>();
 				cachedKey.add(cahcedMenuId);
 				cachedMetaDataKey.put(mainMenu, cachedKey);
 				return tempListMetaData;	
 			} else {
-				LinkedList<Map<String, Object>> data = cachedMetaData.get(cachedMetaDataKey.get(cahcedMenuId).getLast());
+				// akan berlaku hanya untuk row 2-~ pada sheet pertama
+				// pada sheet 2-~ cachedSession sudah exists jd akan langsung ngambil dr cachedMetaData
+				LinkedList<Map<String, Object>> data = cachedMetaData.get(cachedMetaDataKey.get(mainMenu).getLast());
+				cachedSession.addAll(getSessionList());
 				if (data != null && !data.isEmpty()) return data;
 			}
 		}
@@ -218,7 +234,8 @@ public class WebExchange {
 	}
 	public String createSession(int index) {
 		try {
-			return sessionList.get(index);			
+			sessionId = sessionList.get(index);
+			return sessionId;
 		} catch (IndexOutOfBoundsException e) {
 			// do nothing
 		}

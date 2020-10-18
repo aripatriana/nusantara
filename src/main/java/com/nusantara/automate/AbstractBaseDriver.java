@@ -7,7 +7,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Function;
 import com.nusantara.automate.window.WindowScreen;
@@ -22,12 +21,6 @@ public abstract class AbstractBaseDriver {
 
 	private final int TIMEOUT_IN_SECOND = 15;
 	
-	@Value("active_scen")
-	private String scen;
-	
-	@Value("active_workflow")
-	private String workflow;
-	
 	WebDriver wd;
 	WindowScreen ws;
 	
@@ -40,14 +33,8 @@ public abstract class AbstractBaseDriver {
 		this.ws = new WindowScreen(wd);
 	}
 	
-	private void setPreCapture() {
-		ws.setTargetFolder(scen);
-		ws.setPrefixFileName(workflow);
-	}
-	
 	public void captureFullWindow() {
 		try {
-			setPreCapture();
 			ws.capture(WindowScreen.CAPTURE_FULL_WINDOW);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -56,7 +43,6 @@ public abstract class AbstractBaseDriver {
 	
 	public void captureWindow() {
 		try {
-			setPreCapture();
 			ws.capture(WindowScreen.CAPTURE_CURRENT_WINDOW);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -65,7 +51,6 @@ public abstract class AbstractBaseDriver {
 	
 	public void captureFullModal(String elementId) {
 		try {
-			setPreCapture();
 			ws.capture(WindowScreen.CAPTURE_FULL_WINDOW, elementId);
 		} catch (IOException e) {
 			e.printStackTrace();

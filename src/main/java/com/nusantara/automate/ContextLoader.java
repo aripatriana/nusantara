@@ -100,11 +100,23 @@ public class ContextLoader {
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
 			map.put("all_local_variable", getWebExchange().getAllListLocalMap());
+//			map.put("local_variable", getWebExchange().getLocalMap());	
+			map.putAll(getWebExchange().getLocalMap());
+		}
+		setObject(object, map);
+	}
+	
+	public static void setObjectLocalWithCustom(Object object, Map<String, Object> metadata) {
+		Map<String, Object> map = new HashMap<String, Object>(metadata);
+		if (getWebExchange() != null) {
+			map.putAll(getWebExchange().getAll());
+			map.put("all_local_variable", getWebExchange().getAllListLocalMap());
 			map.put("local_variable", getWebExchange().getLocalMap());	
 			map.putAll(getWebExchange().getLocalMap());
 		}
 		setObject(object, map);
 	}
+
 	
 	private static void setObject(Object object, Map<String, Object> metadata) {
 		Class<?> clazz = object.getClass();

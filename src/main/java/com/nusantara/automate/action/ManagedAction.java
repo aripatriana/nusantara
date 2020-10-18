@@ -51,7 +51,7 @@ public class ManagedAction extends AbstractBaseDriver implements Actionable {
 			if (ContextLoader.isLocalVariable(actionable)) {
 				ContextLoader.setObjectLocal(actionable);
 			} else if (ContextLoader.isCompositeVariable(actionable)) {
-				ContextLoader.setObjectWithCustom(actionable, metadata);
+				ContextLoader.setObjectLocalWithCustom(actionable, metadata);
 			} else {
 				ContextLoader.setObjectWithCustom(actionable, metadata);
 			}

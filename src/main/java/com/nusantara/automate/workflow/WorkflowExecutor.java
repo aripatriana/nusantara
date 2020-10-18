@@ -13,7 +13,6 @@ import com.nusantara.automate.action.common.LogoutFormAction;
 import com.nusantara.automate.action.common.ProductSelectorAction;
 import com.nusantara.automate.exception.XlsSheetStyleException;
 import com.nusantara.automate.handler.ModalType;
-import com.nusantara.automate.reader.MadnessXlsFileReader;
 import com.nusantara.automate.reader.MultiLayerXlsFileReader;
 import com.nusantara.automate.util.LoginInfo;
 import com.nusantara.automate.util.ReflectionUtils;
@@ -66,6 +65,7 @@ public class WorkflowExecutor {
 		for (String workflowKey : config.getWorkflowKey(scen)) {
 			log.info("Execute workflow " + workflowKey);
 			ContextLoader.getWebExchange().put("active_workflow", workflowKey);
+			ContextLoader.getWebExchange().put("start_time_milis", System.currentTimeMillis());
 			
 			for (WorkflowEntry entry : config.getWorkflowEntries(workflowKey)) {
 				if (entry.isLoadFile()) {

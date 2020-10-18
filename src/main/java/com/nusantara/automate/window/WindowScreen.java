@@ -3,6 +3,7 @@ package com.nusantara.automate.window;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,11 +20,20 @@ import org.springframework.beans.factory.annotation.Value;
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.DriverManager;
 import com.nusantara.automate.io.FileImageIO;
+import com.nusantara.automate.util.DateUtils;
 import com.nusantara.automate.util.IDUtils;
 import com.nusantara.automate.util.SimpleEntry;
 
 public class WindowScreen {
-
+	
+	public final static int CAPTURE_CURRENT_WINDOW = 0;
+	public final static int CAPTURE_FULL_WINDOW = 1;
+	
+	private final static int SNAPSHOT_TEMP = 0;
+	private final static int SNAPSHOT_FINAL = 1;
+	
+	private final static String FORMAT_DATE_TIME = "yyyy-MM-dd hh-mm-ss";
+	
 	@Value("{tmp_dir}")
 	private String tmpDir;
 	
@@ -32,17 +42,18 @@ public class WindowScreen {
 	
 	@Value("generate.output.image")
 	private String generateOutputImage;
-
-	public final static int CAPTURE_CURRENT_WINDOW = 0;
-	public final static int CAPTURE_FULL_WINDOW = 1;
 	
-	private final static int SNAPSHOT_TEMP = 0;
-	private final static int SNAPSHOT_FINAL = 1;
+	@Value("active_scen")
+	private String targetFolder;
+	
+	@Value("active_workflow")
+	private String prefixFileName;
+	
+	@Value("start_time_milis")
+	private String startTimeMilis;
 	
 	private Scrolling scrolling;
 	private WebDriver webDriver;
-	private String targetFolder;
-	private String prefixFileName;
 	
 	public WindowScreen(WebDriver webDriver) {
 		this.webDriver = webDriver;
@@ -155,7 +166,8 @@ public class WindowScreen {
 		sourceFile = normalizeFile(sourceFile);
 		String targetFileName = testCaseDir + "\\";
 		if (targetFolder != null)
-			targetFileName += targetFolder + "\\";
+			targetFileName += targetFolder + "\\" + prefixFileName.replace(targetFolder + "_", "") 
+							+ " " + DateUtils.format(new Date(Long.valueOf(startTimeMilis)), FORMAT_DATE_TIME) + "\\";
 		if (prefixFileName != null)
 			targetFileName += prefixFileName + "_";
 		targetFileName += IDUtils.getRandomId() + ".png";
@@ -167,7 +179,8 @@ public class WindowScreen {
 	public File putToFile(BufferedImage bufferedImg) throws IOException {
 		String targetFileName = testCaseDir + "\\";
 		if (targetFolder != null)
-			targetFileName += targetFolder + "\\";
+			targetFileName += targetFolder + "\\" + prefixFileName.replace(targetFolder + "_", "") 
+							+ " " + DateUtils.format(new Date(Long.valueOf(startTimeMilis)), FORMAT_DATE_TIME) + "\\";
 		if (prefixFileName != null)
 			targetFileName += prefixFileName + "_";
 		targetFileName += IDUtils.getRandomId() + ".png";

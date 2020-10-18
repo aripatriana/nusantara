@@ -7,6 +7,10 @@ import java.util.Date;
 
 public class DateUtils {
 
+	public static String format(Date date, String format) {
+		DateFormat df = new SimpleDateFormat(format);
+		return df.format(date);
+	}
 	
 	public static Date parse(String date, String format) {
 		DateFormat df = new SimpleDateFormat(format);

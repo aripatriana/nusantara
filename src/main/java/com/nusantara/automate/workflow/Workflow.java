@@ -261,7 +261,7 @@ public class Workflow {
 							if (actionable instanceof ManagedAction) {
 								((ManagedAction) actionable).setMetadata(webExchange.getMetaData(getActiveMenu().getModuleId(), i));
 							} else {
-								ContextLoader.setObjectWithCustom(actionable, webExchange.getMetaData(getActiveMenu().getModuleId(), i));	
+								ContextLoader.setObjectLocalWithCustom(actionable, webExchange.getMetaData(getActiveMenu().getModuleId(), i));	
 							}
 						} else {
 							ContextLoader.setObjectLocal(actionable);	
@@ -279,6 +279,7 @@ public class Workflow {
 					}
 					i++;
 				}
+				webExchange.clearCachedSession();
 			} else {
 				int i = 0;
 				while(true) {
