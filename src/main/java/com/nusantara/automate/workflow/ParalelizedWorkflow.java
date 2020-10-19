@@ -48,7 +48,7 @@ public class ParalelizedWorkflow extends Workflow {
 					// execute common action		
 					// cek klo sesi gagal semua maka logout saja yg diproses
 					if (webExchange.getSessionList().size() > 0
-							&& (webExchange.getSessionList().size() == webExchange.getFailedSessionList().size())) {
+							&& (webExchange.getSessionList().size() <= webExchange.getFailedSessionList().size())) {
 						if (actionable instanceof LogoutFormAction 
 								&& (webExchange.get("token") != null || !webExchange.get("token").toString().isEmpty())) {
 							ContextLoader.setObject(actionable);
