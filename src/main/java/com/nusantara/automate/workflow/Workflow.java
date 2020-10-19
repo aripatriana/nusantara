@@ -269,8 +269,8 @@ public class Workflow {
 					}
 				} else {
 					int i = 0;
-					for (String sessionId : webExchange.getSessionList()) {
-						
+					while(true) {
+						String sessionId = webExchange.createSession(i);
 						if (!webExchange.isSessionFailed(sessionId)) {
 							log.info("Execute data-row index " + i + " with session " + sessionId);
 							webExchange.setCurrentSession(sessionId);
@@ -296,8 +296,12 @@ public class Workflow {
 							}
 						}
 						i++;
+						
+						if (webExchange.getSessionList().size() == i) {
+							webExchange.clearCachedSession();
+							break;
+						}
 					}
-					webExchange.clearCachedSession();
 				}
 
 			} else {
