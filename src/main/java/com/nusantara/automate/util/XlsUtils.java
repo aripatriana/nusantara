@@ -12,7 +12,7 @@ public class XlsUtils {
 			return cell.getNumericCellValue();
 		}
 		if (cell.getCellType() ==  Cell.CELL_TYPE_STRING) {
-			return cell.getStringCellValue().replace("\n", "");
+			return cell.getStringCellValue().replace("\n", "").trim();
 		}
 		if (cell.getCellType() == Cell.CELL_TYPE_BLANK) {
 			return null;
