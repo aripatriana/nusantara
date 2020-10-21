@@ -21,6 +21,7 @@ import com.nusantara.automate.DriverManager;
 import com.nusantara.automate.FormActionable;
 import com.nusantara.automate.Menu;
 import com.nusantara.automate.MenuAwareness;
+import com.nusantara.automate.MultipleFormActionable;
 import com.nusantara.automate.Retention;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.action.ManagedFormAction;
@@ -140,14 +141,22 @@ public class Workflow {
 					ManagedFormAction scoped = null;
 					if (actionable instanceof FormActionable) {
 						scoped = new ManagedFormAction(actionable.getClass());
-					} else {
+					} else if (actionable instanceof MultipleFormActionable) {
 						scoped = new ManagedMultipleFormAction(actionable.getClass());
 					}
-					scoped.addActionable(actionable);
-					actionableForLoop.add(scoped);
+					
+					if (scoped != null) {
+						scoped.addActionable(actionable);
+						actionableForLoop.add(scoped);						
+					} else {
+						log.warn("Managed Action is missing for " + actionable);
+					}
 				} else {
 					Actionable act = actionableForLoop.getLast();
-					((ManagedFormAction) act).addActionable(actionable);		
+					if (act != null)
+						((ManagedFormAction) act).addActionable(actionable);
+					else 
+						log.warn("Managed Action is missing for " + actionable);
 				}
 				scopedActionIndex++;
 			} else {
@@ -350,7 +359,7 @@ public class Workflow {
 		int retry = 1;
 		try {
 			actionable.submit(webExchange);
-		} catch (StaleElementReferenceException | ElementClickInterceptedException | TimeoutException  | NoSuchElementException e) {
+		} catch (StaleElementReferenceException | ElementClickInterceptedException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) {
 			retryWhenException(actionable, ++retry);
 		}
 		
@@ -361,7 +370,7 @@ public class Workflow {
 			log.info("Something happened, be calm! we still loving you!");
 			((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 			actionable.submit(webExchange);
-		} catch (StaleElementReferenceException | ElementClickInterceptedException | TimeoutException  | NoSuchElementException e) { 
+		} catch (StaleElementReferenceException | ElementClickInterceptedException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) { 
 			if (retry < MAX_RETRY_LOAD_PAGE) {
 				retryWhenException(actionable, ++retry);
 			} else {
@@ -392,14 +401,22 @@ public class Workflow {
 					ManagedFormAction scoped = null;
 					if (actionable instanceof FormActionable) {
 						scoped = new ManagedFormAction(actionable.getClass());
-					} else {
+					} else if (actionable instanceof MultipleFormActionable) {
 						scoped = new ManagedMultipleFormAction(actionable.getClass());
 					}
-					scoped.addActionable(actionable);
-					actionableForLoop.add(scoped);
+					
+					if (scoped != null) {
+						scoped.addActionable(actionable);
+						actionableForLoop.add(scoped);						
+					} else {
+						log.warn("Managed Action is missing for " + actionable);
+					}
 				} else {
 					Actionable act = actionableForLoop.getLast();
-					((ManagedFormAction) act).addActionable(actionable);		
+					if (act != null)
+						((ManagedFormAction) act).addActionable(actionable);
+					else
+						log.warn("Managed Action is missing for " + actionable);
 				}
 			} else {
 				actionableForLoop.add(actionable);	
