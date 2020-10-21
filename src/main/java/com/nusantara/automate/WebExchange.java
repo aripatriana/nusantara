@@ -1,6 +1,5 @@
 package com.nusantara.automate;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,10 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import com.nusantara.automate.util.MapUtils;
-
-import java.util.UUID;
 
 /**
  * This object like the memory that hold the object which can be accessed for all implementation of actionable class
@@ -206,7 +204,7 @@ public class WebExchange {
 	}
 	
 	public List<Map<String, Object>> getAllListLocalMap() {
-		List<Map<String, Object>> localMap = new ArrayList<Map<String, Object>>();		
+		List<Map<String, Object>> localMap = new LinkedList<Map<String, Object>>();		
 		for (Entry<String, Map<String, Object>> entry : sessionHolder.entrySet()) {
 			if (!failedSessionList.contains(entry.getKey()))
 				localMap.add(entry.getValue());

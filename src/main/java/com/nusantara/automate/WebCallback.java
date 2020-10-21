@@ -55,9 +55,9 @@ public abstract class WebCallback extends WebElementWrapper implements Callback 
 		captureWindow();
 		clickButton(webElement, "failedOk");
 		try {
-			captureFullModal(getModalId());			
+			captureFailedFullModal(getModalId());			
 		} catch (Exception e) {
-			captureFullWindow();
+			captureFailedFullWindow();
 		}
 		throw new FailedTransactionException("Failed for transaction");
 	}

@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.nusantara.automate.FileReader;
 
 /**
@@ -14,6 +17,8 @@ import com.nusantara.automate.FileReader;
  */
 public class SimpleFileReader implements FileReader<String> {
 
+	private Logger log = LoggerFactory.getLogger(SimpleFileReader.class);
+	
 	private File file;
 	private Scanner scanner;
 	public SimpleFileReader(File file) {
@@ -21,7 +26,7 @@ public class SimpleFileReader implements FileReader<String> {
 		try {
 			 scanner = new Scanner(file);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		}
 	}
 	

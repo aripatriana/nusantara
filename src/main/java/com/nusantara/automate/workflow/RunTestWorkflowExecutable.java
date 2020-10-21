@@ -35,8 +35,7 @@ public class RunTestWorkflowExecutable implements RunTestWorkflow, WorkflowConfi
 		
 				executor.execute(scen, workflow, workflowConfig);
 			} catch (Exception e) {
-				log.error("FATAL error " + e.getMessage());
-				e.printStackTrace();
+				log.error("FATAL ERROR ", e);
 			}			
 		}
 	}

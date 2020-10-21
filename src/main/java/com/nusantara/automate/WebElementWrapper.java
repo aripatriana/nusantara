@@ -79,7 +79,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		
 		int index = 0;
 		try {
-			WebElement webElemenet = findElementByXpath("//table[contains(@id,'" + tableId + "')]//tbody//tr[./td[2]/text()='" + value +"']");
+			WebElement webElemenet = findElementByXpath("//table[contains(@id,'" + tableId + "')]//tbody//tr[./td/text()='" + value +"']");
 			index = Integer.valueOf(webElemenet.getAttribute("data-index"));
 			
 			findElementByXpath("//table[contains(@id,'" + tableId + "')]//tbody//tr[@data-index='" + index + "']//td//input[@type='checkbox' and @data-index='" + index + "']").click();

@@ -15,6 +15,8 @@ import java.util.Map.Entry;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.FileReader;
 
@@ -27,6 +29,8 @@ import com.nusantara.automate.FileReader;
  */
 public class XlsFileReader implements FileReader<Map<String, Object>> {
 
+	private Logger log = LoggerFactory.getLogger(XlsFileReader.class);
+	
 	private File file;
 	private int activeSheet;
 	private Workbook workbook;
@@ -64,9 +68,9 @@ public class XlsFileReader implements FileReader<Map<String, Object>> {
 				data.addAll(d);
 			}
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		}
 	}
 	

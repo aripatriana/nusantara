@@ -4,7 +4,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ReflectionUtils {
+	
+	private static Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
 
 	public static void setProperty(Object object, String fieldName, Object data) {
 		setProperty(object, object.getClass(), fieldName, data);;
@@ -20,10 +25,10 @@ public class ReflectionUtils {
 			if (!Object.class.equals(superClazz)) {
 				setProperty(object, superClazz, fieldName,  data);
 			} else {
-				e1.printStackTrace();
+				log.error("ERROR ", e1);
 			}
 		} catch (SecurityException e1) {
-			e1.printStackTrace();
+			log.error("ERROR ", e1);
 		}
 		
 		if (field != null) {
@@ -31,9 +36,9 @@ public class ReflectionUtils {
 		    	field.setAccessible(true);
 				field.set(object, data);
 			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			}
 		}	
 	}
@@ -56,22 +61,21 @@ public class ReflectionUtils {
 			try {
 				return (T) method.invoke(object, data);
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			} catch (InvocationTargetException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			}
 		} catch (NoSuchMethodException e) {
 			Class<?> superClazz = clazz.getSuperclass();
 			if (!Object.class.equals(superClazz)) {
 				invokeMethod(object, superClazz, methodName, parameterClazz, data);
 			} else {
-				e.printStackTrace();
-				
+				log.error("ERROR ", e);
 			}
 		} catch (SecurityException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		}
 		return null;
 	}
@@ -87,9 +91,9 @@ public class ReflectionUtils {
 			try {
 				return clazz.newInstance();
 			} catch (InstantiationException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			}
 		} else {
 			Class<?>[] parameterTypes = new Class<?>[args.length];
@@ -99,17 +103,17 @@ public class ReflectionUtils {
 			try {
 				return clazz.getConstructor(parameterTypes).newInstance(args);
 			} catch (InstantiationException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			} catch (InvocationTargetException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			} catch (NoSuchMethodException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			} catch (SecurityException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			}
 			
 		}

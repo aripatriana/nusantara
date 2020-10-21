@@ -2,6 +2,9 @@ package com.nusantara.automate.util;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -9,6 +12,8 @@ import com.nusantara.automate.WebExchange;
 
 public class PortForwarding {
 
+	private Logger log = LoggerFactory.getLogger(PortForwarding.class);
+	
 	private String user;
 	private String password;
 	private String host;
@@ -44,7 +49,7 @@ public class PortForwarding {
 				session.setConfig(config);
 				session.setPassword(password);
 			} catch (JSchException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			}
 
 			if (session != null) {
@@ -52,7 +57,7 @@ public class PortForwarding {
 					session.connect();
 					session.setPortForwardingL(localPort, remoteHost, remotePort);
 				} catch (JSchException e) {
-					e.printStackTrace();
+					log.error("ERROR ", e);
 				}
 			}
 			

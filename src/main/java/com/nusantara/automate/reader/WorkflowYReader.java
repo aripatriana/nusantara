@@ -3,6 +3,9 @@ package com.nusantara.automate.reader;
 import java.io.File;
 import java.util.LinkedList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.nusantara.automate.BasicScript;
 import com.nusantara.automate.exception.ScriptInvalidException;
 import com.nusantara.automate.workflow.WorkflowEntry;
@@ -15,6 +18,8 @@ import com.nusantara.automate.workflow.WorkflowEntry;
  */
 public class WorkflowYReader {
 
+	private static Logger log = LoggerFactory.getLogger(WorkflowYReader.class);
+	
 	private SimpleFileReader fileReader;
 	
 	public WorkflowYReader(File file) {
@@ -69,7 +74,7 @@ public class WorkflowYReader {
 				System.out.println(we);
 			}
 		} catch (ScriptInvalidException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		}
 	}
 	

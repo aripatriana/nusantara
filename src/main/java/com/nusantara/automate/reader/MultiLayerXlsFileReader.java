@@ -11,6 +11,8 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.FileReader;
 import com.nusantara.automate.exception.XlsSheetStyleException;
@@ -18,6 +20,8 @@ import com.nusantara.automate.util.MapUtils;
 
 public class MultiLayerXlsFileReader extends MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 
+	private Logger log = LoggerFactory.getLogger(MultiLayerXlsFileReader.class);
+	
 	private static final String MULTI_LAYER_DISTINCTION = "multi_layer_distinction";
 	private static final String NO_DISTINCTION_FOR_ALL_LAYER = "no_distinction_for_all_layer";
 	private Map<String, LinkedHashMap<String, Object>> multiHeader = new HashMap<String, LinkedHashMap<String,Object>>();
@@ -97,9 +101,9 @@ public class MultiLayerXlsFileReader extends MadnessXlsFileReader implements Fil
 				}				
 			}
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		}
 	}
 	

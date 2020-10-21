@@ -132,7 +132,7 @@ public class Workflow {
 					executeSafeActionable(actionable);
 				}
 			} catch (FailedTransactionException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			}
 		} else {
 			if (scopedAction) {
@@ -201,7 +201,7 @@ public class Workflow {
 					}
 				} catch (Exception e) { 
 					log.info("Skipping data-row index " + index);
-					e.printStackTrace();
+					log.error("ERROR ", e);
 				}
 				
 				index++;
@@ -265,7 +265,7 @@ public class Workflow {
 						webExchange.addListFailedSession(webExchange.getSessionList());
 						log.info("Transaction is not completed, skipped for further processes");
 						log.error("ERROR " + e.getMessage());
-						e.printStackTrace();
+						log.error("ERROR ", e);
 					}
 				} else {
 					int i = 0;
@@ -289,10 +289,12 @@ public class Workflow {
 								executeSafeActionable(actionable);
 								((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 							} catch (FailedTransactionException e) {
-								webExchange.addFailedSession(sessionId);
 								log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
 								log.error("ERROR " + e.getMessage());
-								e.printStackTrace();
+								log.error("ERROR ", e);
+
+								webExchange.addFailedSession(sessionId);
+								((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 							}
 						}
 						i++;
@@ -325,7 +327,8 @@ public class Workflow {
 					} catch (FailedTransactionException e) {
 						log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
 						log.error("ERROR " + e.getMessage());
-						e.printStackTrace();
+						log.error("ERROR ", e);
+						
 						webExchange.addFailedSession(sessionId);
 						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 					}
@@ -363,7 +366,7 @@ public class Workflow {
 				retryWhenException(actionable, ++retry);
 			} else {
 				log.error("ERROR " + e.getMessage());
-				e.printStackTrace();
+				log.error("ERROR ", e);
 				throw new FailedTransactionException("Failed for transaction");
 			}	
 		}
@@ -381,7 +384,7 @@ public class Workflow {
 			try {
 				actionable.submit(webExchange);
 			} catch (FailedTransactionException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			}
 		} else {
 			if (scopedAction) {

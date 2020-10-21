@@ -46,7 +46,7 @@ public class LoginFormAction extends WebElementWrapper implements Actionable {
 		try {
 			this.token = new String(Files.readAllBytes(Paths.get(keyFile)));
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Error ", e);
 		}
 	}
 	

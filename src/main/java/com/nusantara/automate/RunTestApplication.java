@@ -80,7 +80,7 @@ public class RunTestApplication {
 				workflow.testWorkflow();				
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		} finally {
 			try {
 				FileUtils.cleanDirectory(new File(System.getProperty("user.dir") + "\\tmp"));
@@ -89,7 +89,7 @@ public class RunTestApplication {
 				ConfigLoader.clear();
 				ContextLoader.clear();
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				log.error("ERROR ", e1);
 			}
 		}
 	}
@@ -121,9 +121,9 @@ public class RunTestApplication {
 			try {
 				prop.load(new FileInputStream(file));
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			}
 			
 			for (final String name: prop.stringPropertyNames()) {
@@ -229,14 +229,6 @@ public class RunTestApplication {
 					mapFiles.put(dir, fileList);
 				};
 			}
-		}
-	}
-	
-	public static void main(String[] args) {
-		try {
-			RunTestApplication.setWorkflowy(new WorkflowConfig());
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 	

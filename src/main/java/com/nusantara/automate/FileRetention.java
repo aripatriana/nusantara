@@ -57,8 +57,10 @@ public class FileRetention implements Retention {
 
 				data.put(entry.getKey().toUpperCase(), d);
 			} else {
-				if (key.length > 1)
+				if (key.length > 1) {
 					title = key[0].concat(".".concat(title.toString()));
+					
+				}
 				data.put(title.toString().toUpperCase().replace(" ", "_"), entry.getValue());	
 			}
 				

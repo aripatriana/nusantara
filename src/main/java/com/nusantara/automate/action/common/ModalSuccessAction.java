@@ -133,7 +133,7 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 		} catch (FailedTransactionException e) {
 			throw e;
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw e;
 		}
 		
 	}
@@ -150,7 +150,6 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 				try {
 					Thread.sleep(3000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				System.out.println("COUNT DOWN 1");

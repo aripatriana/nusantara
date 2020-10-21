@@ -7,6 +7,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.nusantara.automate.window.WindowScreen;
@@ -19,6 +21,8 @@ import com.nusantara.automate.window.WindowScreen;
  */
 public abstract class AbstractBaseDriver {
 
+	private Logger log = LoggerFactory.getLogger(AbstractBaseDriver.class);
+	
 	private final int TIMEOUT_IN_SECOND = 15;
 	
 	WebDriver wd;
@@ -37,7 +41,7 @@ public abstract class AbstractBaseDriver {
 		try {
 			ws.capture(WindowScreen.CAPTURE_FULL_WINDOW);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		}
 	}
 	
@@ -45,7 +49,7 @@ public abstract class AbstractBaseDriver {
 		try {
 			ws.capture(WindowScreen.CAPTURE_CURRENT_WINDOW);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		}
 	}
 	
@@ -53,7 +57,34 @@ public abstract class AbstractBaseDriver {
 		try {
 			ws.capture(WindowScreen.CAPTURE_FULL_WINDOW, elementId);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
+		}
+	}
+	
+	public void captureFailedFullWindow() {
+		try {
+			ws.setRemark("failed");
+			ws.capture(WindowScreen.CAPTURE_FULL_WINDOW);
+		} catch (IOException e) {
+			log.error("ERROR ", e);
+		}
+	}
+	
+	public void captureFailedWindow() {
+		try {
+			ws.setRemark("failed");
+			ws.capture(WindowScreen.CAPTURE_CURRENT_WINDOW);
+		} catch (IOException e) {
+			log.error("ERROR ", e);
+		}
+	}
+	
+	public void captureFailedFullModal(String elementId) {
+		try {
+			ws.setRemark("failed");
+			ws.capture(WindowScreen.CAPTURE_FULL_WINDOW, elementId);
+		} catch (IOException e) {
+			log.error("ERROR ", e);
 		}
 	}
 	

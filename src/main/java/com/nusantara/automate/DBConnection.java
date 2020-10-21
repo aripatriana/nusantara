@@ -8,6 +8,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.nusantara.automate.exception.ReachTimeoutException;
@@ -21,6 +23,8 @@ import com.nusantara.automate.util.Sleep;
  */
 public class DBConnection {
 
+	private static Logger log = LoggerFactory.getLogger(DBConnection.class);
+	
 	@Value(value = "simple.datasource.url")
 	private String url = "jdbc:oracle:thin:@10.10.105.41:1521:fasdb";
 	
@@ -53,16 +57,14 @@ public class DBConnection {
 			try {
 				Class.forName(driverClassName);
 			} catch (ClassNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				log.error("ERROR ", e1);
 			}  
 			  
 			//step2 create  the connection object  
 			try {
 				connection = java.sql.DriverManager.getConnection(url, username, password);
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			}
 		}
 		return connection;
@@ -85,7 +87,7 @@ public class DBConnection {
 				results.add(result);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		} finally {
 				if (stmt != null) try {stmt.close();} catch (Exception e) {}
 				if (rs != null) try {rs.close();} catch (Exception e) {}
@@ -135,7 +137,7 @@ public class DBConnection {
 				results.add(result);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		}  finally {
 			if (stmt != null) try {stmt.close();} catch (Exception e) {}
 			if (rs != null) try {rs.close();} catch (Exception e) {}
@@ -149,7 +151,7 @@ public class DBConnection {
 				getConnection().connect().close();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		}
 	}
 }

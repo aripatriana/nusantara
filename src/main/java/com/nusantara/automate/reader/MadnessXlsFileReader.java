@@ -15,6 +15,8 @@ import java.util.Map.Entry;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.FileReader;
 
@@ -27,6 +29,8 @@ import com.nusantara.automate.FileReader;
  */
 public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 
+	private Logger log = LoggerFactory.getLogger(MadnessXlsFileReader.class);
+	
 	protected File file;
 	protected int activeSheet;
 	protected Workbook workbook;
@@ -70,9 +74,9 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 				data.addAll(d);
 			}
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("ERROR ", e);
 		}
 	}
 	
@@ -154,6 +158,7 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 						list.add(values);
 					} else {
 						arraySize.put(removedMap.get(entry.getKey()), 0);
+						list.add(new String[] {});
 					}
 					arrayList.put(removedMap.get(entry.getKey()), list);
 				}
@@ -171,7 +176,11 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 				for (String[] arr : arrayList.get(values.getKey())) {
 					for (int i=0; i< arraySize.get(values.getKey()); i++) {
 						Map<String, Object> d = normalize.get(i);
-						d.put(z+"", arr[i]);
+						if (arr.length == 0) {
+							d.put(z+"", null);
+						} else {
+							d.put(z+"", arr[i]);
+						}
 					}
 					z++;
 				}

@@ -60,7 +60,7 @@ public class ParalelizedWorkflow extends Workflow {
 				}
 			} catch (Exception e) { 
 				log.info("Transaction interrupted ");
-				e.printStackTrace();
+				log.error("ERROR ", e);
 			}	
 		}
 			

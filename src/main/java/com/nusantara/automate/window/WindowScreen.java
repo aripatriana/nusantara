@@ -55,6 +55,8 @@ public class WindowScreen {
 	private Scrolling scrolling;
 	private WebDriver webDriver;
 	
+	private String remark;
+	
 	public WindowScreen(WebDriver webDriver) {
 		this.webDriver = webDriver;
 		ContextLoader.setObject(this);
@@ -74,6 +76,14 @@ public class WindowScreen {
 	
 	public void setPrefixFileName(String prefixFileName) {
 		this.prefixFileName = prefixFileName;
+	}
+	
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+	
+	public String getRemark() {
+		return remark;
 	}
 	
 	public boolean checkIsScrolling() {
@@ -170,7 +180,13 @@ public class WindowScreen {
 							+ " " + DateUtils.format(new Date(Long.valueOf(startTimeMilis)), FORMAT_DATE_TIME) + "\\";
 		if (prefixFileName != null)
 			targetFileName += prefixFileName + "_";
-		targetFileName += IDUtils.getRandomId() + ".png";
+		
+		if (remark != null) {
+			targetFileName += IDUtils.getRandomId() + "_" + remark + ".png";
+			remark = null;
+		} else {
+			targetFileName += IDUtils.getRandomId() + ".png";
+		}
 		File destFile=new File(targetFileName);
 		FileUtils.copyFile(sourceFile, destFile);
 		return destFile;
@@ -183,7 +199,13 @@ public class WindowScreen {
 							+ " " + DateUtils.format(new Date(Long.valueOf(startTimeMilis)), FORMAT_DATE_TIME) + "\\";
 		if (prefixFileName != null)
 			targetFileName += prefixFileName + "_";
-		targetFileName += IDUtils.getRandomId() + ".png";
+		
+		if (remark != null) {
+			targetFileName += IDUtils.getRandomId() + "_" + remark + ".png";
+			remark = null;
+		} else {
+			targetFileName += IDUtils.getRandomId() + ".png";
+		}
 		File destFile=new File(targetFileName);
 		ImageIO.write(bufferedImg, "png", destFile);
 		return destFile;

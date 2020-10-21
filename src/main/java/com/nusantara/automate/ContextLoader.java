@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.nusantara.automate.annotation.FetchSession;
@@ -27,6 +29,8 @@ import com.nusantara.automate.util.ReflectionUtils;
  *
  */
 public class ContextLoader {
+	
+	private static Logger log = LoggerFactory.getLogger(ContextLoader.class);
 	
 	private static WebExchange webExchange;
 	
@@ -141,10 +145,10 @@ public class ContextLoader {
             	 fields.put(field.getName(), field.getAnnotation(Value.class).value());
             } else if (field.isAnnotationPresent(FetchSession.class)) {
             	try {
-                	if (!field.getType().equals(List.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be List");
+                	if (!checkAssignableFrom(field.getType(), List.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be List");
                 	ReflectionUtils.setProperty(object, field.getName(), metadata.get("all_local_variable"));
             	} catch (InstantiationException e) {
-					e.printStackTrace();
+            		log.error("ERROR ", e);
             	}
             }
         }
@@ -161,6 +165,20 @@ public class ContextLoader {
 		return recognize(object, object.getClass(), metadata);
 	}
 	
+	private static boolean checkAssignableFrom(Class<?> sourceClass, Class<?> targetClass) {
+		if (sourceClass.isAssignableFrom(targetClass))
+			return true;
+		
+		boolean result = false;
+		for (Class<?> c : sourceClass.getInterfaces()) {
+			if (c.isAssignableFrom(Class.class))
+				return false;
+			result = checkAssignableFrom(c, targetClass);
+			if (result) break;
+		}
+		return result;
+	}
+
 	@SuppressWarnings("unchecked")
 	private static Map<String, String> recognize(Object object, Class<?> clazz, Map<String, Object> metadata) {
 		Map<String, String> fields  = new HashMap<String, String>();    
@@ -176,9 +194,9 @@ public class ContextLoader {
 					ReflectionUtils.setProperty(object, field.getName(), d);
 //					BeanUtils.setProperty(object, field.getName(), d);
 				} catch (InstantiationException e) {
-					e.printStackTrace();
+					log.error("ERROR ", e);
 				} catch (IllegalAccessException e1) {
-					e1.printStackTrace();
+					log.error("ERROR ", e1);
 				}
             } else if (field.isAnnotationPresent(MapActionList.class)) {
             	try {
@@ -192,25 +210,25 @@ public class ContextLoader {
 	            	ReflectionUtils.setProperty(object, field.getName(), list);
 //	            	BeanUtils.setProperty(object, field.getName(), list);
     			} catch (InstantiationException e) {
-					e.printStackTrace();
+    				log.error("ERROR ", e);
 				} catch (IllegalAccessException e1) {
-					e1.printStackTrace();
+					log.error("ERROR ", e1);
 				}
             } else if (field.isAnnotationPresent(MapSession.class)) {
             	try {
-                	if (!field.getType().equals(Map.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be Map");
+                	if (!checkAssignableFrom(field.getType(), Map.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be Map");
                 	ReflectionUtils.setProperty(object, field.getName(), metadata.get("local_variable"));
             	} catch (InstantiationException e) {
-					e.printStackTrace();
+            		log.error("ERROR ", e);
             	}
             } else if (field.isAnnotationPresent(Value.class)) {
             	 fields.put(field.getName(), field.getAnnotation(Value.class).value());
             } else if (field.isAnnotationPresent(FetchSession.class)) {
             	try {
-                	if (!field.getType().equals(List.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be List");
+                	if (!checkAssignableFrom(field.getType(), List.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be List");
                 	ReflectionUtils.setProperty(object, field.getName(), metadata.get("all_local_variable"));
             	} catch (InstantiationException e) {
-					e.printStackTrace();
+            		log.error("ERROR ", e);
             	}
             }
             
