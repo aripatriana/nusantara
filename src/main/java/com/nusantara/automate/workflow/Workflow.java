@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
@@ -359,7 +360,7 @@ public class Workflow {
 		int retry = 1;
 		try {
 			actionable.submit(webExchange);
-		} catch (StaleElementReferenceException | ElementClickInterceptedException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) {
+		} catch (StaleElementReferenceException | ElementNotInteractableException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) {
 			retryWhenException(actionable, ++retry);
 		}
 		
@@ -370,7 +371,7 @@ public class Workflow {
 			log.info("Something happened, be calm! we still loving you!");
 			((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 			actionable.submit(webExchange);
-		} catch (StaleElementReferenceException | ElementClickInterceptedException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) { 
+		} catch (StaleElementReferenceException | ElementNotInteractableException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) { 
 			if (retry < MAX_RETRY_LOAD_PAGE) {
 				retryWhenException(actionable, ++retry);
 			} else {

@@ -14,6 +14,7 @@ import com.nusantara.automate.util.Sleep;
 public abstract class WebElementWrapper extends AbstractBaseDriver {
 	
 	protected void setInputField(String id, String value) {
+		findElementById(id).clear();
 		findElementById(id).sendKeys(value);
 		Sleep.wait(200);
 	}
