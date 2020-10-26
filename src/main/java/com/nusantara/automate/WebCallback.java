@@ -52,7 +52,7 @@ public abstract class WebCallback extends WebElementWrapper implements Callback 
 	public abstract void ok(WebElement webElement, WebExchange webExchange) throws FailedTransactionException ;
 	
 	public void notOk(WebElement webElement, WebExchange webExchange) throws FailedTransactionException{
-		captureWindow();
+		captureFailedWindow();
 		clickButton(webElement, "failedOk");
 		try {
 			captureFailedFullModal(getModalId());			

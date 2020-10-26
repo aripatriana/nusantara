@@ -19,6 +19,9 @@ public class LogoutFormAction extends WebElementWrapper implements Actionable {
 	
 	@Override
 	public void submit(WebExchange webExchange) {
+		if (webExchange.get("token") == null) 
+			return;
+		
 		log.info("Logout");
 		
 		Sleep.wait(1000);
@@ -29,5 +32,7 @@ public class LogoutFormAction extends WebElementWrapper implements Actionable {
 		webExchange.remove("memberCode");
 		webExchange.remove("password");
 		webExchange.remove("token");
+		
+		log.info("Logout success");
 	}
 }

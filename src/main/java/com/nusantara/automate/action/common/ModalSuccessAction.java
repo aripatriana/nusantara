@@ -57,12 +57,12 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 	
 	@Override
 	public void submit(WebExchange webExchange) throws FailedTransactionException {
-		log.info("Waiting modal success opened");
+		log.info("Waiting modal success open");
 		
 		try {
 			ExecutorService executor = Executors.newFixedThreadPool(2);
-			
-			CountDownLatch latch = new CountDownLatch(2);
+			CountDownLatch countDownOk = new CountDownLatch(2);
+			CountDownLatch countDownLatch = new CountDownLatch(2);
 			AtomicBoolean modalSuccess = new AtomicBoolean(Boolean.FALSE);
 			
 			executor.execute(new Runnable() {
@@ -73,12 +73,13 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 						WebDriverWait wait = new WebDriverWait(getDriver(),180);
 						wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(successId)));
 						modalSuccess.set(Boolean.TRUE);
-						latch.countDown();
-						log.info("Modal success opened");
+						countDownOk.countDown();	
+						log.info("Modal success open");
 					} catch (TimeoutException e) {
 						// do nothing
+					} finally {
+						countDownLatch.countDown();			
 					}
-					
 				}
 			});
 			
@@ -90,17 +91,18 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 						WebDriverWait wait = new WebDriverWait(getDriver(),180);
 						wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(failedId)));
 						modalSuccess.set(Boolean.FALSE);
-						latch.countDown();
-						log.info("Modal failed opened");
+						countDownOk.countDown();	
+						log.info("Modal failed open");
 					} catch (TimeoutException e) {
 						// do nothing
+					} finally {
+						countDownLatch.countDown();					
 					}
 				}
 			});
 			
 			for (;;) {
-				long countdown = latch.getCount();
-				if (countdown == 1) {
+				if (countDownOk.getCount() == 1 || countDownLatch.getCount() == 0) {
 					// shutdown thread
 					new Thread(new Runnable() {
 						
@@ -118,10 +120,15 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 						}
 					}).start();
 					
+					if (countDownLatch.getCount() == 0)
+						throw new FailedTransactionException("Both of modal window not open");
 					break;
 				}
+
+				Sleep.wait(100);
 			}
 			
+			// wait until modal fully open
 			Sleep.wait(1000);
 			
 			if (modalSuccess.get()) {

@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -31,6 +30,8 @@ import com.nusantara.automate.action.common.ModalSuccessAction;
 import com.nusantara.automate.action.common.OpenFormAction;
 import com.nusantara.automate.action.common.OpenMenuAction;
 import com.nusantara.automate.exception.FailedTransactionException;
+import com.nusantara.automate.report.ReportManager;
+import com.nusantara.automate.report.ReportMonitor;
 
 
 /**
@@ -118,6 +119,26 @@ public class Workflow {
 		return this;
 	}
 	
+	public Workflow actionMajor(Actionable actionable) {
+		try {
+			if (ContextLoader.isPersistentSerializable(actionable)) {
+				if (ContextLoader.isLocalVariable(actionable)) {
+					ContextLoader.setObjectLocal(actionable);
+					executeSafeActionable(actionable);
+				} else {
+					ContextLoader.setObject(actionable);
+					executeSafeActionable(actionable);	
+				}
+			} else {
+				ContextLoader.setObject(actionable);
+				executeSafeActionable(actionable);
+			}
+		} catch (FailedTransactionException e) {
+			log.error("ERROR ", e);
+		}
+		return this;
+	}
+	
 	public Workflow action(Actionable actionable) {
 		if (!activeLoop) {
 			try {
@@ -187,7 +208,7 @@ public class Workflow {
 	 * 
 	 * @return
 	 */
-	public Workflow endLoop() {
+	public Workflow endLoop() throws Exception {
 		if (!activeLoop) {
 			throw new RuntimeException("Loop must be initialized");	
 		}
@@ -267,15 +288,22 @@ public class Workflow {
 			// execute map serializable
 			if (isLocalVariable(actionable) || isCompositeVariable(actionable)) {
 				if (actionable instanceof ManagedMultipleFormAction) {
+					LinkedList<Map<String, Object>> metadata = webExchange.getMetaData(getActiveMenu().getModuleId());
+					
 					try {
 						ContextLoader.setObjectLocal(actionable);	
 						executeSafeActionable(actionable);
 						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
+						
+						ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
+								getWebExchange().get("active_workflow").toString(), metadata);
 					} catch (FailedTransactionException e) {
 						webExchange.addListFailedSession(webExchange.getSessionList());
 						log.info("Transaction is not completed, skipped for further processes");
-						log.error("ERROR " + e.getMessage());
 						log.error("ERROR ", e);
+						
+						ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
+								getWebExchange().get("active_workflow").toString(), metadata, e.getMessage(), ReportManager.FAILED);
 					}
 				} else {
 					int i = 0;
@@ -285,12 +313,14 @@ public class Workflow {
 							log.info("Execute data-row index " + i + " with session " + sessionId);
 							webExchange.setCurrentSession(sessionId);
 							
-							try {
+							Map<String, Object> metadata = webExchange.getMetaData(getActiveMenu().getModuleId(), i);
+							
+							try {	
 								if (isCompositeVariable(actionable)) {
 									if (actionable instanceof ManagedFormAction) {
-										((ManagedFormAction) actionable).setMetadata(webExchange.getMetaData(getActiveMenu().getModuleId(), i));
+										((ManagedFormAction) actionable).setMetadata(metadata);
 									} else {
-										ContextLoader.setObjectLocalWithCustom(actionable, webExchange.getMetaData(getActiveMenu().getModuleId(), i));	
+										ContextLoader.setObjectLocalWithCustom(actionable, metadata);	
 									}
 								} else {
 									ContextLoader.setObjectLocal(actionable);	
@@ -298,13 +328,18 @@ public class Workflow {
 							
 								executeSafeActionable(actionable);
 								((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
+								
+								ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
+										getWebExchange().get("active_workflow").toString(), metadata);
 							} catch (FailedTransactionException e) {
 								log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
-								log.error("ERROR " + e.getMessage());
 								log.error("ERROR ", e);
 
 								webExchange.addFailedSession(sessionId);
 								((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
+								
+								ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
+										getWebExchange().get("active_workflow").toString(), metadata, e.getMessage(), ReportManager.FAILED);
 							}
 						}
 						i++;
@@ -334,13 +369,18 @@ public class Workflow {
 						
 						executeSafeActionable(actionable);
 						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
+						
+						ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
+								getWebExchange().get("active_workflow").toString(), metadata);
 					} catch (FailedTransactionException e) {
 						log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
-						log.error("ERROR " + e.getMessage());
 						log.error("ERROR ", e);
 						
 						webExchange.addFailedSession(sessionId);
 						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
+						
+						ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(), getWebExchange().get("active_scen").toString(),
+								getWebExchange().get("active_workflow").toString(), metadata, e.getMessage(), ReportManager.FAILED);
 					}
 					i++;
 					
@@ -375,9 +415,8 @@ public class Workflow {
 			if (retry < MAX_RETRY_LOAD_PAGE) {
 				retryWhenException(actionable, ++retry);
 			} else {
-				log.error("ERROR " + e.getMessage());
 				log.error("ERROR ", e);
-				throw new FailedTransactionException("Failed for transaction");
+				throw new FailedTransactionException("Failed for transaction, " + e.getMessage());
 			}	
 		}
 	}
@@ -431,7 +470,7 @@ public class Workflow {
 		log.info("Clear session");
 		DBConnection.close();
 		webExchange.clear();
-		Thread.currentThread().interrupt();
+//		Thread.currentThread().interrupt();
 		return this;
 	}
 	

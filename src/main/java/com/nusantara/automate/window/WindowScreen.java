@@ -20,24 +20,27 @@ import org.springframework.beans.factory.annotation.Value;
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.DriverManager;
 import com.nusantara.automate.io.FileImageIO;
+import com.nusantara.automate.report.ReportManager;
+import com.nusantara.automate.report.ReportMonitor;
 import com.nusantara.automate.util.DateUtils;
 import com.nusantara.automate.util.IDUtils;
 import com.nusantara.automate.util.SimpleEntry;
 
 public class WindowScreen {
 	
+	private final static String REMARK_FAILED = "failed";
 	public final static int CAPTURE_CURRENT_WINDOW = 0;
 	public final static int CAPTURE_FULL_WINDOW = 1;
 	
 	private final static int SNAPSHOT_TEMP = 0;
 	private final static int SNAPSHOT_FINAL = 1;
 	
-	private final static String FORMAT_DATE_TIME = "yyyy-MM-dd hh-mm-ss";
+	private final static String FORMAT_DATE_TIME = "yyyyMMdd_hhmmss";
 	
 	@Value("{tmp_dir}")
 	private String tmpDir;
 	
-	@Value("{testcase_dir}")
+	@Value("{report_dir}")
 	private String testCaseDir;
 	
 	@Value("generate.output.image")
@@ -98,6 +101,8 @@ public class WindowScreen {
 	
 	private void capture(int captureType, Scrolling scrolling) throws IOException {
 		if ("true".equalsIgnoreCase(generateOutputImage)) {
+			File outputFile = null;
+			
 			setScrolling(scrolling);
 			
 			LinkedHashMap<String, SimpleEntry<PositionPixel, File>> images = new LinkedHashMap<String, SimpleEntry<PositionPixel, File>>();
@@ -116,12 +121,17 @@ public class WindowScreen {
 					}				
 				}
 				
-				putToFile(FileImageIO.combineImage(scrolling.getClientWidth(), scrolling.getScrollHeight(), scrolling.getClientHeight(), images));
+				outputFile = putToFile(FileImageIO.combineImage(scrolling.getClientWidth(), scrolling.getScrollHeight(), scrolling.getClientHeight(), images));
 			} else {
-				snapshot(WindowScreen.SNAPSHOT_FINAL);
-			}				
+				outputFile = snapshot(WindowScreen.SNAPSHOT_FINAL);
+			}	
+			
+			ReportMonitor.logImageEntry(targetFolder, prefixFileName, 
+					outputFile.getAbsolutePath().replace((testCaseDir + "//" + DateUtils.format(new Date(Long.valueOf(startTimeMilis)), FORMAT_DATE_TIME)), ""), 
+					(REMARK_FAILED.equals(remark) ? ReportManager.FAILED : ReportManager.PASSED));
 		}
 	}
+
 	
 	public void capture(int captureType) throws IOException {
 		capture(captureType, new WindowScrolling((JavascriptExecutor) webDriver));	
@@ -174,29 +184,21 @@ public class WindowScreen {
 	
 	public File putToFile(File sourceFile) throws IOException {
 		sourceFile = normalizeFile(sourceFile);
-		String targetFileName = testCaseDir + "\\";
-		if (targetFolder != null)
-			targetFileName += targetFolder + "\\" + prefixFileName.replace(targetFolder + "_", "") 
-							+ " " + DateUtils.format(new Date(Long.valueOf(startTimeMilis)), FORMAT_DATE_TIME) + "\\";
-		if (prefixFileName != null)
-			targetFileName += prefixFileName + "_";
-		
-		if (remark != null) {
-			targetFileName += IDUtils.getRandomId() + "_" + remark + ".png";
-			remark = null;
-		} else {
-			targetFileName += IDUtils.getRandomId() + ".png";
-		}
-		File destFile=new File(targetFileName);
+		File destFile=new File(constructOutputFileName());
 		FileUtils.copyFile(sourceFile, destFile);
 		return destFile;
 	}
 	
 	public File putToFile(BufferedImage bufferedImg) throws IOException {
-		String targetFileName = testCaseDir + "\\";
+		File destFile=new File(constructOutputFileName());
+		ImageIO.write(bufferedImg, "png", destFile);
+		return destFile;
+	}
+	
+	private String constructOutputFileName() {
+		String targetFileName = testCaseDir + "\\" + DateUtils.format(new Date(Long.valueOf(startTimeMilis)), FORMAT_DATE_TIME) + "\\";
 		if (targetFolder != null)
-			targetFileName += targetFolder + "\\" + prefixFileName.replace(targetFolder + "_", "") 
-							+ " " + DateUtils.format(new Date(Long.valueOf(startTimeMilis)), FORMAT_DATE_TIME) + "\\";
+			targetFileName += targetFolder + "\\" + prefixFileName.replace(targetFolder + "_", "") + "\\";
 		if (prefixFileName != null)
 			targetFileName += prefixFileName + "_";
 		
@@ -206,12 +208,10 @@ public class WindowScreen {
 		} else {
 			targetFileName += IDUtils.getRandomId() + ".png";
 		}
-		File destFile=new File(targetFileName);
-		ImageIO.write(bufferedImg, "png", destFile);
-		return destFile;
+		return targetFileName;
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public static void main1(String[] args) throws IOException {
 		Map<String, Object> metadata = new HashMap<String, Object>();
 		metadata.put("{tmp_dir}", System.getProperty("user.dir") + "\\tmp");
 		metadata.put("{log_dir}", System.getProperty("user.dir") + "\\log");

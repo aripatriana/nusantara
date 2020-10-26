@@ -14,10 +14,10 @@ import com.nusantara.automate.action.common.ProductSelectorAction;
 import com.nusantara.automate.exception.XlsSheetStyleException;
 import com.nusantara.automate.handler.ModalType;
 import com.nusantara.automate.reader.MultiLayerXlsFileReader;
+import com.nusantara.automate.report.ReportMonitor;
 import com.nusantara.automate.util.LoginInfo;
 import com.nusantara.automate.util.ReflectionUtils;
 import com.nusantara.automate.util.SimpleEntry;
-import com.nusantara.automate.util.Sleep;
 
 /**
  * The execution of workflow comes from here
@@ -63,90 +63,104 @@ public class WorkflowExecutor {
 	public void execute(String scen, Workflow workflow, WorkflowConfig config) throws Exception {
 		String productType = null;
 		for (String workflowKey : config.getWorkflowKey(scen)) {
-			log.info("Execute workflow " + workflowKey);
-			ContextLoader.getWebExchange().put("active_workflow", workflowKey);
-			ContextLoader.getWebExchange().put("start_time_milis", System.currentTimeMillis());
 			
-			for (WorkflowEntry entry : config.getWorkflowEntries(workflowKey)) {
-				if (entry.isLoadFile()) {
-					 try {
+			try {
+				log.info("Execute workflow " + workflowKey);
+				ContextLoader.getWebExchange().put("active_workflow", workflowKey);
+				
+				for (WorkflowEntry entry : config.getWorkflowEntries(workflowKey)) {
+					if (entry.isLoadFile()) {
+						 try {
+							FileRetention retention = new FileRetention(new MultiLayerXlsFileReader(config.getWorkflowData(entry.getVariable())));
+							workflow
+							 	.load(retention)
+								.loop();
+							
+							ReportMonitor.getScenEntry(workflowKey).setNumOfData(retention.getSize());
+							ReportMonitor.getTestCaseEntry(scen).setNumOfData(retention.getSize());
+						} catch (XlsSheetStyleException e) {
+							throw new Exception(e);
+						}
+					} else if (entry.isLogin()) {
+						 workflow
+							.openPage(loginUrl)
+							.action(new LoginFormAction(getLoginInfo(entry.getVariable())));
+						 if (workflow.getWebExchange().get("token") == null)
+							 throw new Exception("Workflow halted caused by login failed");
+					} else if (entry.isLogout()) {
+						workflow.action(new LogoutFormAction());
+					} else if (entry.isRelogin()) {
 						workflow
-						 	.load(new FileRetention(new MultiLayerXlsFileReader(config.getWorkflowData(entry.getVariable()))))
-							.loop();
-					} catch (XlsSheetStyleException e) {
-						throw new Exception(e);
-					}
-				} else if (entry.isLogin()) {
-					 workflow
-						.openPage(loginUrl)
-						.action(new LoginFormAction(getLoginInfo(entry.getVariable())));
-					 if (workflow.getWebExchange().get("token") == null)
-						 throw new Exception("Workflow halted caused by login failed");
-				} else if (entry.isLogout()) {
-					workflow.action(new LogoutFormAction());
-				} else if (entry.isRelogin()) {
-					workflow
-						.action(new LogoutFormAction())
-						.action(new LoginFormAction(getLoginInfo(entry.getVariable())))
-						.action(new ProductSelectorAction(productType));
-					 if (workflow.getWebExchange().get("token") == null)
-						 throw new Exception("Workflow halted caused by login failed");
-				} else if (entry.isSelectProduct()) {
-					productType = entry.getVariable();
-					workflow
-						.action(new ProductSelectorAction(entry.getVariable()));
-				} else if (entry.isActionMenu()) {
+							.action(new LogoutFormAction())
+							.action(new LoginFormAction(getLoginInfo(entry.getVariable())))
+							.action(new ProductSelectorAction(productType));
+						 if (workflow.getWebExchange().get("token") == null)
+							 throw new Exception("Workflow halted caused by login failed");
+					} else if (entry.isSelectProduct()) {
+						productType = entry.getVariable();
+						workflow
+							.action(new ProductSelectorAction(entry.getVariable()));
+					} else if (entry.isActionMenu()) {
+						
+						Class<?> clazz = config.getHandler(entry.getVariable());
+						
+						Object handler = ReflectionUtils.instanceObject(clazz);
+						ContextLoader.setObject(handler);
 					
-					Class<?> clazz = config.getHandler(entry.getVariable());
+						workflow
+							.openMenu(config.getMenu(entry.getVariable()));
 					
-					Object handler = ReflectionUtils.instanceObject(clazz);
-					ContextLoader.setObject(handler);
-				
-					workflow
-						.openMenu(config.getMenu(entry.getVariable()));
-				
-					workflow.scopedAction();
-					if (BasicScript.VALIDATE.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.VALIDATE, Workflow.class, workflow);
-					} else if (BasicScript.SEARCH.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.SEARCH, Workflow.class, workflow);
-					} else if (BasicScript.CHECK.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.CHECK, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.MAIN});
-					} else if (BasicScript.APPROVE.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.APPROVE, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.MAIN});
-					} else if (BasicScript.REJECT.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.REJECT, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.MAIN});
-					} else if (BasicScript.REJECT_DETAIL.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.REJECT, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.DETAIL});
-					} else if (BasicScript.MULTIPLE_REJECT.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.MULTIPLE_REJECT, Workflow.class, workflow);
-					} else if (BasicScript.APPROVE_DETAIL.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.APPROVE, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.DETAIL});
-					} else if (BasicScript.MULTIPLE_APPROVE.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.MULTIPLE_APPROVE, Workflow.class, workflow);
-					} else if (BasicScript.CHECK_DETAIL.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.CHECK, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.DETAIL});
-					} else if (BasicScript.MULTIPLE_CHECK.equals(entry.getActionType())) {
-						ReflectionUtils.invokeMethod(handler, BasicScript.MULTIPLE_CHECK, Workflow.class, workflow);
+						workflow.scopedAction();
+						if (BasicScript.VALIDATE.equals(entry.getActionType())) {
+							ReflectionUtils.invokeMethod(handler, BasicScript.VALIDATE, Workflow.class, workflow);
+						} else if (BasicScript.SEARCH.equals(entry.getActionType())) {
+							ReflectionUtils.invokeMethod(handler, BasicScript.SEARCH, Workflow.class, workflow);
+						} else if (BasicScript.CHECK.equals(entry.getActionType())) {
+							ReflectionUtils.invokeMethod(handler, BasicScript.CHECK, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.MAIN});
+						} else if (BasicScript.APPROVE.equals(entry.getActionType())) {
+							ReflectionUtils.invokeMethod(handler, BasicScript.APPROVE, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.MAIN});
+						} else if (BasicScript.REJECT.equals(entry.getActionType())) {
+							ReflectionUtils.invokeMethod(handler, BasicScript.REJECT, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.MAIN});
+						} else if (BasicScript.REJECT_DETAIL.equals(entry.getActionType())) {
+							ReflectionUtils.invokeMethod(handler, BasicScript.REJECT, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.DETAIL});
+						} else if (BasicScript.MULTIPLE_REJECT.equals(entry.getActionType())) {
+							ReflectionUtils.invokeMethod(handler, BasicScript.MULTIPLE_REJECT, Workflow.class, workflow);
+						} else if (BasicScript.APPROVE_DETAIL.equals(entry.getActionType())) {
+							ReflectionUtils.invokeMethod(handler, BasicScript.APPROVE, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.DETAIL});
+						} else if (BasicScript.MULTIPLE_APPROVE.equals(entry.getActionType())) {
+							ReflectionUtils.invokeMethod(handler, BasicScript.MULTIPLE_APPROVE, Workflow.class, workflow);
+						} else if (BasicScript.CHECK_DETAIL.equals(entry.getActionType())) {
+							ReflectionUtils.invokeMethod(handler, BasicScript.CHECK, new Class[] {Workflow.class, ModalType.class}, new Object[] {workflow, ModalType.DETAIL});
+						} else if (BasicScript.MULTIPLE_CHECK.equals(entry.getActionType())) {
+							ReflectionUtils.invokeMethod(handler, BasicScript.MULTIPLE_CHECK, Workflow.class, workflow);
+						}
+						workflow.resetScopedAction();
+					} else if (entry.isFunction()) {
+						SimpleEntry<Class<?>, Object[]> function = config.getFunction(entry.getVariable());
+						Object object = ReflectionUtils.instanceObject(function.getKey(), function.getValue());
+						ContextLoader.setObject(object);
+						workflow
+							.action((Actionable) object);
+					} else if (entry.isClearSession()) {
+						try {
+							workflow.endLoop();	
+						} catch (Exception e) {
+							throw e;
+						} finally {
+							workflow.clearSession();							
+						}
 					}
-					workflow.resetScopedAction();
-				} else if (entry.isFunction()) {
-					SimpleEntry<Class<?>, Object[]> function = config.getFunction(entry.getVariable());
-					Object object = ReflectionUtils.instanceObject(function.getKey(), function.getValue());
-					ContextLoader.setObject(object);
-					workflow
-						.action((Actionable) object);
-				} else if (entry.isClearSession()) {
-					try {
-						workflow.endLoop();	
-					} catch (Exception e) {
-						// do nothing
-					}
-					workflow.clearSession();
 				}
+				
+				ReportMonitor.completeScen(workflowKey);
+			} catch (Exception e) {
+				// scenario halted caused by exception
+				ReportMonitor.scenHalted(scen, workflowKey, e.getMessage());
+			} finally {
+				// if exception occured in any state of the workflow, must be ensured to logout the system
+				 if (workflow.getWebExchange().get("token") != null)
+					 workflow.actionMajor(new LogoutFormAction());
 			}
-			
-			Sleep.wait(1000);
 		}
 	}
 	
@@ -159,19 +173,6 @@ public class WorkflowExecutor {
 			return new LoginInfo(memberCodeApprove, usernameApprove, passwordApprove, keyFileApprove);
 		}
 		return null;
-	}
-	
-	public static void main(String[] args) {
-		test(new String[] {"A"});	
-		testarg(new String[] {"A"});
-	}
-	
-	private static void test(String[] s) {
-		System.out.println(s[0]);
-	}
-	
-	private static void testarg(String...s) {
-		System.out.println(s[0]);
 	}
 }
 

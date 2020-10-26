@@ -10,4 +10,6 @@ public interface Retention {
 
 	public void perform(WebExchange webExchange);
 	
+	public int getSize();
+	
 }

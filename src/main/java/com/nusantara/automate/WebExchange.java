@@ -45,7 +45,6 @@ public class WebExchange {
 	boolean retention = false;
 	
 	private void reset() {
-		transactionId = UUID.randomUUID().toString();
 		retention = false;
 		sessionId = null;
 		listMetaData.clear();
@@ -57,6 +56,15 @@ public class WebExchange {
 		cachedSession.clear();
 		holder.remove(LOCAL_VARIABLE);
 		holder.remove(ALL_LOCAL_VARIABLE);
+		
+		renewTransactionId();
+	}
+	
+	public void renewTransactionId() {
+		// create new copy transaction id
+		String tempTransactionId = UUID.randomUUID().toString();
+		holder.put(tempTransactionId, holder.get(getTransactionId()));
+		transactionId = tempTransactionId;
 	}
 	
 	public void addMetadata(Map<String, Object> metadata) {
@@ -141,7 +149,14 @@ public class WebExchange {
 	
 	public Map<String, Object> getMetaData(String menuId, int index) {
 		LinkedList<Map<String, Object>> tempListMetaData = getListMetaData(menuId);
-		return tempListMetaData.get(index);
+		if (tempListMetaData != null)
+			return tempListMetaData.get(index);
+		return null;
+	}
+	
+	public LinkedList<Map<String, Object>> getMetaData(String menuId) {
+		LinkedList<Map<String, Object>> tempListMetaData = getListMetaData(menuId);
+		return tempListMetaData;
 	}
 	
 	public void clearMetaData() {
@@ -163,7 +178,7 @@ public class WebExchange {
 				localVariable.remove(key);
 			}
 		} else {
-			holder.remove(key);
+			holder.get(getTransactionId()).remove(key);
 		}
 	}
 	public void put(String key, Object value) {

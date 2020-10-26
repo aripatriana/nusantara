@@ -1,10 +1,15 @@
 package com.nusantara.automate.workflow;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nusantara.automate.ConfigLoader;
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.RunTestWorkflow;
+import com.nusantara.automate.report.ReportManager;
+import com.nusantara.automate.report.ReportMonitor;
 
 /**
  * Default implementation of RunTestWorkflow
@@ -25,18 +30,33 @@ public class RunTestWorkflowExecutable implements RunTestWorkflow, WorkflowConfi
 	
 	@Override
 	public void testWorkflow() {
+		long startExeDate = System.currentTimeMillis();
 		for (String scen : workflowConfig.getWorkflowScens()) {
 			try {
 				Workflow workflow = ParalelizedWorkflow.configure();
 				ContextLoader.getWebExchange().put("active_scen", scen);
+				ContextLoader.getWebExchange().put("start_time_milis", startExeDate);
 				
 				WorkflowExecutor executor = new WorkflowExecutor();
 				ContextLoader.setObject(executor);
 		
 				executor.execute(scen, workflow, workflowConfig);
+				
+				ReportMonitor.completeTestCase(scen);
 			} catch (Exception e) {
 				log.error("FATAL ERROR ", e);
+				
+				ReportMonitor.testCaseHalted(scen, e.getMessage());
 			}			
+		}
+		
+		
+		try {
+			ReportManager report = new ReportManager(ConfigLoader.getConfig("{template_dir}").toString(),
+					ConfigLoader.getConfig("{report_dir}").toString(), String.valueOf(startExeDate));
+			report.createReport();
+		} catch (IOException e) {
+			log.error("FATAL ERROR ", e);
 		}
 	}
 }

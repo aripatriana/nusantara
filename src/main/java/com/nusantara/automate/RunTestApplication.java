@@ -19,6 +19,10 @@ import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.exception.ScriptInvalidException;
 import com.nusantara.automate.reader.WorkflowYReader;
+import com.nusantara.automate.report.ReportMonitor;
+import com.nusantara.automate.report.ReportManager;
+import com.nusantara.automate.report.ScenEntry;
+import com.nusantara.automate.report.TestCaseEntry;
 import com.nusantara.automate.util.ReflectionUtils;
 import com.nusantara.automate.util.SimpleEntry;
 import com.nusantara.automate.workflow.WorkflowConfig;
@@ -64,6 +68,7 @@ public class RunTestApplication {
 			
 			workflowConfig = new WorkflowConfig();
 			setWorkflowy(workflowConfig);
+			initReport(workflowConfig);
 			
 			RunTestWorkflow workflow = (RunTestWorkflow) ReflectionUtils.instanceObject(clazz);
 			
@@ -109,8 +114,11 @@ public class RunTestApplication {
 		systemData.put("{tmp_dir}", System.getProperty("user.dir") + "\\tmp");
 		systemData.put("{log_dir}", System.getProperty("user.dir") + "\\log");
 		systemData.put("{config_dir}", System.getProperty("user.dir") + "\\config");
-		systemData.put("{keyfile_dir}", System.getProperty("user.dir") + "\\keyfile");
+		systemData.put("{keyfile_dir}", System.getProperty("user.dir") + "\\config\\keyfile");
 		systemData.put("{testcase_dir}", System.getProperty("user.dir") + "\\testcase");
+		systemData.put("{report_dir}", System.getProperty("user.dir") + "\\report");
+		systemData.put("{template_dir}", System.getProperty("user.dir") + "\\config\\template");
+		
 		metadata.putAll(systemData);
 		
 		if (configPathFile != null) {
@@ -189,6 +197,30 @@ public class RunTestApplication {
 				throw new Exception("Tscen required file incomplete");
 			}
 			
+		}
+	}
+	
+	/**
+	 * Initialize report testcase and testscen
+	 * 
+	 * @param workflowConfig
+	 */
+	private static void initReport(WorkflowConfig workflowConfig) {
+		for (String workflowScen : workflowConfig.getWorkflowScens()) {
+			LinkedList<ScenEntry> scenEntries = new LinkedList<ScenEntry>();
+			for (String workflowKey : workflowConfig.getWorkflowMapScens(workflowScen)) {
+				ScenEntry scenEntry = new ScenEntry();
+				scenEntry.setTestCaseId(workflowScen);
+				scenEntry.setTscanId(workflowKey);
+				scenEntry.setStatus(ReportManager.INPROGRESS);
+				scenEntries.add(scenEntry);
+			}
+			
+			TestCaseEntry testCaseEntry = new TestCaseEntry();
+			testCaseEntry.setTestCaseId(workflowScen);
+			testCaseEntry.setStatus(ReportManager.INPROGRESS);
+			testCaseEntry.setNumOfScen(scenEntries.size());
+			ReportMonitor.addTestCaseEntry(testCaseEntry, scenEntries);
 		}
 	}
 	

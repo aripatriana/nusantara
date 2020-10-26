@@ -38,7 +38,7 @@ public class MultiLayerXlsFileReader extends MadnessXlsFileReader implements Fil
 			
 			
 			// verify standar style format
-			for (int index = 0; index<activeSheet; index++) {
+			for (int index = 0; index<workbook.getNumberOfSheets(); index++) {
 				Sheet sheet = workbook.getSheetAt(index);
 				
 				if (!sheet.getSheetName().equalsIgnoreCase("meta-data")) {
@@ -52,6 +52,8 @@ public class MultiLayerXlsFileReader extends MadnessXlsFileReader implements Fil
 					}
 					
 					sheetList.add(sheet.getSheetName());
+				} else {
+					activeSheet = activeSheet -1;
 				}
 			}
 			
@@ -93,12 +95,18 @@ public class MultiLayerXlsFileReader extends MadnessXlsFileReader implements Fil
 							newRowList.add(row);
 						}
 					}
-					data.addAll(newRowList);
-				}				
+					data.addAll(newRowList);	
+				}	
+				
+				if (sheetContainer.get(sheetList.get(0)) != null)
+					size = sheetContainer.get(sheetList.get(0)).get(0).size();
 			} else {
-				for (LinkedList<Map<String, Object>> d : container.values()) {
-					data.addAll(d);
-				}				
+				if (container.size()>  0) {
+					size = container.get(0).size();
+					for (LinkedList<Map<String, Object>> d : container.values()) {
+						data.addAll(d);
+					}									
+				}
 			}
 		} catch (FileNotFoundException e) {
 			log.error("ERROR ", e);

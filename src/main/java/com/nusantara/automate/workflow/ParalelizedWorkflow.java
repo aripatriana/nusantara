@@ -7,7 +7,6 @@ import com.nusantara.automate.ConfigLoader;
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.MenuAwareness;
 import com.nusantara.automate.WebExchange;
-import com.nusantara.automate.action.common.LogoutFormAction;
 
 /**
  * Workflow that supports for session operation
@@ -31,44 +30,40 @@ public class ParalelizedWorkflow extends Workflow {
 		return new ParalelizedWorkflow(webExchange);
 	}
 	
-	public Workflow endLoop() {
+	public Workflow endLoop() throws Exception {
 		if (!activeLoop) {
 			throw new RuntimeException("Loop must be initialized");	
 		}
 		
-		if (webExchange.getMetaDataSize() > 0) {
-			log.info("Total data-row " + webExchange.getMetaDataSize());
-			try {
-				for (Actionable actionable : actionableForLoop) {
-					
-					if (actionable instanceof MenuAwareness) {
-						activeMenu = ((MenuAwareness) actionable).getMenu();
-					}
-					
-					// execute common action		
-					// cek klo sesi gagal semua maka logout saja yg diproses
-					if (webExchange.getSessionList().size() > 0
-							&& (webExchange.getSessionList().size() <= webExchange.getFailedSessionList().size())) {
-						if (actionable instanceof LogoutFormAction 
-								&& (webExchange.get("token") != null || !webExchange.get("token").toString().isEmpty())) {
-							ContextLoader.setObject(actionable);
-							executeSafeActionable(actionable);	
+		try {
+			if (webExchange.getMetaDataSize() > 0) {
+				log.info("Total data-row " + webExchange.getMetaDataSize());
+				try {
+					for (Actionable actionable : actionableForLoop) {
+						
+						if (actionable instanceof MenuAwareness) {
+							activeMenu = ((MenuAwareness) actionable).getMenu();
 						}
-					}  else {
-						executeActionableWithSession(actionable);						
+						
+						// execute actionable if any session active, if all session failed no further process performed
+						if (!(webExchange.getSessionList().size() > 0
+								&& (webExchange.getSessionList().size() <= webExchange.getFailedSessionList().size()))) {
+							executeActionableWithSession(actionable);						
+						}
 					}
+				} catch (Exception e) { 
+					log.info("Transaction interrupted ");
+					log.error("ERROR ", e);
+					throw e;
 				}
-			} catch (Exception e) { 
-				log.info("Transaction interrupted ");
-				log.error("ERROR ", e);
 			}	
+		} finally {
+			webExchange.setRetention(Boolean.FALSE);
+			webExchange.clearMetaData();
+			activeLoop = false;
 		}
-			
-		webExchange.setRetention(Boolean.FALSE);
-		webExchange.clearMetaData();
-		activeLoop = false;
+		
 		return this;
 	}
-
 	
 }

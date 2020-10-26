@@ -38,6 +38,7 @@ public class XlsFileReader implements FileReader<Map<String, Object>> {
 	private LinkedHashMap<String, Object> header;
 	private LinkedList<Map<String, Object>> data;
 	private LinkedList<Map<String, Object>> dataCompile;
+	private int size = 0;
 	
 	public XlsFileReader(File file) {
 		this.file = file;
@@ -46,7 +47,7 @@ public class XlsFileReader implements FileReader<Map<String, Object>> {
 			workbook = new XSSFWorkbook(new FileInputStream(file));
 			activeSheet = workbook.getNumberOfSheets();
 			container = new HashMap<Integer, LinkedList<Map<String, Object>>>();
-			for (int index = 0; index<activeSheet; index++) {
+			for (int index = 0; index<workbook.getNumberOfSheets(); index++) {
 				Sheet sheet = workbook.getSheetAt(index);
 				if (!sheet.getSheetName().equalsIgnoreCase("meta-data")) {
 					XlsSheetReader<LinkedHashMap<String, Object>> dataSheet = new XlsSheetReader<LinkedHashMap<String, Object>>(new XlsCustomRowReader(workbook.getSheetAt(index)));
@@ -60,12 +61,17 @@ public class XlsFileReader implements FileReader<Map<String, Object>> {
 					}
 					
 					container.put(index, new LinkedList<Map<String, Object>>(dataPerSheet.values()));
+				} else {
+					activeSheet = activeSheet -1;
 				}
 			}
 			
-			data = new LinkedList<Map<String, Object>>();
-			for (LinkedList<Map<String, Object>> d : container.values()) {
-				data.addAll(d);
+			if (container.size() > 0) {
+				size = container.get(0).size();
+				data = new LinkedList<Map<String, Object>>();
+				for (LinkedList<Map<String, Object>> d : container.values()) {
+					data.addAll(d);
+				}
 			}
 		} catch (FileNotFoundException e) {
 			log.error("ERROR ", e);
@@ -180,5 +186,10 @@ public class XlsFileReader implements FileReader<Map<String, Object>> {
 		data.clear();
 		header.clear();
 		container.clear();
+	}
+	
+	@Override
+	public int getSize() {
+		return size;
 	}
 }

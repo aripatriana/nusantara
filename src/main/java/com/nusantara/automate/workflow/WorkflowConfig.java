@@ -112,6 +112,10 @@ public class WorkflowConfig {
 		return workflowScens;
 	}
 	
+	public LinkedList<String> getWorkflowMapScens(String scen) {
+		return workflowMapScens.get(scen);
+	}
+	
 	public void clear() {
 		functionMap.clear();
 		handlerMap.clear();

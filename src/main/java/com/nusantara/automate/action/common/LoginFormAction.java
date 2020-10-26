@@ -92,6 +92,7 @@ public class LoginFormAction extends WebElementWrapper implements Actionable {
 	
 	@Override
 	public void submit(WebExchange webExchange) throws FailedTransactionException {
+		if (webExchange.get("token") != null) return;
 		log.info("Open Login Page");
 		
 		Sleep.wait(1000);
@@ -131,6 +132,8 @@ public class LoginFormAction extends WebElementWrapper implements Actionable {
 		webExchange.put("memberCode", getMemberCode());
 		webExchange.put("password", getPassword());
 		webExchange.put("token", getToken());	
+		
+		log.info("Login success");
 	}
 
 	

@@ -21,4 +21,6 @@ public interface FileReader<T> {
 	public T read();
 	
 	public void close();
+	
+	public int getSize();
 }

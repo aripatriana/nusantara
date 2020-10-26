@@ -81,6 +81,11 @@ public class FileRetention implements Retention {
 		fileReader.close();
 	}
 	
+	@Override
+	public int getSize() {
+		return fileReader.getSize();
+	}
+	
 	public static void main(String[] args) throws XlsSheetStyleException {
 		new FileRetention(new MultiLayerXlsFileReader(new File("D:\\tscen-001.xlsx"))).perform(new WebExchange());;
 	}
