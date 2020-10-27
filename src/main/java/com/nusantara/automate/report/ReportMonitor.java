@@ -11,7 +11,7 @@ public class ReportMonitor {
 	private static LinkedList<TestCaseEntry> testCaseEntries = new LinkedList<TestCaseEntry>();
 	private static Map<String, LinkedList<ScenEntry>> scenEntries = new HashMap<String, LinkedList<ScenEntry>>();  
 	private static Map<String, ScenEntry> scenEntriesByTscenId = new HashMap<String, ScenEntry>();
-	private static LinkedHashMap<String, String> dataEntryBySessionId = new LinkedHashMap<String, String>();
+	private static LinkedHashMap<String, DataEntry> dataEntryBySessionId = new LinkedHashMap<String, DataEntry>();
 	private static Map<String, LinkedList<DataEntry>> dataEntries = new HashMap<String, LinkedList<DataEntry>>();
 	private static Map<String, LinkedList<ImageEntry>> imageEntries = new HashMap<String, LinkedList<ImageEntry>>();
 	
@@ -73,23 +73,20 @@ public class ReportMonitor {
 	}
 	
 	public static void logDataEntry(String sessionId, DataEntry dataEntry) {
-		String scenId = dataEntryBySessionId.get(sessionId);
-		if (scenId == null) {
+		DataEntry data = dataEntryBySessionId.get(sessionId);
+		if (data == null) {
 			LinkedList<DataEntry> dataEntryList = dataEntries.get(dataEntry.getScenId());
 			if (dataEntryList == null)  dataEntryList = new LinkedList<DataEntry>();
 			dataEntryList.add(dataEntry);
 			
 			dataEntries.put(dataEntry.getScenId(), dataEntryList);
-			dataEntryBySessionId.put(sessionId, dataEntry.getScenId());
+			dataEntryBySessionId.put(sessionId, dataEntry);
 		} else {
-			for (DataEntry data : dataEntries.get(dataEntry.getScenId())) {
-				if (data.equals(dataEntry)) {
-					data.setStatus(dataEntry.getStatus());
-					data.appendErrorLog(dataEntry.getErrorLog());
-					if (data.checkMetaData(dataEntry.getMetaData().get(0))) {
-						data.addAllMetaData(dataEntry.getMetaData());
-					}
-					break;
+			if (data.equals(dataEntry)) {
+				data.setStatus(dataEntry.getStatus());
+				data.appendErrorLog(dataEntry.getErrorLog());
+				if (!data.checkMetaData(dataEntry.getMetaData().get(0))) {
+					data.addAllMetaData(dataEntry.getMetaData());
 				}
 			}
 		}
