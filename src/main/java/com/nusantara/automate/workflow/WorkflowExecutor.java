@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.BasicScript;
 import com.nusantara.automate.ContextLoader;
+import com.nusantara.automate.DriverManager;
 import com.nusantara.automate.FileRetention;
 import com.nusantara.automate.action.common.LoginFormAction;
 import com.nusantara.automate.action.common.LogoutFormAction;
@@ -158,8 +159,15 @@ public class WorkflowExecutor {
 				ReportMonitor.scenHalted(scen, workflowKey, e.getMessage());
 			} finally {
 				// if exception occured in any state of the workflow, must be ensured to logout the system
-				 if (workflow.getWebExchange().get("token") != null)
-					 workflow.actionMajor(new LogoutFormAction());
+				 if (workflow.getWebExchange().get("token") != null) {
+					 try {
+						 workflow.actionMajor(new LogoutFormAction());	 
+					 } catch (Exception e) {
+						 // if exception keeps stubborn then close driver
+						 DriverManager.close();
+					 }
+				 }
+					 
 			}
 		}
 	}

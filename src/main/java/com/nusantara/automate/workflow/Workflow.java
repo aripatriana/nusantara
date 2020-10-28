@@ -1,6 +1,7 @@
 package com.nusantara.automate.workflow;
 
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,6 +24,7 @@ import com.nusantara.automate.Menu;
 import com.nusantara.automate.MenuAwareness;
 import com.nusantara.automate.MultipleFormActionable;
 import com.nusantara.automate.Retention;
+import com.nusantara.automate.WebElementWrapper;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.action.ManagedFormAction;
 import com.nusantara.automate.action.ManagedMultipleFormAction;
@@ -276,6 +278,7 @@ public class Workflow {
 		return ContextLoader.isLocalVariable(object);
 	}
 	
+	@Deprecated
 	private boolean isCompositeVariable(Object object) {
 		if (object instanceof ManagedFormAction) {
 			return ContextLoader.isCompositeVariable(((ManagedFormAction) object).getInheritClass());
@@ -288,22 +291,21 @@ public class Workflow {
 			// execute map serializable
 			if (isLocalVariable(actionable) || isCompositeVariable(actionable)) {
 				if (actionable instanceof ManagedMultipleFormAction) {
-					LinkedList<Map<String, Object>> metadata = webExchange.getMetaData(getActiveMenu().getModuleId());
-					
 					try {
 						ContextLoader.setObjectLocal(actionable);	
 						executeSafeActionable(actionable);
 						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 						
-						ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
-								getWebExchange().get("active_workflow").toString(), metadata);
+						ReportMonitor.logDataEntry(getWebExchange().getSessionList(),getWebExchange().get("active_scen").toString(),
+								getWebExchange().get("active_workflow").toString(), null, null);
 					} catch (FailedTransactionException e) {
 						webExchange.addListFailedSession(webExchange.getSessionList());
 						log.info("Transaction is not completed, skipped for further processes");
 						log.error("ERROR ", e);
 						
-						ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
-								getWebExchange().get("active_workflow").toString(), metadata, e.getMessage(), ReportManager.FAILED);
+						ReportMonitor.logDataEntry(getWebExchange().getSessionList(),getWebExchange().get("active_scen").toString(),
+								getWebExchange().get("active_workflow").toString(), null, null, 
+								e.getMessage(), ReportManager.FAILED);
 					}
 				} else {
 					int i = 0;
@@ -330,7 +332,7 @@ public class Workflow {
 								((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 								
 								ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
-										getWebExchange().get("active_workflow").toString(), metadata);
+										getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalMap(), metadata);
 							} catch (FailedTransactionException e) {
 								log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
 								log.error("ERROR ", e);
@@ -339,7 +341,8 @@ public class Workflow {
 								((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 								
 								ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
-										getWebExchange().get("active_workflow").toString(), metadata, e.getMessage(), ReportManager.FAILED);
+										getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalMap(),
+										metadata, e.getMessage(), ReportManager.FAILED);
 							}
 						}
 						i++;
@@ -356,7 +359,7 @@ public class Workflow {
 				while(true) {
 					String sessionId = webExchange.createSession(i);
 
-					Map<String, Object> metadata = webExchange.getMetaData(getActiveMenu().getModuleId(),i);
+					Map<String, Object> metadata = webExchange.getMetaData(getActiveMenu().getModuleId(),i, true);
 					
 					log.info("Execute data-row index " + i + " with session " + sessionId);
 				
@@ -371,7 +374,7 @@ public class Workflow {
 						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 						
 						ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
-								getWebExchange().get("active_workflow").toString(), metadata);
+								getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalMap(), metadata);
 					} catch (FailedTransactionException e) {
 						log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
 						log.error("ERROR ", e);
@@ -380,7 +383,8 @@ public class Workflow {
 						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 						
 						ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(), getWebExchange().get("active_scen").toString(),
-								getWebExchange().get("active_workflow").toString(), metadata, e.getMessage(), ReportManager.FAILED);
+								getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalMap(),
+								metadata, e.getMessage(), ReportManager.FAILED);
 					}
 					i++;
 					
@@ -401,17 +405,29 @@ public class Workflow {
 		try {
 			actionable.submit(webExchange);
 		} catch (StaleElementReferenceException | ElementNotInteractableException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) {
+			try {
+				((AbstractBaseDriver)actionable).captureFailedFullModal(((WebElementWrapper)actionable).getModalId());
+			} catch (Exception e1) {
+				((AbstractBaseDriver)actionable).captureFailedFullWindow();
+			}
+			
 			retryWhenException(actionable, ++retry);
 		}
-		
 	}
 	
 	private void retryWhenException(Actionable actionable, int retry) throws FailedTransactionException {
 		try {
 			log.info("Something happened, be calm! we still loving you!");
+
 			((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 			actionable.submit(webExchange);
-		} catch (StaleElementReferenceException | ElementNotInteractableException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) { 
+		} catch (StaleElementReferenceException | ElementNotInteractableException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) {
+			try {
+				((AbstractBaseDriver)actionable).captureFailedFullModal(((WebElementWrapper)actionable).getModalId());
+			} catch (Exception e1) {
+				((AbstractBaseDriver)actionable).captureFailedFullWindow();
+			}
+			
 			if (retry < MAX_RETRY_LOAD_PAGE) {
 				retryWhenException(actionable, ++retry);
 			} else {

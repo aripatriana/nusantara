@@ -31,32 +31,35 @@ public class RunTestWorkflowExecutable implements RunTestWorkflow, WorkflowConfi
 	@Override
 	public void testWorkflow() {
 		long startExeDate = System.currentTimeMillis();
-		for (String scen : workflowConfig.getWorkflowScens()) {
-			try {
-				Workflow workflow = ParalelizedWorkflow.configure();
-				ContextLoader.getWebExchange().put("active_scen", scen);
-				ContextLoader.getWebExchange().put("start_time_milis", startExeDate);
-				
-				WorkflowExecutor executor = new WorkflowExecutor();
-				ContextLoader.setObject(executor);
-		
-				executor.execute(scen, workflow, workflowConfig);
-				
-				ReportMonitor.completeTestCase(scen);
-			} catch (Exception e) {
-				log.error("FATAL ERROR ", e);
-				
-				ReportMonitor.testCaseHalted(scen, e.getMessage());
-			}			
-		}
-		
-		
 		try {
-			ReportManager report = new ReportManager(ConfigLoader.getConfig("{template_dir}").toString(),
-					ConfigLoader.getConfig("{report_dir}").toString(), String.valueOf(startExeDate));
-			report.createReport();
-		} catch (IOException e) {
+			for (String scen : workflowConfig.getWorkflowScens()) {
+				try {
+					Workflow workflow = ParalelizedWorkflow.configure();
+					ContextLoader.getWebExchange().put("active_scen", scen);
+					ContextLoader.getWebExchange().put("start_time_milis", startExeDate);
+					
+					WorkflowExecutor executor = new WorkflowExecutor();
+					ContextLoader.setObject(executor);
+			
+					executor.execute(scen, workflow, workflowConfig);
+					
+					ReportMonitor.completeTestCase(scen);
+				} catch (Exception e) {
+					log.error("FATAL ERROR ", e);
+					
+					ReportMonitor.testCaseHalted(scen, e.getMessage());
+				}			
+			}
+		} catch (Exception e) {
 			log.error("FATAL ERROR ", e);
+		} finally {
+			try {
+				ReportManager report = new ReportManager(ConfigLoader.getConfig("{template_dir}").toString(),
+						ConfigLoader.getConfig("{report_dir}").toString(), String.valueOf(startExeDate));
+				report.createReport();
+			} catch (IOException e) {
+				log.error("FATAL ERROR ", e);
+			}			
 		}
 	}
 }

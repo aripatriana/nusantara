@@ -130,6 +130,11 @@ public class WindowScreen {
 					outputFile.getAbsolutePath().replace((testCaseDir + "//" + DateUtils.format(new Date(Long.valueOf(startTimeMilis)), FORMAT_DATE_TIME)), ""), 
 					(REMARK_FAILED.equals(remark) ? ReportManager.FAILED : ReportManager.PASSED));
 		}
+		resetRemark();
+	}
+
+	public void resetRemark() {
+		setRemark(null);
 	}
 
 	
@@ -204,7 +209,6 @@ public class WindowScreen {
 		
 		if (remark != null) {
 			targetFileName += IDUtils.getRandomId() + "_" + remark + ".png";
-			remark = null;
 		} else {
 			targetFileName += IDUtils.getRandomId() + ".png";
 		}

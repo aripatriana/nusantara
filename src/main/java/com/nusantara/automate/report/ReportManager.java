@@ -31,6 +31,8 @@ public class ReportManager {
 	private static final String EL_TSCEN_ID = "${tscen_id}";
 	private static final String EL_IMG_FILE = "${img_file}";
 	private static final String EL_ROW = "${row}";
+	private static final String EL_SESSION_ID = "${session_id}";
+	private static final String EL_SESSION_DATA = "${session_data}";
 	private static final String EL_META_DATA = "${meta_data}";
 	private static final String EL_FAILED_DATA = "${failed_data}";
 	private static final String EL_LOG_ERROR = "${log_error}";
@@ -111,7 +113,7 @@ public class ReportManager {
 			rowIdx = replaceVar(rowIdx, EL_NUM_DATA, testCaseEntry.getNumOfData());
 			rowIdx = replaceVar(rowIdx, EL_STATUS, testCaseEntry.getStatus());
 			rowIdx = replaceVar(rowIdx, EL_SCEN_HTML, "./" + testCaseEntry.getTestCaseId() + "/" + testCaseEntry.getTestCaseId() + ".html");
-			if (testCaseEntry.getStatus().equals(FAILED)) {
+			if (testCaseEntry.getStatus().equals(FAILED) || testCaseEntry.getStatus().equals(HALTED)) {
 				rowIdx = replaceVar(rowIdx, EL_CSS_FLAG, CSS_RED);				
 			} else {
 				rowIdx = replaceVar(rowIdx, EL_CSS_FLAG, "");
@@ -189,6 +191,8 @@ public class ReportManager {
 				String rowIdx = row;
 				rowIdx = replaceVar(rowIdx, EL_ROW, no);
 				rowIdx = replaceVar(rowIdx, EL_META_DATA, dataEntry.getMetaData());
+				rowIdx = replaceVar(rowIdx, EL_SESSION_ID, dataEntry.getSessionId());
+				rowIdx = replaceVar(rowIdx, EL_SESSION_DATA, dataEntry.getSessionData());
 				if (dataEntry.getStatus().equals(FAILED)) {
 					rowIdx = replaceVar(rowIdx, EL_CSS_FLAG, CSS_RED);				
 				} else {
@@ -239,8 +243,21 @@ public class ReportManager {
 		}
 	}
 
+	private String replaceVar(String text, String var, List<?> value) {
+		String val = "";
+		for (Object o : value) {
+			val = val + "#" + removeBracket(o.toString());
+
+		}
+		return text.replace(var, val);
+	}
+
 	
 	private String replaceVar(String text, String var, Object value) {
-		return text.replace(var, String.valueOf(value));
+		return text.replace(var, removeBracket(value.toString()));
+	}
+	
+	private String removeBracket(String val) {
+		return val.replace("[", "").replace("]", "").replace("{", "").replace("}", "");
 	}
 }

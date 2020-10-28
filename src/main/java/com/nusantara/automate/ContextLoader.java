@@ -64,6 +64,7 @@ public class ContextLoader {
 		return isLocalVariable(clazz);
 	}
 	
+	@Deprecated
 	public static boolean isCompositeVariable(Class<?> clazz) {
 		if (clazz.isAnnotationPresent(MapSerializable.class)) {
 			MapType type = clazz.getAnnotation(MapSerializable.class).type();
@@ -72,6 +73,7 @@ public class ContextLoader {
 		return false;
 	}
 	
+	@Deprecated
 	public static boolean isCompositeVariable(Object object) {
 		Class<?> clazz = object.getClass();
 		return isCompositeVariable(clazz);

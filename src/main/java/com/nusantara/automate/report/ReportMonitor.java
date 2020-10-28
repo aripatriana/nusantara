@@ -3,6 +3,7 @@ package com.nusantara.automate.report;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class ReportMonitor {
@@ -45,27 +46,28 @@ public class ReportMonitor {
 		return null;
 	}
 	
-	
-	public static void logDataEntry(String sessionId, String testCaseId, String tscenId, LinkedList<Map<String, Object>> metadataList) {
-		for (Map<String, Object> metadata : metadataList) {
-			logDataEntry(sessionId, testCaseId, tscenId, metadata, null, ReportManager.PASSED);
+	public static void logDataEntry(List<String> sessionId, String testCaseId, String tscenId, Map<String, Object> sessionData, Map<String, Object> rawdata) {
+		for (String session : sessionId) {
+			logDataEntry(session, testCaseId, tscenId, sessionData, rawdata, null, ReportManager.PASSED);			
 		}
 	}
 	
-	public static void logDataEntry(String sessionId, String testCaseId, String tscenId, Map<String, Object> metadata) {
-		logDataEntry(sessionId, testCaseId, tscenId, metadata, null, ReportManager.PASSED);
+	public static void logDataEntry(String sessionId, String testCaseId, String tscenId, Map<String, Object> sessionData, Map<String, Object> rawdata) {
+		logDataEntry(sessionId, testCaseId, tscenId, sessionData, rawdata, null, ReportManager.PASSED);
 	}
 
-	public static void logDataEntry(String sessionId, String testCaseId, String tscenId, LinkedList<Map<String, Object>> metadataList, String errorLog, String status) {
-		for (Map<String, Object> metadata : metadataList) {
-			logDataEntry(sessionId, testCaseId, tscenId, metadata, errorLog, status);
+	public static void logDataEntry(List<String> sessionId, String testCaseId, String tscenId, Map<String, Object> sessionData, Map<String, Object> rawdata, String errorLog, String status) {
+		for (String session : sessionId) {
+			logDataEntry(session, testCaseId, tscenId, sessionData, rawdata, errorLog, status);
 		}
 	}
 	
-	public static void logDataEntry(String sessionId, String testCaseId, String tscenId,  Map<String, Object> metadata, String errorLog, String status) {
+	public static void logDataEntry(String sessionId, String testCaseId, String tscenId, Map<String, Object> sessionData, Map<String, Object> rawdata, String errorLog, String status) {
 		DataEntry dataEntry = new DataEntry();
-		dataEntry.addMetaData(metadata);
+		dataEntry.addMetaData(rawdata);
 		dataEntry.setScenId(tscenId);
+		dataEntry.setSessionId(sessionId);
+		dataEntry.setSessionData(sessionData);
 		dataEntry.setStatus(status);
 		dataEntry.appendErrorLog(errorLog);
 		dataEntry.setTestCaseId(testCaseId);
@@ -85,9 +87,12 @@ public class ReportMonitor {
 			if (data.equals(dataEntry)) {
 				data.setStatus(dataEntry.getStatus());
 				data.appendErrorLog(dataEntry.getErrorLog());
-				if (!data.checkMetaData(dataEntry.getMetaData().get(0))) {
-					data.addAllMetaData(dataEntry.getMetaData());
-				}
+				if (dataEntry.getSessionData() != null)
+					data.setSessionData(dataEntry.getSessionData());
+				if(dataEntry.getMetaData().size() > 0)
+					if (!data.checkMetaData(dataEntry.getMetaData().get(0))) {
+						data.addAllMetaData(dataEntry.getMetaData());
+					}
 			}
 		}
 	}
@@ -128,7 +133,9 @@ public class ReportMonitor {
 	
 	public static void completeTestCase(String testCaseId) {
 		boolean testCaseFailed = false;
+		boolean testCaseHalted = false;
 		int numfailed = 0;
+		int numdata = 0;
 		LinkedList<ScenEntry> scenEntryList = scenEntries.get(testCaseId);
 		if (scenEntryList != null) {
 			for (ScenEntry scen : scenEntries.get(testCaseId)) {
@@ -137,13 +144,21 @@ public class ReportMonitor {
 					numfailed++;
 					testCaseFailed = true;
 				}
+				if (scen.getStatus().equals(ReportManager.HALTED)) {
+					testCaseHalted = true;
+				}
+				numdata = numdata + scen.getNumOfData();
 			}			
 		}
 		
 		TestCaseEntry testCase = getTestCaseEntry(testCaseId);
 		testCase.setNumOfFailed(numfailed);
+		testCase.setNumOfData(numdata);
 		if (testCaseFailed)
-			testCase.setStatus(ReportManager.FAILED);
+			if (testCaseHalted)
+				testCase.setStatus(ReportManager.HALTED);
+			else
+				testCase.setStatus(ReportManager.FAILED);
 		else
 			testCase.setStatus(ReportManager.PASSED);
 	}
@@ -151,14 +166,18 @@ public class ReportMonitor {
 	public static void completeScen(String tscenId) {
 		ScenEntry scen = scenEntriesByTscenId.get(tscenId);
 		if (scen != null) {
+			StringBuffer sb = new StringBuffer();
+			int numfailed = 0;
 			if (scen.getStatus().equals(ReportManager.INPROGRESS)) {
 				boolean scenFailed = false;
 				if (dataEntries.get(tscenId) != null) {
 					for (DataEntry dataEntry : dataEntries.get(tscenId)) {
 						if (dataEntry.getStatus().equals(ReportManager.FAILED)
 								||dataEntry.getStatus().equals(ReportManager.HALTED)) {
+							numfailed++;
 							scenFailed=true;
-							break;
+							sb.append(dataEntry.getErrorLog());
+							sb.append(System.lineSeparator());
 						}
 					}					
 				}
@@ -173,6 +192,8 @@ public class ReportMonitor {
 					}					
 				}
 				
+				scen.setFailedRow(numfailed);
+				scen.appendErrorLog(sb.toString());
 				if (scenFailed) {
 					scen.setStatus(ReportManager.FAILED);
 				} else {
@@ -191,14 +212,16 @@ public class ReportMonitor {
 		LinkedList<DataEntry> dataEntryList = dataEntries.get(tscenId);
 		if (dataEntryList != null) {
 			for (DataEntry dataEntry : dataEntryList) {
-				dataEntry.setStatus(ReportManager.FAILED);
+				if (dataEntry.getStatus().equals(ReportManager.INPROGRESS))
+					dataEntry.setStatus(ReportManager.HALTED);
 			}
 		}
 		
 		LinkedList<ImageEntry> imageEntryList = imageEntries.get(tscenId);
 		if (imageEntryList != null) {
 			for (ImageEntry imageEntry : imageEntryList) {
-				imageEntry.setStatus(ReportManager.FAILED);
+				if (imageEntry.getStatus().equals(ReportManager.INPROGRESS))
+					imageEntry.setStatus(ReportManager.HALTED);
 			}
 		}
 	}
@@ -206,6 +229,7 @@ public class ReportMonitor {
 	public static void testCaseHalted(String testCaseId, String errorLog) {
 		boolean setErrorLog = false;
 		int numfailed = 0;
+		int numdata = 0;
 		LinkedList<ScenEntry> scenEntryList = scenEntries.get(testCaseId);
 		if (scenEntryList != null) {
 			for (ScenEntry scenEntry : scenEntries.get(testCaseId)) {
@@ -218,12 +242,14 @@ public class ReportMonitor {
 					setErrorLog = true;
 					numfailed++;
 				}
+				numdata = numdata + scenEntry.getNumOfData();
 			}
 		}
 		
 		TestCaseEntry testCase = getTestCaseEntry(testCaseId);
-		testCase.setStatus(ReportManager.HALTED);
+		testCase.setNumOfData(numdata);
 		testCase.setNumOfFailed(numfailed);
+		testCase.setStatus(ReportManager.HALTED);
 	}
 	
 	public static void main(String[] args) {

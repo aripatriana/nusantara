@@ -108,7 +108,6 @@ public class LoginFormAction extends WebElementWrapper implements Actionable {
 		
 		try {
 			findElementByXpath("//form//section[@class='error']", 1);
-			captureFullWindow();
 			
 			try {
 				findElementByXpath("//form//fieldset//section//div//div//p[contains(text(),'Bad credentials')]",1);

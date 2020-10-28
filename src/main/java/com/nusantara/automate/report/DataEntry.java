@@ -12,7 +12,11 @@ public class DataEntry {
 	
 	private String row;
 	
-	private String errorLog;
+	private String sessionId;
+	
+	private Map<String, Object> sessionData = new HashMap<String, Object>();
+	
+	private String errorLog = "";
 	
 	private LinkedList<Map<String, Object>> metaData = new LinkedList<Map<String, Object>>();
 	
@@ -75,6 +79,22 @@ public class DataEntry {
 	
 	public String getErrorLog() {
 		return errorLog;
+	}
+	
+	public String getSessionId() {
+		return sessionId;
+	}
+	
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+	
+	public Map<String, Object> getSessionData() {
+		return sessionData;
+	}
+	
+	public void setSessionData(Map<String, Object> sessionData) {
+		this.sessionData = sessionData;
 	}
 	
 	public void appendErrorLog(String error) {

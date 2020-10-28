@@ -32,4 +32,9 @@ public class DriverManager {
 	public static WebDriver getDefaultDriver() {
 		return getChromeDriver();
 	}
+	
+	public static void close() {
+		getDefaultDriver().close();
+		wd = null;
+	}
 }
