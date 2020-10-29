@@ -149,7 +149,7 @@ public class ReportManager {
 			rowIdx = replaceVar(rowIdx, EL_TSCEN_ID, scenEntry.getTscanId());
 			rowIdx = replaceVar(rowIdx, EL_NUM_DATA, scenEntry.getNumOfData());
 			rowIdx = replaceVar(rowIdx, EL_FAILED_DATA, scenEntry.getFailedRow());
-			rowIdx = replaceVar(rowIdx, EL_LOG_ERROR, scenEntry.getErrorLog());
+			rowIdx = replaceVar(rowIdx, EL_LOG_ERROR, (scenEntry.getErrorLog().isEmpty() ? "-" : scenEntry.getErrorLog()));
 			rowIdx = replaceVar(rowIdx, EL_STATUS, scenEntry.getStatus());
 			
 			if (scenEntry.getStatus().equals(FAILED) || scenEntry.getStatus().equals(HALTED)) {
@@ -246,7 +246,8 @@ public class ReportManager {
 	private String replaceVar(String text, String var, List<?> value) {
 		String val = "";
 		for (Object o : value) {
-			val = val + "#" + removeBracket(o.toString());
+			if (!val.isEmpty()) val = val + ",";
+			val = val + "[" + removeBracket(String.valueOf(o)) + "]";
 
 		}
 		return text.replace(var, val);

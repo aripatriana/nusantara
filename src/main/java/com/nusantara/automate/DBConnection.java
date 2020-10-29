@@ -149,6 +149,7 @@ public class DBConnection {
 		try {
 			if (!getConnection().connect().isClosed()) {
 				getConnection().connect().close();
+				dbConnection = null;
 			}
 		} catch (SQLException e) {
 			log.error("ERROR ", e);

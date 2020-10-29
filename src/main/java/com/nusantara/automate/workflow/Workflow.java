@@ -358,33 +358,34 @@ public class Workflow {
 				int i = 0;
 				while(true) {
 					String sessionId = webExchange.createSession(i);
-
-					Map<String, Object> metadata = webExchange.getMetaData(getActiveMenu().getModuleId(),i, true);
+					if (!webExchange.isSessionFailed(sessionId)) {
+						Map<String, Object> metadata = webExchange.getMetaData(getActiveMenu().getModuleId(),i, true);
+						
+						log.info("Execute data-row index " + i + " with session " + sessionId);
 					
-					log.info("Execute data-row index " + i + " with session " + sessionId);
-				
-					try {
-						if (actionable instanceof ManagedFormAction) {
-							((ManagedFormAction) actionable).setMetadata(metadata);
-						} else {
-							ContextLoader.setObjectWithCustom(actionable, metadata);	
+						try {
+							if (actionable instanceof ManagedFormAction) {
+								((ManagedFormAction) actionable).setMetadata(metadata);
+							} else {
+								ContextLoader.setObjectWithCustom(actionable, metadata);	
+							}
+							
+							executeSafeActionable(actionable);
+							((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
+							
+							ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
+									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalMap(), metadata);
+						} catch (FailedTransactionException e) {
+							log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
+							log.error("ERROR ", e);
+							
+							webExchange.addFailedSession(sessionId);
+							((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
+							
+							ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(), getWebExchange().get("active_scen").toString(),
+									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalMap(),
+									metadata, e.getMessage(), ReportManager.FAILED);
 						}
-						
-						executeSafeActionable(actionable);
-						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
-						
-						ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
-								getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalMap(), metadata);
-					} catch (FailedTransactionException e) {
-						log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
-						log.error("ERROR ", e);
-						
-						webExchange.addFailedSession(sessionId);
-						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
-						
-						ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(), getWebExchange().get("active_scen").toString(),
-								getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalMap(),
-								metadata, e.getMessage(), ReportManager.FAILED);
 					}
 					i++;
 					
@@ -405,12 +406,6 @@ public class Workflow {
 		try {
 			actionable.submit(webExchange);
 		} catch (StaleElementReferenceException | ElementNotInteractableException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) {
-			try {
-				((AbstractBaseDriver)actionable).captureFailedFullModal(((WebElementWrapper)actionable).getModalId());
-			} catch (Exception e1) {
-				((AbstractBaseDriver)actionable).captureFailedFullWindow();
-			}
-			
 			retryWhenException(actionable, ++retry);
 		}
 	}
@@ -421,16 +416,16 @@ public class Workflow {
 
 			((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 			actionable.submit(webExchange);
-		} catch (StaleElementReferenceException | ElementNotInteractableException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) {
-			try {
-				((AbstractBaseDriver)actionable).captureFailedFullModal(((WebElementWrapper)actionable).getModalId());
-			} catch (Exception e1) {
-				((AbstractBaseDriver)actionable).captureFailedFullWindow();
-			}
-			
+		} catch (StaleElementReferenceException | ElementNotInteractableException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) {			
 			if (retry < MAX_RETRY_LOAD_PAGE) {
 				retryWhenException(actionable, ++retry);
 			} else {
+				try {
+					((AbstractBaseDriver)actionable).captureFailedFullModal(((WebElementWrapper)actionable).getModalId());
+				} catch (Exception e1) {
+					((AbstractBaseDriver)actionable).captureFailedFullWindow();
+				}
+				
 				log.error("ERROR ", e);
 				throw new FailedTransactionException("Failed for transaction, " + e.getMessage());
 			}	

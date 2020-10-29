@@ -152,6 +152,9 @@ public class WebExchange {
 				cachedKey.add(cahcedMenuId);
 				cachedMetaDataKey.put(mainMenu, cachedKey);
 				return tempListMetaData;	
+			} else {
+				cachedSession.add(getCurrentSession());
+				return cachedMetaData.get(cachedMetaDataKey.get(mainMenu).getLast());
 			}
 		}
 		return listMetaData;

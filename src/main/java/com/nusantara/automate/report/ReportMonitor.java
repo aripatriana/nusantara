@@ -233,7 +233,8 @@ public class ReportMonitor {
 		LinkedList<ScenEntry> scenEntryList = scenEntries.get(testCaseId);
 		if (scenEntryList != null) {
 			for (ScenEntry scenEntry : scenEntries.get(testCaseId)) {
-				if (scenEntry.getStatus().equals(ReportManager.FAILED)) numfailed++;
+				if (scenEntry.getStatus().equals(ReportManager.FAILED)
+						|| scenEntry.getStatus().equals(ReportManager.HALTED)) numfailed++;
 				if (scenEntry.getStatus().equals(ReportManager.INPROGRESS)) {
 					scenEntry.setStatus(ReportManager.HALTED);
 					if (!setErrorLog)
@@ -251,22 +252,5 @@ public class ReportMonitor {
 		testCase.setNumOfFailed(numfailed);
 		testCase.setStatus(ReportManager.HALTED);
 	}
-	
-	public static void main(String[] args) {
-		TestCaseEntry t =new TestCaseEntry();
-		t.setTestCaseId("T1");
-		
-		ScenEntry s = new ScenEntry();
-		s.setTscanId("S1");
-		
-		LinkedList<ScenEntry> en = new LinkedList<ScenEntry>();
-		en.add(s);
-		
-		ReportMonitor.addTestCaseEntry(t, en);
-		
-		ReportMonitor.scenEntriesByTscenId.get("S1").setErrorLog("ERROR");
-		System.out.println(ReportMonitor.scenEntries.get("T1").get(0).getErrorLog());
-	}
-	
 	
 }

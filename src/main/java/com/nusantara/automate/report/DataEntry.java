@@ -1,7 +1,9 @@
 package com.nusantara.automate.report;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class DataEntry {
@@ -47,8 +49,10 @@ public class DataEntry {
 	}
 
 	public boolean checkMetaData(Map<String, Object> metadata) {
-		for (Map<String, Object> temp : metaData) {
-			if (temp.equals(metadata)) return true;
+		if (metadata != null) {
+			for (Map<String, Object> temp : metaData) {
+				if (temp.equals(metadata)) return true;
+			}
 		}
 		return false;
 	}
@@ -58,10 +62,12 @@ public class DataEntry {
 	}
 	
 	public void addMetaData(Map<String, Object> metaData) {
+		if (metaData == null) return;
 		this.metaData.add(metaData);
 	}
 	
 	public void addAllMetaData(LinkedList<Map<String, Object>> metadataList) {
+		if (metadataList == null) return;
 		this.metaData.addAll(metadataList);
 	}
 
