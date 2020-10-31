@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.nusantara.automate.reader.TemplateReader;
 import com.nusantara.automate.util.DateUtils;
@@ -39,6 +40,7 @@ public class ReportManager {
 
 	
 	private static final String EL_DATA_HTML = "${data_html}";
+	private static final String EL_SCRIPT_HTML = "${script_html}";
 	private static final String EL_SNAPHSOT_HTML = "${snapshot_html}";
 	private static final String EL_SCEN_HTML = "${scen_html}";
 	
@@ -61,17 +63,20 @@ public class ReportManager {
 		banners.add("banner_bg.png");
 	}
 	
+	@Value("{template_dir}")
 	private String templateDir;
 	
+	@Value("{report_dir}")
 	private String reportDir;
+	
+	@Value("{testcase_dir}")
+	private String testCaseDir;
 
 	private String startDate;
 	
 	private String reportDateFolder;
 	
-	public ReportManager(String templateDir, String reportDir, String startTimeMilis) {
-		this.templateDir = templateDir;
-		this.reportDir = reportDir;
+	public ReportManager(String startTimeMilis) {
 		this.startDate = DateUtils.format(new Date(Long.valueOf(startTimeMilis)), "YYYY-MM-DD HH:MM:SS");
 		this.reportDateFolder =  DateUtils.format(new Date(Long.valueOf(startTimeMilis)), "yyyyMMdd_hhmmss");
 	}
@@ -146,6 +151,7 @@ public class ReportManager {
 					&& ReportMonitor.getImageEntries(scenEntry.getTscanId()).size() > 0 ? scenEntry.getTscanId()+ "_snapshot.html" : "#"));
 			rowIdx = replaceVar(rowIdx, EL_DATA_HTML, (ReportMonitor.getDataEntries(scenEntry.getTscanId()) != null 
 					&& ReportMonitor.getDataEntries(scenEntry.getTscanId()).size() > 0 ? scenEntry.getTscanId()+ "_data.html" : "#"));
+			rowIdx = replaceVar(rowIdx, EL_SCRIPT_HTML, scenEntry.getTscanId().replace(scenEntry.getTestCaseId() + "_", "") + ".y");
 			rowIdx = replaceVar(rowIdx, EL_TSCEN_ID, scenEntry.getTscanId());
 			rowIdx = replaceVar(rowIdx, EL_NUM_DATA, scenEntry.getNumOfData());
 			rowIdx = replaceVar(rowIdx, EL_FAILED_DATA, scenEntry.getFailedRow());
@@ -159,11 +165,17 @@ public class ReportManager {
 			}
 			sb.append(rowIdx);
 			
+			// create data html
 			String dataFilename = reportDir + "\\" + reportDateFolder + "\\" + testCaseId + "\\"+ scenEntry.getTscanId()+ "_data.html";
 			createDataHtml(new File(dataFilename), templates, scenEntry.getTscanId(), testCaseId);
 			
+			// create snapshot html
 			String snapshotFilename = reportDir + "\\" + reportDateFolder + "\\" + testCaseId + "\\"+ scenEntry.getTscanId()+ "_snapshot.html";
 			createSnapshotHtml(new File(snapshotFilename), templates, scenEntry.getTscanId(), testCaseId);
+			
+			// copy y script file
+			FileUtils.copyFile(new File(testCaseDir + "\\" + testCaseId + "\\" + scenEntry.getTscanId().replace(testCaseId + "_", "") + ".y"),
+					new File(reportDir + "\\" + reportDateFolder + "\\" + testCaseId + "\\" + scenEntry.getTscanId().replace(testCaseId + "_", "") + ".y"));
 		}
 		
 		template = template.replace(EL_TIMESTAMP, startDate);

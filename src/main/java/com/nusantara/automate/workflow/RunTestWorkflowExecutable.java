@@ -54,8 +54,8 @@ public class RunTestWorkflowExecutable implements RunTestWorkflow, WorkflowConfi
 			log.error("FATAL ERROR ", e);
 		} finally {
 			try {
-				ReportManager report = new ReportManager(ConfigLoader.getConfig("{template_dir}").toString(),
-						ConfigLoader.getConfig("{report_dir}").toString(), String.valueOf(startExeDate));
+				ReportManager report = new ReportManager(String.valueOf(startExeDate));
+				ContextLoader.setObjectLocalWithCustom(report, ConfigLoader.getConfigMap());
 				report.createReport();
 			} catch (IOException e) {
 				log.error("FATAL ERROR ", e);
