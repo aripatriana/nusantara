@@ -44,6 +44,14 @@ public class RunTestApplication {
 	private static final String LOGBACK_FILE_PATH = "src/main/resources/logback.xml";
 	private static final String CONFIG_FILE_PATH = "/config/config.properties";
 	private static final String DRIVER_FILE_PATH = "/lib/driver/bin/chromedriver.exe";
+
+	public final static String SUFFIX_USER = "user";
+	public final static String PREFIX_MEMBER_CODE = "memberCode";
+	public final static String PREFIX_USERNAME = "username";
+	public final static String PREFIX_PASSWORD = "password";
+	public final static String PREFIX_KEYFILE = "keyFile";
+	public final static String PREFIX_TOKEN = "token";
+	
 	
 	public static void run(Class<? extends RunTestWorkflow> clazz, String[] args) {
 		WorkflowConfig workflowConfig = null;
@@ -68,7 +76,7 @@ public class RunTestApplication {
 			
 			workflowConfig = new WorkflowConfig();
 			setWorkflowy(workflowConfig);
-			initReport(workflowConfig);
+			setInitReport(workflowConfig);
 			
 			RunTestWorkflow workflow = (RunTestWorkflow) ReflectionUtils.instanceObject(clazz);
 			
@@ -145,7 +153,25 @@ public class RunTestApplication {
 			    }
 			}
 			
+			Map<String, Map<String, Object>> loginUser = new HashMap<String, Map<String, Object>>();
+			for (Entry<String, Object> entry : ConfigLoader.getConfigMap().entrySet()) {
+				if (entry.getKey().startsWith(SUFFIX_USER + ".")) {
+					
+					String key = entry.getKey().replace("." + PREFIX_MEMBER_CODE, "")
+							.replace("." + PREFIX_USERNAME, "")
+							.replace("." + PREFIX_PASSWORD, "")
+							.replace("." + PREFIX_KEYFILE, "")
+							.replace("." + PREFIX_TOKEN, "");
+					
+					Map<String, Object> login = loginUser.get(key);
+					if (login == null) login = new HashMap<String, Object>();
+					login.put(entry.getKey(), entry.getValue());
+					loginUser.put(key, login);
+				}
+			}
+			
 			ConfigLoader.setConfigMap(metadata);
+			ConfigLoader.setLoginInfo(loginUser);
 		}
 	}
 	
@@ -205,7 +231,7 @@ public class RunTestApplication {
 	 * 
 	 * @param workflowConfig
 	 */
-	private static void initReport(WorkflowConfig workflowConfig) {
+	private static void setInitReport(WorkflowConfig workflowConfig) {
 		for (String workflowScen : workflowConfig.getWorkflowScens()) {
 			LinkedList<ScenEntry> scenEntries = new LinkedList<ScenEntry>();
 			for (String workflowKey : workflowConfig.getWorkflowMapScens(workflowScen)) {
@@ -232,14 +258,24 @@ public class RunTestApplication {
 					if (menu == null) {
 						throw new ScriptInvalidException("Menu not found for " + entry.getVariable());
 					}
-				}
-				if (entry.isFunction()) {
+				} else if (entry.isFunction()) {
 					SimpleEntry<Class<?>, Object[]> function = workflowConfig.getFunction(entry.getVariable());
 					if (function == null) {
 						throw new ScriptInvalidException("Function not found for " + entry.getVariable());
 					}
-				}
+				} else if (entry.isLogin() || entry.isRelogin()) {
+					Map<String, Object> login = ConfigLoader.getLoginInfo(entry.getVariable());
+					if (login == null) {
+						throw new ScriptInvalidException("Login info not found for " + entry.getVariable());
+					}
 					
+					if (login.get(entry.getVariable() + "." + PREFIX_MEMBER_CODE) == null
+							|| login.get(entry.getVariable() + "." + PREFIX_USERNAME) == null
+							|| login.get(entry.getVariable() + "." + PREFIX_PASSWORD) == null
+							|| login.get(entry.getVariable() + "." + PREFIX_KEYFILE) == null) {
+						throw new ScriptInvalidException("Login info not completed for " + entry.getVariable());
+					}
+				}
 			}
 		}
 		

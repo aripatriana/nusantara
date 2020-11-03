@@ -12,6 +12,7 @@ import java.util.Map;
 public class ConfigLoader {
 
 	private static Map<String, Object> configMap = new HashMap<String, Object>();
+	private static Map<String, Map<String, Object>> loginMap = new HashMap<String, Map<String, Object>>();
 	
 	public static Map<String, Object> getConfigMap() {
 		return configMap;
@@ -24,6 +25,18 @@ public class ConfigLoader {
 	
 	public static void addConfig(String key, Object value) {
 		ConfigLoader.configMap.put(key, value);
+	}
+	
+	public static void setLoginInfo(Map<String, Map<String, Object>> loginMap) {
+		ConfigLoader.loginMap = loginMap;
+	}
+	
+	public static void addLoginInfo(String key, Map<String, Object> value) {
+		ConfigLoader.configMap.put(key, value);
+	}
+
+	public static Map<String, Object> getLoginInfo(String key) {
+		return ConfigLoader.loginMap.get(key);
 	}
 	
 	public static Object getConfig(String key) {

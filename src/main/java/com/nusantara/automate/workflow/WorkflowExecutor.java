@@ -1,14 +1,18 @@
 package com.nusantara.automate.workflow;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.BasicScript;
+import com.nusantara.automate.ConfigLoader;
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.DriverManager;
 import com.nusantara.automate.FileRetention;
+import com.nusantara.automate.RunTestApplication;
 import com.nusantara.automate.action.common.LoginFormAction;
 import com.nusantara.automate.action.common.LogoutFormAction;
 import com.nusantara.automate.action.common.ProductSelectorAction;
@@ -33,34 +37,6 @@ public class WorkflowExecutor {
 	@Value("login.url")
 	private String loginUrl;
 	
-	@Value("user.create.memberCode")
-	private String memberCodeCreate;
-	@Value("user.create.username")
-	private String usernameCreate;
-	@Value("user.create.password")
-	private String passwordCreate;
-	@Value("user.create.keyFile")
-	private String keyFileCreate;
-	
-	@Value("user.check.memberCode")
-	private String memberCodeCheck;
-	@Value("user.check.username")
-	private String usernameCheck;
-	@Value("user.check.password")
-	private String passwordCheck;
-	@Value("user.check.keyFile")
-	private String keyFileCheck;
-	
-	@Value("user.approve.memberCode")
-	private String memberCodeApprove;
-	@Value("user.approve.username")
-	private String usernameApprove;
-	@Value("user.approve.password")
-	private String passwordApprove;
-	@Value("user.approve.keyFile")
-	private String keyFileApprove;
-	
-	
 	public void execute(String scen, Workflow workflow, WorkflowConfig config) throws Exception {
 		String productType = null;
 		for (String workflowKey : config.getWorkflowKey(scen)) {
@@ -78,7 +54,6 @@ public class WorkflowExecutor {
 								.loop();
 							
 							ReportMonitor.getScenEntry(workflowKey).setNumOfData(retention.getSize());
-							ReportMonitor.getTestCaseEntry(scen).setNumOfData(retention.getSize());
 						} catch (XlsSheetStyleException e) {
 							throw new Exception(e);
 						}
@@ -173,14 +148,11 @@ public class WorkflowExecutor {
 	}
 	
 	public LoginInfo getLoginInfo(String variable) {
-		if ("user.create".equals(variable)) {
-			return new LoginInfo(memberCodeCreate, usernameCreate, passwordCreate, keyFileCreate);
-		} else if ("user.check".equals(variable)) {
-			return new LoginInfo(memberCodeCheck, usernameCheck, passwordCheck, keyFileCheck);
-		} else if ("user.approve".equals(variable)) {
-			return new LoginInfo(memberCodeApprove, usernameApprove, passwordApprove, keyFileApprove);
-		}
-		return null;
+		Map<String, Object> loginUser = ConfigLoader.getLoginInfo(variable);
+		return new LoginInfo(loginUser.get(variable + "." + RunTestApplication.PREFIX_MEMBER_CODE).toString(), 
+				loginUser.get(variable + "." + RunTestApplication.PREFIX_USERNAME).toString(), 
+				loginUser.get(variable + "." + RunTestApplication.PREFIX_PASSWORD).toString(), 
+				loginUser.get(variable + "." + RunTestApplication.PREFIX_KEYFILE).toString());
 	}
 }
 
