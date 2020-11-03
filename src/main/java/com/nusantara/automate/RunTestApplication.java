@@ -152,6 +152,8 @@ public class RunTestApplication {
 					metadata.put(name.replace("keyFile", "token"), new String(Files.readAllBytes(Paths.get(value))));
 			    }
 			}
+
+			ConfigLoader.setConfigMap(metadata);
 			
 			Map<String, Map<String, Object>> loginUser = new HashMap<String, Map<String, Object>>();
 			for (Entry<String, Object> entry : ConfigLoader.getConfigMap().entrySet()) {
@@ -170,7 +172,6 @@ public class RunTestApplication {
 				}
 			}
 			
-			ConfigLoader.setConfigMap(metadata);
 			ConfigLoader.setLoginInfo(loginUser);
 		}
 	}

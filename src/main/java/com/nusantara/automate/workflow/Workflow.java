@@ -430,14 +430,7 @@ public class Workflow {
 			}	
 		}
 	}
-	
-	public static void main(String[] args) {
-		int i = 0;
-		System.out.println(i++);
-		System.out.println(i);
-	}
-	
-	
+		
 	public Workflow waitUntil(ModalSuccessAction actionable) {
 		if (!activeLoop) {
 			try {
