@@ -44,9 +44,7 @@ public class DBConnection {
 	private synchronized static DBConnection getConnection() {
 		if (dbConnection == null) {
 			dbConnection = new DBConnection();
-			if (ConfigLoader.getConfigMap().size() > 0) {
-				ContextLoader.setObjectWithCustom(dbConnection, ConfigLoader.getConfigMap());	
-			}
+			ContextLoader.setObjectWithCustom(dbConnection, ConfigLoader.getConfigMap());	
 		}
 		return dbConnection;
 	}

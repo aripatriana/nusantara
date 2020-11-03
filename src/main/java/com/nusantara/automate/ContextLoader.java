@@ -102,7 +102,11 @@ public class ContextLoader {
 	}
 	
 	public static void setObjectWithCustom(Object object, Map<String, Object> metadata) {
-		Map<String, Object> map = new HashMap<String, Object>(metadata);
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		if (metadata != null && metadata.size() > 0)
+			map.putAll(metadata);
+		
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
 			map.put("all_local_variable", getWebExchange().getAllListLocalMap());
@@ -113,7 +117,11 @@ public class ContextLoader {
 	}
 	
 	public static void setObjectLocalWithCustom(Object object, Map<String, Object> metadata) {
-		Map<String, Object> map = new HashMap<String, Object>(metadata);
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		if (metadata != null && metadata.size() > 0)
+			map.putAll(metadata);
+		
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
 			map.put("all_local_variable", getWebExchange().getAllListLocalMap());
