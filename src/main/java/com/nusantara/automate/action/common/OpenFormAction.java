@@ -57,6 +57,7 @@ public class OpenFormAction extends WebElementWrapper implements Actionable, Men
 	@Override
 	public void submit(WebExchange webExchange) {
 		log.info("Open Form " + form);
+		Sleep.wait(100);
 		try {
 			WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
 			WebElement webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//ul[@id='" + getMenuId() + "']//li//a[./span[text()='" + getForm() + "']]")));

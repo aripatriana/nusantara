@@ -53,7 +53,7 @@ public class OpenSubMenuAction extends WebElementWrapper implements Actionable {
 	@Override
 	public void submit(WebExchange webExchange) {
 		if (menuName == null) return;
-		
+		Sleep.wait(100);
 		log.info("Open Sub Menu " + menuName);
 		try {
 			WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
