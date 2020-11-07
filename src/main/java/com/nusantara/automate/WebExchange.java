@@ -80,6 +80,19 @@ public class WebExchange {
 		cachedSession.clear();
 	}
 
+	private LinkedList<Map<String, Object>> getMetaDataByMenuId(String cahcedMenuId) {
+		LinkedList<Map<String, Object>> tempListMetaData = new LinkedList<Map<String,Object>>();
+		LinkedList<Map<String, Object>> bufferListMetaData = new LinkedList<Map<String,Object>>(listMetaData);
+		Collections.copy(bufferListMetaData, listMetaData);
+		for (Map<String, Object> map : bufferListMetaData) {
+			if (map.keySet().toArray()[0].toString().toUpperCase().startsWith(cahcedMenuId+".")) {
+				MapUtils.clearMapKey(cahcedMenuId + ".", map);
+				tempListMetaData.add(map);
+			}
+		}
+		return tempListMetaData;
+	}
+	
 	/**
 	 * Sesi dibentuk per row dalam 1 sheet, apabila ada sheet lain maka sesi nya akan mengikuti sesi sebelumnya
 	 * row pertama pada setiap sheet cachedSession akan kosong, tujuannya untuk identifikasi apakah ada module$number
@@ -91,29 +104,26 @@ public class WebExchange {
 	public LinkedList<Map<String, Object>> getListMetaData(String moduleId, boolean checkNextMenuId) {
 		String mainMenu = moduleId.toUpperCase();
 		String cahcedMenuId = moduleId.toUpperCase();
-		boolean emptyCached = false;
+		LinkedList<Map<String, Object>> metadata = new LinkedList<Map<String,Object>>();
 		int indexMenuId = 0;
 		
 		// the cached session is in the empty condition in every sheet begin
 		if (cachedSession.contains(getCurrentSession())) {
 			// read the metadata in the next row in the existing sheet
-			if (cachedMetaDataKey.containsKey(cahcedMenuId)) {
-				return cachedMetaData.get(cachedMetaDataKey.get(cahcedMenuId).getLast());	
-			} else {
-				// while cached session is empty after sheet finished, this condition rarely fulfilled
-				emptyCached = true;
-			}
+			return cachedMetaData.get(cachedMetaDataKey.get(cahcedMenuId).getLast());	
 		} else {
+			cachedSession.add(getCurrentSession());
+			
 			// there are three conditions the code comes here
 			// 1. read the first sheet, the cached metadata must be empty
 			// 2. read new sheet with different sheet names, the cached metadata must be empty
 			// 3. read the sheet with the same name but containing suffix $number, 
-			// cek metadata, klo ada maka cek module$number
 			if (cachedMetaData.containsKey(cahcedMenuId)) {
 				// the third conditions, check the next suffix $number
 				if (checkNextMenuId) {
 					indexMenuId++;
 					cahcedMenuId = mainMenu + "" + indexMenuId;
+					boolean emptyCached = false;
 					while(true) {
 						if (cachedMetaData.containsKey(cahcedMenuId)) {
 							indexMenuId++;
@@ -123,41 +133,34 @@ public class WebExchange {
 							break;
 						}
 					}
+					if (!emptyCached) {
+						metadata = getMetaDataByMenuId(cahcedMenuId);
+						if (metadata.isEmpty()) {
+							metadata = cachedMetaData.get(cachedMetaDataKey.get(mainMenu).getLast());
+						} else {
+							cachedMetaData.put(cahcedMenuId, metadata);
+							LinkedList<String> cachedKey = cachedMetaDataKey.get(mainMenu);
+							if (cachedKey == null) cachedKey = new LinkedList<String>();
+							cachedKey.add(cahcedMenuId);
+							cachedMetaDataKey.put(mainMenu, cachedKey);
+						}
+					}
 				} else {
-					cachedSession.add(getCurrentSession());
-					return cachedMetaData.get(cachedMetaDataKey.get(mainMenu).getLast());
+					metadata = cachedMetaData.get(cachedMetaDataKey.get(mainMenu).getLast());
 				}
 			} else {
 				// the first and second conditions comes here
-				emptyCached = true;
-			}
-		}
-		
-		if (emptyCached) {
-			LinkedList<Map<String, Object>> tempListMetaData = new LinkedList<Map<String,Object>>();
-			LinkedList<Map<String, Object>> bufferListMetaData = new LinkedList<Map<String,Object>>(listMetaData);
-			Collections.copy(bufferListMetaData, listMetaData);
-			for (Map<String, Object> map : bufferListMetaData) {
-				if (map.keySet().toArray()[0].toString().toUpperCase().startsWith(cahcedMenuId+".")) {
-					MapUtils.clearMapKey(cahcedMenuId + ".", map);
-					tempListMetaData.add(map);
-				}
-			}
-			
-			if (!tempListMetaData.isEmpty()) {
-				cachedSession.add(getCurrentSession());
-				cachedMetaData.put(cahcedMenuId, tempListMetaData);
+				metadata = getMetaDataByMenuId(cahcedMenuId);
+				
+				cachedMetaData.put(cahcedMenuId, metadata);
 				LinkedList<String> cachedKey = cachedMetaDataKey.get(mainMenu);
 				if (cachedKey == null) cachedKey = new LinkedList<String>();
 				cachedKey.add(cahcedMenuId);
+;
 				cachedMetaDataKey.put(mainMenu, cachedKey);
-				return tempListMetaData;	
-			} else {
-				cachedSession.add(getCurrentSession());
-				return cachedMetaData.get(cachedMetaDataKey.get(mainMenu).getLast());
 			}
 		}
-		return listMetaData;
+		return metadata;
 	}
 	
 	public LinkedList<Map<String, Object>> getListMetaData(String moduleId) {
@@ -166,15 +169,16 @@ public class WebExchange {
 	
 	public Map<String, Object> getMetaData(String menuId, int index, boolean checkNextMenuId) {
 		LinkedList<Map<String, Object>> tempListMetaData = getListMetaData(menuId, checkNextMenuId);
-		if (tempListMetaData != null)
+		if (tempListMetaData != null && tempListMetaData.size() > 0)
 			return tempListMetaData.get(index);
 		return null;
 	}
 	
 	public Map<String, Object> getMetaData(String menuId, int index) {
 		LinkedList<Map<String, Object>> tempListMetaData = getListMetaData(menuId, false);
-		if (tempListMetaData != null)
+		if (tempListMetaData != null && tempListMetaData.size() > 0) {
 			return tempListMetaData.get(index);
+		}
 		return null;
 	}
 	

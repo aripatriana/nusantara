@@ -12,6 +12,13 @@ import com.nusantara.automate.util.Sleep;
  *
  */
 public abstract class WebElementWrapper extends AbstractBaseDriver {
+
+	protected void setInputFieldLike(String id, String value) {
+		findElementByXpath("//input[contains(@id,'" + id + "')]").clear();
+		findElementByXpath("//input[contains(@id,'" + id + "')]").sendKeys(value);
+		Sleep.wait(200);
+	}
+
 	
 	protected void setInputField(String id, String value) {
 		findElementById(id).clear();
@@ -38,8 +45,18 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		Sleep.wait(1000);
 	}
 	
+	protected void clickButtonLike(WebElement webElement, String id) {
+		findElementByXpath(webElement, "//button[contains(@id,'" + id + "')]").click();
+		Sleep.wait(1000);
+	}
+	
 	protected void clickButton(WebElement webElement, String id) {
 		findElementById(webElement, id).click();
+		Sleep.wait(1000);
+	}
+
+	protected void clickButtonLike(String id) {
+		findElementByXpath("//button[contains(@id,'" + id + "')]").click();
 		Sleep.wait(1000);
 	}
 	
@@ -133,7 +150,10 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		}
 	}
 
-	
+	public String getTextByIdLike(String id) {
+		return findElementByXpath("//p[contains(@id,'" + id + "')]").getText();
+	}
+
 	public String getTextById(String id) {
 		return findElementById(id).getText();
 	}

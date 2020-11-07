@@ -1,5 +1,6 @@
 package com.nusantara.automate.action.common;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,9 +35,20 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 	
 	private Callback callback;
 	private String successId;
-	private String failedId;
+	private String[] failedId;
 	
 	public ModalSuccessAction(String successId, String failedId, WebCallback callback) {
+		callback.setSuccessId(successId);
+		callback.setFailedId(new String[] {failedId});
+		
+		this.callback = callback;
+		this.successId = successId;
+		this.failedId = new String[] {failedId};
+		
+		ContextLoader.setObject(callback);
+	}
+	
+	public ModalSuccessAction(String successId, String[] failedId, WebCallback callback) {
 		callback.setSuccessId(successId);
 		callback.setFailedId(failedId);
 		
@@ -58,12 +70,12 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 	@Override
 	public void submit(WebExchange webExchange) throws FailedTransactionException {
 		log.info("Waiting modal success open");
-		
+		int totalThread = failedId.length+1; 
 		try {
-			ExecutorService executor = Executors.newFixedThreadPool(2);
-			CountDownLatch countDownOk = new CountDownLatch(2);
-			CountDownLatch countDownLatch = new CountDownLatch(2);
-			AtomicBoolean modalSuccess = new AtomicBoolean(Boolean.FALSE);
+			ExecutorService executor = Executors.newFixedThreadPool(totalThread);
+			CountDownLatch countDownOk = new CountDownLatch(totalThread);
+			CountDownLatch countDownLatch = new CountDownLatch(totalThread);
+			ConcurrentHashMap<Boolean, String> modalSuccess = new ConcurrentHashMap<Boolean, String>();
 			
 			executor.execute(new Runnable() {
 				
@@ -72,7 +84,7 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 					try {
 						WebDriverWait wait = new WebDriverWait(getDriver(),180);
 						wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(successId)));
-						modalSuccess.set(Boolean.TRUE);
+						modalSuccess.put(Boolean.TRUE, successId);
 						countDownOk.countDown();	
 						log.info("Modal success open");
 					} catch (TimeoutException e) {
@@ -83,26 +95,28 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 				}
 			});
 			
-			executor.execute(new Runnable() {
-				
-				@Override
-				public void run() {
-					try {
-						WebDriverWait wait = new WebDriverWait(getDriver(),180);
-						wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(failedId)));
-						modalSuccess.set(Boolean.FALSE);
-						countDownOk.countDown();	
-						log.info("Modal failed open");
-					} catch (TimeoutException e) {
-						// do nothing
-					} finally {
-						countDownLatch.countDown();					
+			for (String failedModalId : failedId) {
+				executor.execute(new Runnable() {
+					
+					@Override
+					public void run() {
+						try {
+							WebDriverWait wait = new WebDriverWait(getDriver(),180);
+							wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(failedModalId)));
+							modalSuccess.put(Boolean.FALSE, failedModalId);
+							countDownOk.countDown();	
+							log.info("Modal failed open");
+						} catch (TimeoutException e) {
+							// do nothing
+						} finally {
+							countDownLatch.countDown();					
+						}
 					}
-				}
-			});
+				});
+			}
 			
 			for (;;) {
-				if (countDownOk.getCount() == 1 || countDownLatch.getCount() == 0) {
+				if (countDownOk.getCount() == (totalThread-1) || countDownLatch.getCount() == 0) {
 					// shutdown thread
 					new Thread(new Runnable() {
 						
@@ -121,7 +135,7 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 					}).start();
 					
 					if (countDownLatch.getCount() == 0)
-						throw new FailedTransactionException("Both of modal window not open");
+						throw new FailedTransactionException("All modal window not open");
 					break;
 				}
 
@@ -131,10 +145,10 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 			// wait until modal fully open
 			Sleep.wait(1000);
 			
-			if (modalSuccess.get()) {
-				callback.callback(findElementById(successId), webExchange);
+			if (modalSuccess.containsKey(Boolean.TRUE)) {
+				callback.callback(findElementById(modalSuccess.get(Boolean.TRUE)), webExchange);
 			} else {
-				callback.callback(findElementById(failedId), webExchange);				
+				callback.callback(findElementById(modalSuccess.get(Boolean.FALSE)), webExchange);				
 			}
 				
 		} catch (FailedTransactionException e) {

@@ -30,6 +30,7 @@ import com.nusantara.automate.action.ManagedMultipleFormAction;
 import com.nusantara.automate.action.common.ModalSuccessAction;
 import com.nusantara.automate.action.common.OpenFormAction;
 import com.nusantara.automate.action.common.OpenMenuAction;
+import com.nusantara.automate.action.common.OpenSubMenuAction;
 import com.nusantara.automate.exception.FailedTransactionException;
 import com.nusantara.automate.report.ReportManager;
 import com.nusantara.automate.report.ReportMonitor;
@@ -98,12 +99,8 @@ public class Workflow {
 	
 	public Workflow openMenu(Menu menu) {
 		OpenMenuAction menuAction = new OpenMenuAction(null, menu.getMenu());
-		setMenuAwareness(menu, menuAction);
-		
-		OpenMenuAction subMenuAction = new OpenMenuAction(menuAction, menu.getSubMenu());
-		setMenuAwareness(menu, subMenuAction);
-		
-		OpenFormAction formAction = new OpenFormAction(subMenuAction, menu.getMenuId(), menu.getForm());
+		OpenSubMenuAction subMenuAction = new OpenSubMenuAction(menuAction, menu.getSubMenu(), menu.getMenuId());
+		OpenFormAction formAction = new OpenFormAction((menu.getSubMenu() != null ? subMenuAction : menuAction), menu.getMenuId(), menu.getForm());
 		setMenuAwareness(menu, formAction);
 	
 		if (!activeLoop) {
@@ -346,7 +343,7 @@ public class Workflow {
 						}
 						i++;
 						
-						if (webExchange.getSessionList().size() == i) {
+						if (webExchange.getSessionList().size() <= i) {
 							webExchange.clearCachedSession();
 							break;
 						}
@@ -388,7 +385,7 @@ public class Workflow {
 					}
 					i++;
 					
-					if (webExchange.getListMetaData(getActiveMenu().getModuleId()).size() == i) {
+					if (webExchange.getListMetaData(getActiveMenu().getModuleId()).size() <= i) {
 						webExchange.clearCachedSession();
 						break;
 					}

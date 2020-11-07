@@ -14,12 +14,12 @@ public abstract class WebCallback extends WebElementWrapper implements Callback 
 
 	private String successId;
 	
-	private String failedId;
+	private String[] failedId;
 	
 	public WebCallback() {
 	}
 	
-	public WebCallback(String successId, String failedId) {
+	public WebCallback(String successId, String[] failedId) {
 		this.successId = successId;
 		this.failedId = failedId;
 	}
@@ -32,11 +32,11 @@ public abstract class WebCallback extends WebElementWrapper implements Callback 
 		return successId;
 	}
 	
-	public void setFailedId(String failedId) {
+	public void setFailedId(String[] failedId) {
 		this.failedId = failedId;
 	}
 	
-	public String getFailedId() {
+	public String[] getFailedId() {
 		return failedId;
 	}
 	
