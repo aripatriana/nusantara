@@ -12,6 +12,7 @@ import com.nusantara.automate.Actionable;
 import com.nusantara.automate.WebElementWrapper;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.util.Sleep;
+import com.nusantara.automate.util.StringUtils;
 
 /**
  * The action for open the menu trees
@@ -19,16 +20,22 @@ import com.nusantara.automate.util.Sleep;
  * @author ari.patriana
  *
  */
-public class OpenMenuAction extends WebElementWrapper implements Actionable {
+public class OpenSubMenuAction extends WebElementWrapper implements Actionable {
 
-	Logger log = LoggerFactory.getLogger(OpenMenuAction.class);
+	Logger log = LoggerFactory.getLogger(OpenSubMenuAction.class);
 	OpenMenuAction prevMenu;
 	String menuName;
-	int timeout = 10;
+	String menuId;
+	int timeout = 3;
 	
-	public OpenMenuAction(OpenMenuAction prevMenu, String menuName) {
+	public OpenSubMenuAction(OpenMenuAction prevMenu, String menuName, String menuId) {
 		this.prevMenu = prevMenu;
 		this.menuName = menuName;
+		this.menuId = menuId;
+	}
+	
+	public String getMenuId() {
+		return menuId;
 	}
 	
 	public String getMenuName() {
@@ -47,10 +54,10 @@ public class OpenMenuAction extends WebElementWrapper implements Actionable {
 	public void submit(WebExchange webExchange) {
 		if (menuName == null) return;
 		
-		log.info("Open Menu " + menuName);
+		log.info("Open Sub Menu " + menuName);
 		try {
 			WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
-			WebElement webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//ul//li//a//span[text()='" + getMenuName() + "']")));
+			WebElement webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//ul[@id='" + StringUtils.removeLastChar(menuId, "::") + "']//li//a//span[text()='" + getMenuName() + "']")));
 			webElement.click();
 		} catch (TimeoutException e) {
 			if (prevMenu != null) {

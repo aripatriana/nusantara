@@ -13,6 +13,7 @@ import com.nusantara.automate.Menu;
 import com.nusantara.automate.MenuAwareness;
 import com.nusantara.automate.WebElementWrapper;
 import com.nusantara.automate.WebExchange;
+import com.nusantara.automate.exception.FailedTransactionException;
 import com.nusantara.automate.util.Sleep;
 
 /**
@@ -24,12 +25,13 @@ import com.nusantara.automate.util.Sleep;
 public class OpenFormAction extends WebElementWrapper implements Actionable, MenuAwareness {
 
 	Logger log = LoggerFactory.getLogger(OpenFormAction.class);
-	private OpenMenuAction prevMenu;
+	private Actionable prevMenu;
 	private String menuId;
 	private String form;
 	private Menu menu;
+	int timeout = 1;
 	
-	public OpenFormAction(OpenMenuAction prevMenu, String menuId, String form) {
+	public OpenFormAction(Actionable prevMenu, String menuId, String form) {
 		this.prevMenu = prevMenu;
 		this.menuId = menuId;
 		this.form = form;
@@ -55,14 +57,20 @@ public class OpenFormAction extends WebElementWrapper implements Actionable, Men
 	@Override
 	public void submit(WebExchange webExchange) {
 		log.info("Open Form " + form);
-		Sleep.wait(500);
 		try {
-			WebDriverWait wait = new WebDriverWait(getDriver(),3);
+			WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
 			WebElement webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//ul[@id='" + getMenuId() + "']//li//a[./span[text()='" + getForm() + "']]")));
 			webElement.click();
 		} catch (TimeoutException e) {
 			if (prevMenu != null) {
-				prevMenu.submit(webExchange);
+				if (prevMenu instanceof OpenMenuAction 
+						|| prevMenu instanceof OpenSubMenuAction) {
+					try {
+						prevMenu.submit(webExchange);
+					} catch (FailedTransactionException e1) {
+						// do nothing
+					}
+				}
 				this.submit(webExchange);
 			} else {
 				getDriver().navigate().refresh();
