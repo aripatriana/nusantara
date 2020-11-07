@@ -46,7 +46,7 @@ public class OpenMenuAction extends WebElementWrapper implements Actionable {
 	@Override
 	public void submit(WebExchange webExchange) {
 		if (menuName == null) return;
-		Sleep.wait(100);
+		Sleep.wait(500);
 		log.info("Open Menu " + menuName);
 		try {
 			WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
