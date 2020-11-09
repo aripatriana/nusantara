@@ -39,6 +39,10 @@ public class ConfigLoader {
 		return ConfigLoader.loginMap.get(key);
 	}
 	
+	public static Map<String, Map<String, Object>> getLoginInfo() {
+		return ConfigLoader.loginMap;
+	}
+	
 	public static Object getConfig(String key) {
 		return ConfigLoader.configMap.get(key);
 	}
