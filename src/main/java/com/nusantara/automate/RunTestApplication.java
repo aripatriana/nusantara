@@ -53,15 +53,17 @@ public class RunTestApplication {
 	public final static String PREFIX_KEYFILE = "keyFile";
 	public final static String PREFIX_TOKEN = "token";
 	
-	private static String driverPathFile = DRIVER_FILE_PATH;
-	private static String configPathFile = CONFIG_FILE_PATH;
-	private static String moduleName = null;
-	private static String userPathFile = USER_FILE_PATH;
 	
 	public static void run(Class<? extends RunTestWorkflow> clazz, String[] args) {
+		System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, LOGBACK_FILE_PATH);
+		
 		WorkflowConfig workflowConfig = null;
 		try {
-			System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, LOGBACK_FILE_PATH);
+			String driverPathFile = System.getProperty("user.dir") + DRIVER_FILE_PATH;
+			String configPathFile = System.getProperty("user.dir") + CONFIG_FILE_PATH;
+			String userPathFile = System.getProperty("user.dir") + USER_FILE_PATH;
+			
+			String moduleName = null;
 			
 			for (String arg : args) {
 				if (arg.startsWith("-Ddriver.path=")) {
@@ -116,9 +118,9 @@ public class RunTestApplication {
 	
 	private static void setDriver(String driverPathFile) {
 		if (driverPathFile != null) {
-			log.info("Driver Path : " + System.getProperty("user.dir") + driverPathFile);
+			log.info("Driver Path : " + driverPathFile);
 			
-			DriverManager.setDriverPath(System.getProperty("user.dir") + driverPathFile);
+			DriverManager.setDriverPath(driverPathFile);
 		}
 	}
 	
@@ -141,9 +143,9 @@ public class RunTestApplication {
 				Map<String, Object> metadata = new HashMap<String, Object>();
 				Map<String, Map<String, Object>> loginUser = new HashMap<String, Map<String, Object>>();
 				
-				log.info("Config Properties : " + System.getProperty("user.dir") + configPathFile);
+				log.info("Config Properties : " + configPathFile);
 	
-				File file = new File(System.getProperty("user.dir") + configPathFile); 
+				File file = new File(configPathFile); 
 				Properties prop = new Properties();
 				try {
 					prop.load(new FileInputStream(file));
