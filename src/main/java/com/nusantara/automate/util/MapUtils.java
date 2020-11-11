@@ -1,6 +1,9 @@
 package com.nusantara.automate.util;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -33,4 +36,11 @@ public class MapUtils {
 		}
 	}
 
+	public static void copyKeepOriginal(List<Map<String, Object>> dest, List<Map<String, Object>> src) {
+		ListIterator<Map<String, Object>> di=dest.listIterator();
+        ListIterator<Map<String, Object>> si=src.listIterator();
+        for (int i=0; i<src.size(); i++) {
+            di.add(new HashMap<String, Object>(si.next()));
+        }
+	}
 }

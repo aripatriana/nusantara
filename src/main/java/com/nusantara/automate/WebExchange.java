@@ -1,11 +1,13 @@
 package com.nusantara.automate;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -82,8 +84,8 @@ public class WebExchange {
 
 	private LinkedList<Map<String, Object>> getMetaDataByMenuId(String cahcedMenuId) {
 		LinkedList<Map<String, Object>> tempListMetaData = new LinkedList<Map<String,Object>>();
-		LinkedList<Map<String, Object>> bufferListMetaData = new LinkedList<Map<String,Object>>(listMetaData);
-		Collections.copy(bufferListMetaData, listMetaData);
+		LinkedList<Map<String, Object>> bufferListMetaData = new LinkedList<Map<String,Object>>();
+		MapUtils.copyKeepOriginal(bufferListMetaData, listMetaData);
 		for (Map<String, Object> map : bufferListMetaData) {
 			if (map.keySet().toArray()[0].toString().toUpperCase().startsWith(cahcedMenuId+".")) {
 				MapUtils.clearMapKey(cahcedMenuId + ".", map);
@@ -133,7 +135,7 @@ public class WebExchange {
 							break;
 						}
 					}
-					if (!emptyCached) {
+					if (emptyCached) {
 						metadata = getMetaDataByMenuId(cahcedMenuId);
 						if (metadata.isEmpty()) {
 							metadata = cachedMetaData.get(cachedMetaDataKey.get(mainMenu).getLast());
