@@ -1,5 +1,7 @@
 <configuration debug="false">
 
+  <property name="LOG_DIR" value="." />
+
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
     <file>${LOG_DIR}/log/console.log</file>
     <append>true</append>
