@@ -19,6 +19,7 @@ import com.nusantara.automate.query.QueryEntry;
 import com.nusantara.automate.report.ReportManager;
 import com.nusantara.automate.report.ReportMonitor;
 import com.nusantara.automate.report.SnapshotEntry;
+import com.nusantara.automate.util.DataTypeUtils;
 import com.nusantara.automate.util.MapUtils;
 import com.nusantara.automate.util.StringUtils;
 
@@ -77,6 +78,7 @@ public class AssertQueryAction implements Actionable {
 		List<String[]> result = new ArrayList<String[]>();
 		List<Assertion> asserts = new LinkedList<Assertion>();
 		try {
+			int i = 0;
 			for (String query : qe.getParsedQuery(webExchange)) {
 
 				log.info("Execute Query -> " + query);
@@ -90,19 +92,19 @@ public class AssertQueryAction implements Actionable {
 				assertion.setResult(StringUtils.asStringTableHtml(columns, result));
 				for (String[] res : result) {
 					Map<String, String> resultMap = MapUtils.copyAsMap(columns, res, String.class, String.class);
-					for (Statement state : qe.getStatements().values()) {
+					for (Statement state : qe.getStatements(i).values()) {
 						Statement statement = new Statement(state);
 						if (statement.getEquality() != null) {
-							if (statement.isArg1(Statement.TYPE_OF_COLUMN)) {
+							if (statement.isArg1(DataTypeUtils.TYPE_OF_COLUMN)) {
 								statement.setVal1(resultMap.get(statement.getArg1()));
-							} else if (statement.isArg1(Statement.TYPE_OF_VARIABLE)) {
+							} else if (statement.isArg1(DataTypeUtils.TYPE_OF_VARIABLE)) {
 								statement.setVal1(webExchange.get(statement.getArg1()).toString());
 							} else {
 								statement.setVal1(statement.getArg1());
 							}
-							if (statement.isArg2(Statement.TYPE_OF_COLUMN)) {
+							if (statement.isArg2(DataTypeUtils.TYPE_OF_COLUMN)) {
 								statement.setVal2(resultMap.get(statement.getArg2()));
-							} else if (statement.isArg1(Statement.TYPE_OF_VARIABLE)) {
+							} else if (statement.isArg2(DataTypeUtils.TYPE_OF_VARIABLE)) {
 								statement.setVal2(webExchange.get(statement.getArg2()).toString());
 							} else {
 								statement.setVal2(statement.getArg2());
@@ -113,6 +115,7 @@ public class AssertQueryAction implements Actionable {
 					}
 				}
 				asserts.add(assertion);
+				i++;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -124,7 +127,7 @@ public class AssertQueryAction implements Actionable {
 			if (!rawText.isEmpty())
 				rawText += "<br><br>";
 			rawText += e.getAssertion();
-			if (!status) status = e.isTrue();
+			if (status) status = e.isTrue();
 		}
 		
 		SnapshotEntry entry = new SnapshotEntry();

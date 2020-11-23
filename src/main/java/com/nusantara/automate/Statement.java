@@ -1,11 +1,9 @@
 package com.nusantara.automate;
 
+import com.nusantara.automate.util.DataTypeUtils;
+
 public class Statement {
 
-	public static final String TYPE_OF_COLUMN = "type_of_column";
-	public static final String TYPE_OF_VARIABLE = "type_of_variable";
-	public static final String TYPE_OF_ARGUMENT = "type_of_argument";
-	
 	public static final String EQUAL = "==";
 	public static final String NOT_EQUAL = "<>";
 
@@ -33,9 +31,9 @@ public class Statement {
 		this.arg1 = arg1;
 		this.arg2 = arg2;
 		this.equality = equality;
-		if (isArg1(TYPE_OF_ARGUMENT))
+		if (isArg1(DataTypeUtils.TYPE_OF_ARGUMENT))
 			this.val1 = arg1;
-		if (isArg2(TYPE_OF_ARGUMENT))
+		if (isArg2(DataTypeUtils.TYPE_OF_ARGUMENT))
 			this.val2 = arg2;
 	}
 	
@@ -43,21 +41,10 @@ public class Statement {
 		return arg1;
 	}
 	
-	public boolean isArg1(String type) {
-		return checkType(arg1, type);
+	public boolean isArg1(int type) {
+		return DataTypeUtils.checkType(arg1, type);
 	}
-	public boolean checkType(String val, String type) {
-		if (type.equals(TYPE_OF_VARIABLE)) {
-			return arg1.startsWith("@");
-		} else if (type.equals(TYPE_OF_COLUMN)) {
-			return (!val.startsWith("@"))  && (!val.startsWith("'"));
-		} else if (type.equals(TYPE_OF_ARGUMENT)) {
-			return arg1.startsWith("'");
-			
-		}
-		return false;
-	}
-
+	
 	public void setArg1(String arg1) {
 		this.arg1 = arg1;
 	}
@@ -74,8 +61,8 @@ public class Statement {
 		return arg2;
 	}
 
-	public boolean isArg2(String type) {
-		return checkType(arg2, type);
+	public boolean isArg2(int type) {
+		return DataTypeUtils.checkType(arg2, type);
 	}
 	public void setArg2(String arg2) {
 		this.arg2 = arg2;
@@ -120,6 +107,12 @@ public class Statement {
 		sb.append("'");
 		sb.append(" is <b>" + String.valueOf(isTrue()).toUpperCase() + "<b>");
 		return sb.toString();
+	}
+
+	@Override
+	public String toString() {
+		return "Statement [arg1=" + arg1 + ", val1=" + val1 + ", arg2=" + arg2 + ", val2=" + val2 + ", equality="
+				+ equality + "]";
 	}
 	
 }

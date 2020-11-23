@@ -1,6 +1,7 @@
 package com.nusantara.automate.util;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.SystemUtils;
 
@@ -117,6 +118,7 @@ public class StringUtils {
 	
 	
 	public static String removeLastChar(String value, String separator) {
+		if (!value.contains(separator)) return value;
 		String[] temp = value.split(separator);
 		return removeCharIndex(value, separator, temp.length-1);
 	}
@@ -138,7 +140,7 @@ public class StringUtils {
 		for (String s : separator) {
 			if (statement.contains(statement)) {
 				String[] sh = statement.split(s);
-				if (sh.length > 2)
+				if (sh.length !=  2)
 					throw new ScriptInvalidException("Script not valid for " + statement);
 				return new String[] {sh[0], sh[1], s};				
 			}
@@ -150,7 +152,28 @@ public class StringUtils {
 		String[] sh = statement.split(separator);
 		if (sh.length > 2)
 			throw new ScriptInvalidException("Script not valid for " + statement);
-		return sh;
+		return trimArray(sh);
+	}
+	
+	public static String concatIfNotEmpty(String text, String concat) {
+		if (!text.isEmpty() && !text.isBlank()) 
+			text += ",";
+		return text;
+	}
+	
+	public static String[] trimArray(String[] arg) {
+		String[] temp = new String[arg.length];
+		for (int i=0; i<arg.length; i++) {
+			temp[i] = arg[i].trim();
+		}
+		return temp;
+	}
+	public static String findContains(String data, String[] key) {
+		for (int i=0; i<key.length; i++) {
+			if (data.contains(key[i]))
+				return key[i];
+		}
+		return null;
 	}
 	
 	public static String findContains(String[] data, String key) {
@@ -218,6 +241,31 @@ public class StringUtils {
 	}
 	
 	public static String removeBracket(String val) {
-		return val.replace("[", "").replace("]", "").replace("{", "").replace("}", "");
+		return val;
+//		return val.replace("[", "").replace("]", "").replace("{", "").replace("}", "");
+	}
+	
+	public static String replaceById(String text, String[] var, Map<String, String> ids) {
+		for (String bracket : var) {
+			String id = IDUtils.getRandomId();
+			text = text.replace(bracket, id);
+			ids.put(id, bracket);
+		}
+		return text;
+	}
+	
+	public static Object nvl(Object obj) {
+		if (obj == null) return "";
+		return obj;
+	}
+	
+	public static String substringUntil(String text, char[] vars) {
+		for (int i=0; i<text.length(); i++) {
+			for (char var : vars) {
+				if (text.charAt(i) == var)
+					return text.substring(0, i);
+			}
+		}
+		return text;
 	}
 }

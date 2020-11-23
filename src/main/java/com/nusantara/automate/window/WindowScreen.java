@@ -3,7 +3,6 @@ package com.nusantara.automate.window;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -125,7 +124,7 @@ public class WindowScreen {
 			
 			ReportMonitor.logSnapshotEntry(targetFolder, prefixFileName, 
 					outputFile.getAbsolutePath().replace((testCaseDir + "//" + DateUtils.format(Long.valueOf(startTimeMilis))), ""), 
-					(REMARK_FAILED.equals(remark) ? ReportManager.FAILED : ReportManager.PASSED));
+					ReportManager.PASSED);
 		}
 		resetRemark();
 	}

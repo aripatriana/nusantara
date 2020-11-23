@@ -152,30 +152,30 @@ public class WorkflowYReader {
 	
 	private String detectVariable(String script) throws ScriptInvalidException {
 		boolean findout = false;
-		int startI = 0;
-		int endI = 0;
+		int start = 0;
+		int end = 0;
 		for (int i=0; i < script.length(); i++) {
 			if (script.charAt(i) == '"') {
 				if (!findout) {
-					startI = i+1;
+					start = i+1;
 					findout = true;
 				} else {
-					if (findout && endI != 0) {
+					if (findout && end != 0) {
 						throw new ScriptInvalidException("Invalid quote variable for " + script);
 					} 
-					endI = i;
+					end = i;
 				}
 			}
 		}
 		
-		if (startI >0 && endI == 0)
+		if (start >0 && end == 0)
 			throw new ScriptInvalidException("Invalid quote variable for " + script);
 		
-		if (startI == 0 && endI == 0) {
+		if (start == 0 && end == 0) {
 			return null;
 		} 
 
-		return script.substring(startI, endI);
+		return script.substring(start, end);
 	}
 	
 	public void setBasicScript(String basicScript, WorkflowEntry workflowEntry) throws ScriptInvalidException {

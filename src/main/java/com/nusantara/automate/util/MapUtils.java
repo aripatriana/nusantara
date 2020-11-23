@@ -13,6 +13,25 @@ import java.util.Map.Entry;
 
 public class MapUtils {
 
+	public static <T> T findEquals(List<T> list, String key) {
+		for (T t : list) {
+			if (t.equals(key))
+				return t;
+		}
+		return null;
+	}
+	
+	public static <T> void removeEquals(List<T> list, String key) {
+		while (list.contains(key)) {
+			for(int i=0; i<list.size(); i++) {
+				if (list.get(i).equals(key)) {
+					list.remove(i);
+					break;
+				}
+			}
+		}
+	}
+	
 	public static <T> List<T> combineValueAsList(Collection<? extends List<T>> mapValueList) {
 		List<T> list = new LinkedList<T>();
 		for(List<T> d : mapValueList) {

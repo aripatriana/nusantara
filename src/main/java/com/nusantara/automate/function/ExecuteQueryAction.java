@@ -49,6 +49,7 @@ public class ExecuteQueryAction implements Actionable {
 				webExchange.addFailedSession(webExchange.getCurrentSession());
 				ReportMonitor.logError(webExchange.get("active_scen").toString(),
 						webExchange.get("active_workflow").toString(), e.getMessage());
+					throw e;
 			}
 		}
 	}

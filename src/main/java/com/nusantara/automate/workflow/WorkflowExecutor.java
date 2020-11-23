@@ -84,8 +84,7 @@ public class WorkflowExecutor {
 				
 				ReportMonitor.completeScen(workflowKey);
 			} catch (Exception e) {
-				e.printStackTrace();
-				log.error("CRITICAL ERROR " + e);
+				log.error(e.toString());
 				// scenario halted caused by exception
 				ReportMonitor.scenHalted(scen, workflowKey, e.getMessage());
 			} finally {
@@ -194,39 +193,39 @@ public class WorkflowExecutor {
 		workflow.action((Actionable) object);
 	}
 	
-	private void executeQuery(WorkflowConfig wc, WorkflowEntry we, Workflow workflow) {
+	private void executeQuery(WorkflowConfig wc, WorkflowEntry we, Workflow workflow) throws ScriptInvalidException {
 		try {
 			QueryReader qr = new QueryReader(we.getVariable());
 			QueryEntry qe = qr.read();
 			ExecuteQueryAction actionable = new ExecuteQueryAction(qe);
 			workflow.action(actionable);
 		} catch (ScriptInvalidException e) {
-			e.printStackTrace();
+			throw e;
 		}
 	}
 	
-	private void asserts(WorkflowConfig wc, WorkflowEntry we, Workflow workflow) {
+	private void asserts(WorkflowConfig wc, WorkflowEntry we, Workflow workflow) throws ScriptInvalidException {
 		try {
 			String[] result = StringUtils.parseStatement(we.getVariable(), Statement.MARK);
 			AssertStatementAction actionable = new AssertStatementAction(new Statement(result[0], result[1], result[2]));
 			workflow.action(actionable);
 		} catch (ScriptInvalidException e) {
-			e.printStackTrace();
+			throw e;
 		}
 	}
 	
-	private void assertQuery(WorkflowConfig wc, WorkflowEntry we, Workflow workflow) {
+	private void assertQuery(WorkflowConfig wc, WorkflowEntry we, Workflow workflow) throws ScriptInvalidException {
 		try {
 			QueryReader qr = new QueryReader(we.getVariable());
 			QueryEntry qe = qr.read();
 			AssertQueryAction actionable = new AssertQueryAction(qe);
 			workflow.action(actionable);
 		} catch (ScriptInvalidException e) {
-			e.printStackTrace();
+			throw e;
 		}
 	}
 	
-	private void assertAggregate(WorkflowConfig wc, WorkflowEntry we, Workflow workflow, String testCase) {
+	private void assertAggregate(WorkflowConfig wc, WorkflowEntry we, Workflow workflow, String testCase) throws ScriptInvalidException {
 		try {			
 			TemplateReader tr = new TemplateReader(wc.getWorkflowQuery(testCase, we.getVariable()));
 			QueryReader qr = new QueryReader(tr.read().toString());
@@ -234,7 +233,7 @@ public class WorkflowExecutor {
 			AssertQueryAction actionable = new AssertQueryAction(qe);
 			workflow.action(actionable);
 		} catch (ScriptInvalidException e) {
-			e.printStackTrace();
+			throw e;
 		}
 	}
 	

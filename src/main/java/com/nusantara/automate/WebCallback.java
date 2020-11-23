@@ -43,8 +43,10 @@ public abstract class WebCallback extends WebElementWrapper implements Callback 
 	@Override
 	public void callback(WebElement webElement, WebExchange webExchange) throws FailedTransactionException {
 		if (webElement.getAttribute("id").equals(successId)) {
+			webExchange.put("@response_modal", "success");
 			ok(webElement, webExchange);
 		} else {
+			webExchange.put("@response_modal", "failed");
 			notOk(webElement, webExchange);
 		}
 	}

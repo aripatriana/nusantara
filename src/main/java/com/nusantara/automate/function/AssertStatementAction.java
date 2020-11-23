@@ -12,6 +12,8 @@ import com.nusantara.automate.exception.FailedTransactionException;
 import com.nusantara.automate.report.ReportManager;
 import com.nusantara.automate.report.ReportMonitor;
 import com.nusantara.automate.report.SnapshotEntry;
+import com.nusantara.automate.util.DataTypeUtils;
+import com.nusantara.automate.util.StringUtils;
 
 public class AssertStatementAction  implements Actionable {
 	
@@ -42,17 +44,17 @@ public class AssertStatementAction  implements Actionable {
 	
 	private void assertStatement(WebExchange webExchange) throws FailedTransactionException {
 		Assertion assertion = new Assertion();
-		if (statement.isArg1(Statement.TYPE_OF_COLUMN)) {
+		if (statement.isArg1(DataTypeUtils.TYPE_OF_COLUMN)) {
 			statement.setVal1("");
-		} else if (statement.isArg1(Statement.TYPE_OF_VARIABLE)) {
-			statement.setVal1(webExchange.get(statement.getArg1()).toString());
+		} else if (statement.isArg1(DataTypeUtils.TYPE_OF_VARIABLE)) {
+			statement.setVal1(StringUtils.nvl(webExchange.get(statement.getArg1())).toString());
 		} else {
 			statement.setVal1(statement.getArg1());
 		}
-		if (statement.isArg2(Statement.TYPE_OF_COLUMN)) {
+		if (statement.isArg2(DataTypeUtils.TYPE_OF_COLUMN)) {
 			statement.setVal2("");
-		} else if (statement.isArg2(Statement.TYPE_OF_VARIABLE)) {
-			statement.setVal2(webExchange.get(statement.getArg2()).toString());
+		} else if (statement.isArg2(DataTypeUtils.TYPE_OF_VARIABLE)) {
+			statement.setVal2(StringUtils.nvl(webExchange.get(statement.getArg2())).toString());
 		} else {
 			statement.setVal2(statement.getArg2());
 		}

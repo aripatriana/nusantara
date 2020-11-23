@@ -18,8 +18,9 @@ import com.nusantara.automate.util.ReflectionUtils;
 
 public class QueryEntry {
 
-	private static final String ROUND_BRACKET = "()";
-	private static final String SQUARE_BRACKET = "[]";
+	public static final String ROUND_BRACKET = "()";
+	public static final String SQUARE_BRACKET = "[]";
+	public static final String[] BRACKETS = new String[] {ROUND_BRACKET,SQUARE_BRACKET};
 	
 	private String query;
 	private Map<String, Statement> statements = new LinkedHashMap<String, Statement>();
@@ -53,7 +54,7 @@ public class QueryEntry {
 	public List<String> getColumns() {
 		List<String> columns = new LinkedList<String>();
 		for (String column : statements.keySet()) {
-			column = com.nusantara.automate.util.StringUtils.replaceCharBackward(column, '#', "");
+			column = com.nusantara.automate.util.StringUtils.removeLastChar(column, "#");
 			columns.add(column);
 		}
 		return columns;
@@ -63,6 +64,29 @@ public class QueryEntry {
 		Map<String, Statement> temp = new LinkedHashMap<String, Statement>();
 		MapUtils.copyValueNotNull(statements, temp);
 		return temp;
+	}
+	
+	public Map<String, Statement> getStatements(int index) {
+		Map<String, Statement> temp = new LinkedHashMap<String, Statement>();
+		MapUtils.copyValueNotNull(statements, temp);
+		Map<String, Statement> result = new LinkedHashMap<String, Statement>();
+		
+		for (Entry<String, Statement> entry : temp.entrySet()) {
+			String key = entry.getKey();
+			Statement statement = new Statement(entry.getValue());
+			
+			if (statement.getArg1().contains(ROUND_BRACKET)) {
+				statement.setArg1(statement.getArg1().replace(ROUND_BRACKET, "[" +  index + "]"));
+			}
+			if (statement.getArg2().contains(ROUND_BRACKET)) {
+				statement.setArg2(statement.getArg2().replace(ROUND_BRACKET, "[" +  index + "]"));
+			}
+			if (key.contains(ROUND_BRACKET)) {
+				key = key.replace(ROUND_BRACKET, "[" + index + "]");
+			}
+			result.put(key, statement);
+		}
+		return result;
 	}
 	
 	public void setStatements(Map<String, Statement> statements) {
@@ -169,6 +193,7 @@ public class QueryEntry {
 							tempQuery = tempQuery.replace(e.getKey()+ROUND_BRACKET + "." + s, StringUtils.quote(webExchange.get(e.getKey()+"[" + j + "]" + "." + s).toString()));
 						}
 					} else {
+						MapUtils.removeEquals(getParameters(), e.getKey()+ROUND_BRACKET);
 						tempQuery = tempQuery.replace(e.getKey()+ROUND_BRACKET, StringUtils.quote(webExchange.get(e.getKey()+"[" + j + "]").toString()));
 					}
 				}

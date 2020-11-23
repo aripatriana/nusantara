@@ -1,10 +1,14 @@
 package com.nusantara.automate.reader;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.nusantara.automate.Statement;
 import com.nusantara.automate.exception.ScriptInvalidException;
 import com.nusantara.automate.query.QueryEntry;
+import com.nusantara.automate.util.DataTypeUtils;
 import com.nusantara.automate.util.StringUtils;
 
 public class QueryReader {
@@ -43,87 +47,52 @@ public class QueryReader {
 	}
 	
 	public void parseParameter(QueryEntry qe, String query) {
-		boolean marked = false;
-		int start = 0;
-		int bracket = 0;
+		Map<String, String> temp = new HashMap<String, String>();
+		query = StringUtils.replaceById(query, QueryEntry.BRACKETS, temp);
+
 		for (int i=0; i<query.length(); i++) {
 			if (query.charAt(i) == '@') {
-				marked=true;
-				start=i;
-			} else if (marked && query.charAt(i) == '(') {
-				bracket++;
-			} else if (marked && bracket > 0 && query.charAt(i) == ')') {
-				bracket--;
-			} else if (marked && bracket == 0 && query.charAt(i) == ')') {
-				qe.addParameter(query.substring(start, i));
-				marked=false;
-			} else if (marked && bracket == 0 && (query.charAt(i) == ' ')) {
-				qe.addParameter(query.substring(start, i));
-				marked=false;
-			} else if (marked && (i == query.length()-1)) {
-				qe.addParameter(query.substring(start, query.length()));
-				marked=false;
-			}
+				String param = StringUtils.substringUntil(query.substring(i, query.length()), new char[] {')',' '});
+				for (Entry<String, String> id : temp.entrySet()) {
+					param = param.replace(id.getKey(), id.getValue());
+				}
+				qe.addParameter(param);
+			} 
 		}
 	}
 	
-	public static void main(String[] args) {
-		QueryReader r = new QueryReader("select instructionId<>@elementId from gen_tx_instruction where instructionId=@web.element columnId=@session.data");
-		try {
-			QueryEntry qe = r.read();
-			System.out.println(qe);
-		} catch (ScriptInvalidException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	
-	public String parseSelect(QueryEntry qe, String query) throws ScriptInvalidException {
+	public static String parseSelect(QueryEntry qe, String query) throws ScriptInvalidException {
 		query = query.replace(SELECT, "");
 		String[] headers = query.split(",");
 		String returnQuery = "";
 		for (String header : headers) {
-			boolean marked = false;
-			int index = 0;
-			for (int j=0; j<Statement.MARK.length; j++) {
-				if (header.contains(Statement.MARK[j])) {
-					marked = true;
-					index=j;
+			String mark = StringUtils.findContains(header, Statement.MARK);
+			if (mark != null) {
+				String[] sh = StringUtils.parseStatement(header.trim(), mark);
+				String var1 = DataTypeUtils.checkColumnPrefix(sh[0]);
+				String var2 = DataTypeUtils.checkColumnPrefix(sh[1]);
+				if (DataTypeUtils.checkIsColumn(var1) && DataTypeUtils.checkIsColumn(var2)) {
+					returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
+					returnQuery += var1 + " ";
+					qe.addStatement(var1, var2, mark);			
+				} else if (DataTypeUtils.checkIsColumn(var1)) {
+					returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
+					returnQuery += var1 + " ";
+					qe.addStatement(var1, var2, mark);			
+				} else if (DataTypeUtils.checkIsColumn(var2)) {
+					returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
+					returnQuery += var2 + " ";
+					qe.addStatement(var2, var1, mark);			
 				}
-			}
-			
-			if (!returnQuery.isEmpty() && !returnQuery.isBlank()) 
-				returnQuery += ",";
-			
-			if (marked) {
-				String[] sh = StringUtils.parseStatement(header.trim(), Statement.MARK[index]);
-				String var1 = checkColumnPrefix(sh[0]);
-				String var2 = checkColumnPrefix(sh[1]);
-				String columnQuery = "";
-				if (!var1.startsWith("@") && !var1.startsWith("'"))
-					columnQuery = var1;
-				if (!var2.startsWith("@") && !var2.startsWith("'"))
-					columnQuery = var2;				
-				qe.addStatement(var1, var2, Statement.MARK[index]);				
-				returnQuery += columnQuery + " ";
 			} else {
+				returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
 				qe.addStatement(header.trim(), null, null);
 				returnQuery += header.trim() + " ";
 			}
 			
 		}
 		return SELECT + " " + returnQuery;
-	}
-	
-	private String checkColumnPrefix(String var) {
-		if (var.startsWith("@") || var.startsWith("'"))
-			return var;
-		
-		String[] c = var.split(".");
-		if (c.length> 1) {
-			var = c[1];
-		}
-		return var;
 	}
 	
 	public String[] splitQuery(String query) {
