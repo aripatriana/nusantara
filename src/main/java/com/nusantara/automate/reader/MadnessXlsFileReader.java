@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.FileReader;
+import com.nusantara.automate.util.MapUtils;
 
 /**
  * Read xls file and process it to the format that known by the system
@@ -146,6 +147,8 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 	 */
 	public List<Object> normalizeValue(Map<Object, String> removedMap, Map<String, LinkedList<Object>> removedMapDetail, LinkedHashMap<Integer, LinkedHashMap<String, Object>> dataPerSheet) {
 		List<Object> removed = null;
+		Map<String, String> simpleList = new HashMap<String, String>();
+		
 		for (Map<String, Object> data : dataPerSheet.values()) {
 			removed = new ArrayList<Object>(removedMap.keySet());
 			Map<String, Integer> arraySize = new HashMap<String, Integer>();
@@ -167,6 +170,19 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 						list.add(new String[] {});
 					}
 					arrayList.put(removedMap.get(entry.getKey()), list);
+				} else if (entry.getValue() != null && entry.getValue().toString().contains("|")) {		
+					LinkedList<String[]> list = arrayList.get(removedMap.get(entry.getKey()));
+					if (list == null) list = new LinkedList<String[]>();
+					
+					removedMap.put(entry.getKey(), header.get(entry.getKey()).toString());
+					removedMapDetail.put(header.get(entry.getKey()).toString(), new LinkedList<Object>());
+					
+					String value = entry.getValue().toString();	
+					String[] values = value.split("\\|");
+					arraySize.put(removedMap.get(entry.getKey()), values.length);
+					list.add(values);
+					arrayList.put(removedMap.get(entry.getKey()), list);
+					simpleList.put(entry.getKey(), removedMap.get(entry.getKey()));
 				}
 			}
 			
@@ -191,22 +207,28 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 					z++;
 				}
 				
-				// get index of removed object from value
-				removed = new ArrayList<Object>();
-				for (Entry<Object, String> removedEntry : removedMap.entrySet()) {
-					if (removedEntry.getValue().equals(values.getKey())) 
-						removed.add(removedEntry.getKey());
-				}
-				
-				// remove datasheet
-				for (Object rem : removed) {
-					data.remove(rem);
-				}
-				
 				// replace datasheet to new matrix
-				data.put(values.getKey(), normalize.values());
+				if (simpleList.containsValue(values.getKey())) {
+					data.put(values.getKey(), MapUtils.matrixAsList(normalize, "0"));
+				} else {
+					data.put(values.getKey(), new LinkedList<LinkedHashMap<String, Object>>(normalize.values()));					
+				}
 			}
 			
+			// get index of removed object from value
+			removed = new ArrayList<Object>(removedMap.keySet());
+			
+			// remove datasheet
+			for (Object rem : removedMap.keySet()) {
+				data.remove(rem);
+			}
+			
+		}
+
+		// update header
+		for (Entry<String, String> e : simpleList.entrySet()) {
+			header.remove(e.getKey());				
+			header.put(e.getValue(), e.getValue());
 		}
 		return removed;
 	}

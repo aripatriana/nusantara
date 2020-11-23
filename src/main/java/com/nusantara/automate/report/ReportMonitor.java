@@ -14,7 +14,7 @@ public class ReportMonitor {
 	private static Map<String, ScenEntry> scenEntriesByTscenId = new HashMap<String, ScenEntry>();
 	private static LinkedHashMap<String, DataEntry> dataEntryBySessionId = new LinkedHashMap<String, DataEntry>();
 	private static Map<String, LinkedList<DataEntry>> dataEntries = new HashMap<String, LinkedList<DataEntry>>();
-	private static Map<String, LinkedList<ImageEntry>> imageEntries = new HashMap<String, LinkedList<ImageEntry>>();
+	private static Map<String, LinkedList<SnapshotEntry>> imageEntries = new HashMap<String, LinkedList<SnapshotEntry>>();
 	
 	public static void addTestCaseEntry(TestCaseEntry testCaseEntry, LinkedList<ScenEntry> scenEntryList) {
 		for (ScenEntry scenEntry : scenEntryList) {
@@ -97,18 +97,34 @@ public class ReportMonitor {
 		}
 	}
 	
-	public static void logImageEntry(String testCaseId, String scenId, String filePath, String status) {
-		ImageEntry imageEntry = new ImageEntry();
+	public static void logError(String testCaseId, String tscenId, String errorMessage) {
+		ScenEntry scenEntry =  getScenEntry(testCaseId, tscenId);
+		scenEntry.appendErrorLog(errorMessage);
+	}
+	
+	public static void logSnapshotEntry(String testCaseId, String scenId, String as, String rawText, String filePath, String status) {
+		SnapshotEntry snapshotEntry = new SnapshotEntry();
+		snapshotEntry.setTscenId(scenId);
+		snapshotEntry.setTestCaseId(testCaseId);
+		snapshotEntry.setSnapshotAs(as);
+		snapshotEntry.setRawText(rawText);
+		snapshotEntry.setImgFile(filePath);
+		snapshotEntry.setStatus(status);
+		logSnapshotEntry(snapshotEntry);
+	}
+	
+	public static void logSnapshotEntry(String testCaseId, String scenId, String filePath, String status) {
+		SnapshotEntry imageEntry = new SnapshotEntry();
 		imageEntry.setTscenId(scenId);
 		imageEntry.setTestCaseId(testCaseId);
 		imageEntry.setImgFile(filePath);
 		imageEntry.setStatus(status);
-		logImageEntry(imageEntry);
-		
+		logSnapshotEntry(imageEntry);	
 	}
-	public static void logImageEntry(ImageEntry imageEntry) {
-		LinkedList<ImageEntry> imageEntryTemp = imageEntries.get(imageEntry.getTscenId());
-		if (imageEntryTemp == null) imageEntryTemp = new LinkedList<ImageEntry>();
+	
+	public static void logSnapshotEntry(SnapshotEntry imageEntry) {
+		LinkedList<SnapshotEntry> imageEntryTemp = imageEntries.get(imageEntry.getTscenId());
+		if (imageEntryTemp == null) imageEntryTemp = new LinkedList<SnapshotEntry>();
 		imageEntryTemp.add(imageEntry);
 		imageEntries.put(imageEntry.getTscenId(), imageEntryTemp);
 	}
@@ -127,7 +143,7 @@ public class ReportMonitor {
 	}
 	
 	
-	public static LinkedList<ImageEntry> getImageEntries(String tscenId) {
+	public static LinkedList<SnapshotEntry> getImageEntries(String tscenId) {
 		return imageEntries.get(tscenId);
 	}
 	
@@ -183,7 +199,7 @@ public class ReportMonitor {
 				}
 				
 				if (imageEntries.get(tscenId) != null) {
-					for (ImageEntry imageEntry : imageEntries.get(tscenId)) {
+					for (SnapshotEntry imageEntry : imageEntries.get(tscenId)) {
 						if (imageEntry.getStatus().equals(ReportManager.FAILED)
 								|| imageEntry.getStatus().equals(ReportManager.HALTED)) {
 							scenFailed=true;
@@ -217,9 +233,9 @@ public class ReportMonitor {
 			}
 		}
 		
-		LinkedList<ImageEntry> imageEntryList = imageEntries.get(tscenId);
+		LinkedList<SnapshotEntry> imageEntryList = imageEntries.get(tscenId);
 		if (imageEntryList != null) {
-			for (ImageEntry imageEntry : imageEntryList) {
+			for (SnapshotEntry imageEntry : imageEntryList) {
 				if (imageEntry.getStatus().equals(ReportManager.INPROGRESS))
 					imageEntry.setStatus(ReportManager.HALTED);
 			}

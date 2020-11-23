@@ -10,7 +10,7 @@ public class ScenEntry {
 	
 	private int failedRow;
 	
-	private String errorLog = "-";
+	private String errorLog = "";
 	
 	private String status;
 

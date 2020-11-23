@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.exception.XlsSheetStyleException;
 import com.nusantara.automate.reader.MultiLayerXlsFileReader;
+import com.nusantara.automate.util.MapUtils;
 
 
 /**
@@ -48,22 +49,25 @@ public class FileRetention implements Retention {
 			if (key.length > 1) entryKey = key[1];
 
 			Object title = header.get(entryKey);
-			if (title instanceof Map) {
-				Map<String, Object> h = (Map<String, Object>) title;
-				Collection<Map<String, Object>> d = (Collection<Map<String, Object>>) entry.getValue();
-				for (Map<String, Object> v : d) {
-					setHeaderInfo(h, v);
+			if (title != null) {
+				if (title instanceof Map) {
+					Map<String, Object> h = (Map<String, Object>) title;
+					Collection<Map<String, Object>> d = (Collection<Map<String, Object>>) entry.getValue();
+					for (Map<String, Object> v : d) {
+						setHeaderInfo(h, v);
+					}
+	
+					data.put(entry.getKey(), d);
+				} else {
+					if (key.length > 1) {
+						title = key[0].concat(".".concat(title.toString()));
+						
+					}
+					data.put(title.toString().replace(" ", "_"), entry.getValue());	
 				}
-
-				data.put(entry.getKey().toUpperCase(), d);
 			} else {
-				if (key.length > 1) {
-					title = key[0].concat(".".concat(title.toString()));
-					
-				}
-				data.put(title.toString().toUpperCase().replace(" ", "_"), entry.getValue());	
+				data.put(entry.getKey(), entry.getValue());
 			}
-				
 		}
 	}
 	
@@ -73,6 +77,7 @@ public class FileRetention implements Retention {
 			Map<String, Object> metadata = fileReader.read();
 			if (!fileReader.skipHeader())
 				setHeaderInfo(fileReader.getHeader(), metadata);
+			MapUtils.keyLowercase(metadata);
 			webExchange.addMetadata(metadata);
 
 			log.info("Read metadata : " + metadata);

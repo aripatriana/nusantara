@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.Menu;
@@ -22,10 +23,12 @@ public class WorkflowConfig {
 	private Map<String, Class<? extends SubmitHandler>> handlerMap = new HashMap<String, Class<? extends SubmitHandler>>();
 	private Map<String, LinkedList<WorkflowEntry>> workflowEntries = new HashMap<String, LinkedList<WorkflowEntry>>();
 	private Map<String, File> workflowDatas = new HashMap<String, File>();
+	private Map<String, Map<String, File>> workflowQueries = new HashMap<String, Map<String, File>>();
 	private Map<String, Menu> menuMap = new HashMap<String, Menu>();
 	private LinkedList<String> workflowKeys = new LinkedList<String>();
 	private LinkedList<String> workflowScens = new LinkedList<String>();
 	private Map<String, LinkedList<String>> workflowMapScens = new HashMap<String, LinkedList<String>>();
+	private Map<String, String> workflowMapKeys = new HashMap<String, String>();
 	
 	public Map<String, SimpleEntry<Class<?>, Object[]>> getFunctionMap() {
 		return functionMap;
@@ -75,9 +78,37 @@ public class WorkflowConfig {
 			keys = new LinkedList<String>();
 		keys.add(workflowKey);
 		workflowMapScens.put(workflowScan, keys);
+		workflowMapKeys.put(workflowKey, workflowScan);
 	}
+	
+	public Map<String, String> getWorkflowMapKeys() {
+		return workflowMapKeys;
+	}
+	
+	public String getWorkflowMapKey(String key) {
+		return workflowMapKeys.get(key);
+	}
+	
 	public void addWorkflowData(String workflowScan, File file) {
 		workflowDatas.put(workflowScan, file);
+	}
+	
+	public void addWorkflowQuery(String workflowScan, File file) {
+		Map<String, File> files = workflowQueries.get(workflowScan);
+		if (files == null)
+			files = new HashMap<String, File>();
+		files.put(file.getName().replace(".sql", ""), file);
+		workflowQueries.put(workflowScan, files);
+	}
+	
+	public Map<String, Map<String, File>> getWorkflowQueries() {
+		return workflowQueries;
+	}
+	
+	public File getWorkflowQuery(String scen, String filename) {
+		if (!workflowQueries.containsKey(scen))
+			return null;
+		return workflowQueries.get(scen).get(filename);
 	}
 	
 	public Map<String, File> getWorkflowDatas() {
@@ -112,6 +143,10 @@ public class WorkflowConfig {
 		return workflowScens;
 	}
 	
+	public Map<String, LinkedList<String>> getWorkflowMapScens() {
+		return workflowMapScens;
+	}
+	
 	public LinkedList<String> getWorkflowMapScens(String scen) {
 		return workflowMapScens.get(scen);
 	}
@@ -125,6 +160,7 @@ public class WorkflowConfig {
 		workflowKeys.clear();
 		workflowScens.clear();
 		workflowMapScens.clear();
+		workflowQueries.clear();
 		
 	}
 }

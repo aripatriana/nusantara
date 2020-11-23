@@ -1,5 +1,7 @@
 package com.nusantara.automate.workflow;
 
+import java.util.List;
+
 /**
  * This class represent a line of script inside y file
  * 
@@ -8,77 +10,30 @@ package com.nusantara.automate.workflow;
  */
 public class WorkflowEntry {
 
-	private boolean clearSession;
-	private boolean loadFile;
-	private boolean login;
-	private boolean logout;
-	private boolean relogin;
-	private boolean selectProduct; 
-	private boolean actionMenu;
-	private boolean function;
+	private String keyword;
 	private String variable;
 	private String actionType;
-	
-	public void setClearSession(boolean clearSession) {
-		this.clearSession = clearSession;
+
+	public boolean checkKeyword(String basicScript) {
+		return keyword.equals(basicScript);
 	}
 	
-	public boolean isClearSession() {
-		return clearSession;
-	}
-	public void setLoadFile(boolean loadFile) {
-		this.loadFile = loadFile;
+	public boolean checkKeywords(List<String> basicScripts) {
+		if (keyword == null) return false;
+		return basicScripts.contains(keyword);
 	}
 	
-	public boolean isLoadFile() {
-		return loadFile;
+	public boolean checkActionTypes(List<String> actionTypes) {
+		if (actionType == null) return false;
+		return actionTypes.contains(actionType);
 	}
 	
-	public void setLogout(boolean logout) {
-		this.logout = logout;
+	public String getKeyword() {
+		return keyword;
 	}
 	
-	public boolean isLogout() {
-		return logout;
-	}
-	public void setLogin(boolean login) {
-		this.login = login;
-	}
-	
-	public boolean isLogin() {
-		return login;
-	}
-	
-	public void setRelogin(boolean relogin) {
-		this.relogin = relogin;
-	}
-	
-	public boolean isRelogin() {
-		return relogin;
-	}
-	
-	public void setSelectProduct(boolean selectProduct) {
-		this.selectProduct = selectProduct;
-	}
-	
-	public boolean isSelectProduct() {
-		return selectProduct;
-	}
-	
-	public boolean isActionMenu() {
-		return actionMenu;
-	}
-	
-	public void setActionMenu(boolean actionMenu) {
-		this.actionMenu = actionMenu;
-	}
-	
-	public boolean isFunction() {
-		return function;
-	}
-	
-	public void setFunction(boolean function) {
-		this.function = function;
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
 	}
 	
 	public String getVariable() {
@@ -99,11 +54,6 @@ public class WorkflowEntry {
 
 	@Override
 	public String toString() {
-		return "WorkflowEntry [clearSession=" + clearSession + ", loadFile=" + loadFile + ", login=" + login
-				+ ", logout=" + logout + ", relogin=" + relogin + ", selectProduct=" + selectProduct + ", actionMenu="
-				+ actionMenu + ", function=" + function + ", variable=" + variable + ", actionType="
-				+ actionType + "]";
+		return "WorkflowEntry [keyword=" + keyword + ", variable=" + variable + ", actionType=" + actionType + "]";
 	}
-	
-	
 }

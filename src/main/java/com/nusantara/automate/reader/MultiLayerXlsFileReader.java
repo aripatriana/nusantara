@@ -90,7 +90,7 @@ public class MultiLayerXlsFileReader extends MadnessXlsFileReader implements Fil
 					LinkedList<Map<String, Object>> newRowList = new LinkedList<Map<String,Object>>();
 					for (LinkedList<Map<String, Object>> rowList : container.values()) {
 						for (Map<String, Object> row : rowList) {
-							
+							row.put("module_name", sheetName.replace("$", ""));
 							MapUtils.concatMapKey(sheetName.replace("$", "") + ".", row);
 							newRowList.add(row);
 						}

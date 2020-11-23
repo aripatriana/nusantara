@@ -3,7 +3,6 @@ package com.nusantara.automate.workflow;
 
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.NoSuchElementException;
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.AbstractBaseDriver;
 import com.nusantara.automate.Actionable;
-import com.nusantara.automate.ConfigLoader;
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.DBConnection;
 import com.nusantara.automate.DriverManager;
@@ -42,7 +40,7 @@ import com.nusantara.automate.report.ReportMonitor;
  * @author ari.patriana
  *
  */
-public class Workflow {
+public abstract class Workflow {
 
 	Logger log = LoggerFactory.getLogger(Workflow.class);
 	protected WebExchange webExchange;
@@ -74,15 +72,6 @@ public class Workflow {
 		this.scopedAction = false;
 	}
 	
-	public static Workflow configure() {
-		WebExchange webExchange = new WebExchange();
-		for (Entry<String, Object> config : ConfigLoader.getConfigMap().entrySet()) {
-			webExchange.put(config.getKey(), config.getValue());
-		}
-		ContextLoader.setWebExchange(webExchange);
-		return new Workflow(webExchange);
-	}
-	
 	public Workflow openPage(String url) {
 		log.info("Open Page " + url);
 		
@@ -90,19 +79,18 @@ public class Workflow {
 		return this;
 	}
 	
-	private void setMenuAwareness(Menu menu, Actionable actionable) {
-		if (actionable instanceof MenuAwareness) {
-			this.activeMenu = menu;
-			((MenuAwareness) actionable).setMenu(menu);
-		}
+	public void setActiveMenu(Menu activeMenu) {
+		this.activeMenu = activeMenu;
+		webExchange.put("active_module_id", activeMenu.getModuleId());
+		webExchange.put("active_menu_id", activeMenu.getId());
 	}
-	
+
 	public Workflow openMenu(Menu menu) {
 		OpenMenuAction menuAction = new OpenMenuAction(null, menu.getMenu());
 		OpenSubMenuAction subMenuAction = new OpenSubMenuAction(menuAction, menu.getSubMenu(), menu.getMenuId());
 		OpenFormAction formAction = new OpenFormAction((menu.getSubMenu() != null ? subMenuAction : menuAction), menu.getMenuId(), menu.getForm());
-		setMenuAwareness(menu, formAction);
-	
+		((MenuAwareness) formAction).setMenu(menu);
+		
 		if (!activeLoop) {
 			menuAction.submit(webExchange);
 			subMenuAction.submit(webExchange);
@@ -200,48 +188,7 @@ public class Workflow {
 		return this;
 	}
 	
-	
-	/**
-	 * Proses dilakukan sequential
-	 * 
-	 * @return
-	 */
-	public Workflow endLoop() throws Exception {
-		if (!activeLoop) {
-			throw new RuntimeException("Loop must be initialized");	
-		}
-		
-		if (webExchange.getMetaDataSize() > 0) {
-			int length = webExchange.getMetaDataSize();
-			
-			log.info("Total data-row " + length);
-			
-			int index = 1;
-			for (Map<String, Object> metadata : webExchange.getListMetaData(getActiveMenu().getModuleId())) {
-				log.info("Execute data-row index " + index);
-				try {
-					for (Actionable actionable : actionableForLoop) {
-						
-						if (actionable instanceof MenuAwareness) {
-							activeMenu = ((MenuAwareness) actionable).getMenu();
-						}
-					
-						executeActionableNoSession(actionable, metadata);	
-					}
-				} catch (Exception e) { 
-					log.info("Skipping data-row index " + index);
-					log.error("ERROR ", e);
-				}
-				
-				index++;
-			}
-		}
-		
-		webExchange.setRetention(Boolean.FALSE);
-		webExchange.clearMetaData();
-		activeLoop = false;
-		return this;
-	}
+	public abstract Workflow endLoop() throws Exception;
 	
 	public void executeActionableNoSession(Actionable actionable, Map<String, Object> metadata) throws Exception {
 		if (isPersistentSerializable(actionable)) {
@@ -393,7 +340,7 @@ public class Workflow {
 			}
 		} else {
 			ContextLoader.setObject(actionable);
-			executeSafeActionable(actionable);
+			executeSafeActionable(actionable);	
 		}
 	}
 	

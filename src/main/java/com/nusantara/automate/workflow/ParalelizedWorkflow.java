@@ -1,7 +1,5 @@
 package com.nusantara.automate.workflow;
 
-import java.util.Map.Entry;
-
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.ConfigLoader;
 import com.nusantara.automate.ContextLoader;
@@ -20,29 +18,30 @@ public class ParalelizedWorkflow extends Workflow {
 	public ParalelizedWorkflow(WebExchange webExchange) {
 		super(webExchange);
 	}
-	
+		
 	public static Workflow configure() {
 		WebExchange webExchange = new WebExchange();
-		for (Entry<String, Object> config : ConfigLoader.getConfigMap().entrySet()) {
-			webExchange.put(config.getKey(), config.getValue());
-		}
+		webExchange.putAll(ConfigLoader.getConfigMap());
+		webExchange.addElements(ConfigLoader.getElementMap());
 		ContextLoader.setWebExchange(webExchange);
 		return new ParalelizedWorkflow(webExchange);
 	}
 	
 	public Workflow endLoop() throws Exception {
-		if (!activeLoop) {
+		if (!activeLoop && webExchange.isRetention()) {
 			throw new RuntimeException("Loop must be initialized");	
 		}
 		
 		try {
-			if (webExchange.getMetaDataSize() > 0) {
-				log.info("Total data-row " + webExchange.getMetaDataSize());
+			if (webExchange.getTotalMetaData() > 0) {
+				webExchange.initSession(webExchange.getMetaDataSize());
+				
+				log.info("Total data-row " + webExchange.getTotalMetaData());
 				try {
 					for (Actionable actionable : actionableForLoop) {
 						
 						if (actionable instanceof MenuAwareness) {
-							activeMenu = ((MenuAwareness) actionable).getMenu();
+							setActiveMenu(((MenuAwareness) actionable).getMenu());
 						}
 						
 						// execute actionable if any session active, if all session failed no further process performed

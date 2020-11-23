@@ -13,11 +13,11 @@ public class ConfigLoader {
 
 	private static Map<String, Object> configMap = new HashMap<String, Object>();
 	private static Map<String, Map<String, Object>> loginMap = new HashMap<String, Map<String, Object>>();
+	private static Map<String, Map<String, Object>> elementMap = new HashMap<String, Map<String,Object>>();
 	
 	public static Map<String, Object> getConfigMap() {
 		return configMap;
 	}
-	
 	
 	public static void setConfigMap(Map<String, Object> configMap) {
 		ConfigLoader.configMap = configMap;
@@ -49,6 +49,14 @@ public class ConfigLoader {
 	
 	public static void clear() {
 		ConfigLoader.configMap.clear();
+	}
+	
+	public static Map<String, Map<String, Object>> getElementMap() {
+		return elementMap;
+	}
+	
+	public static void setElementMap(String key, Map<String, Object> elements) {
+		elementMap.put(key, elements);
 	}
 	
 	

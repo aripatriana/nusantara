@@ -83,8 +83,8 @@ public class ContextLoader {
 		Map<String, Object> map = new HashMap<String, Object>();
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
-			map.put("all_local_variable", getWebExchange().getAllListLocalMap());
-			//map.put("local_variable", getWebExchange().getLocalMap());		
+			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalMap());
+//			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalMap());		
 			map.putAll(getWebExchange().getLocalMap());
 		}
 		setObject(object, map);
@@ -94,8 +94,8 @@ public class ContextLoader {
 		Map<String, Object> map = new HashMap<String, Object>();
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
-			map.put("all_local_variable", getWebExchange().getAllListLocalMap());
-			map.put("local_variable", getWebExchange().getLocalMap());		
+			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalMap());
+			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalMap());		
 			map.putAll(getWebExchange().getLocalMap());
 		}
 		setObject(object, map);
@@ -109,8 +109,8 @@ public class ContextLoader {
 		
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
-			map.put("all_local_variable", getWebExchange().getAllListLocalMap());
-//			map.put("local_variable", getWebExchange().getLocalMap());	
+			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalMap());
+//			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalMap());	
 			map.putAll(getWebExchange().getLocalMap());
 		}
 		setObject(object, map);
@@ -124,8 +124,8 @@ public class ContextLoader {
 		
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
-			map.put("all_local_variable", getWebExchange().getAllListLocalMap());
-			map.put("local_variable", getWebExchange().getLocalMap());	
+			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalMap());
+			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalMap());	
 			map.putAll(getWebExchange().getLocalMap());
 		}
 		setObject(object, map);
@@ -155,8 +155,8 @@ public class ContextLoader {
             	 fields.put(field.getName(), field.getAnnotation(Value.class).value());
             } else if (field.isAnnotationPresent(FetchSession.class)) {
             	try {
-                	if (!checkAssignableFrom(field.getType(), List.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be List");
-                	ReflectionUtils.setProperty(object, field.getName(), metadata.get("all_local_variable"));
+                	if (!ReflectionUtils.checkAssignableFrom(field.getType(), List.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be List");
+                	ReflectionUtils.setProperty(object, field.getName(), metadata.get(WebExchange.ALL_LOCAL_VARIABLE));
             	} catch (InstantiationException e) {
             		log.error("ERROR ", e);
             	}
@@ -175,21 +175,8 @@ public class ContextLoader {
 		return recognize(object, object.getClass(), metadata);
 	}
 	
-	private static boolean checkAssignableFrom(Class<?> sourceClass, Class<?> targetClass) {
-		if (sourceClass.isAssignableFrom(targetClass))
-			return true;
-		
-		boolean result = false;
-		for (Class<?> c : sourceClass.getInterfaces()) {
-			if (c.isAssignableFrom(Class.class))
-				return false;
-			result = checkAssignableFrom(c, targetClass);
-			if (result) break;
-		}
-		return result;
-	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	private static Map<String, String> recognize(Object object, Class<?> clazz, Map<String, Object> metadata) {
 		Map<String, String> fields  = new HashMap<String, String>();    
         for (Field field : clazz.getDeclaredFields()) {
@@ -226,8 +213,8 @@ public class ContextLoader {
 				}
             } else if (field.isAnnotationPresent(MapSession.class)) {
             	try {
-                	if (!checkAssignableFrom(field.getType(), Map.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be Map");
-                	ReflectionUtils.setProperty(object, field.getName(), metadata.get("local_variable"));
+                	if (!ReflectionUtils.checkAssignableFrom(field.getType(), Map.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be Map");
+                	ReflectionUtils.setProperty(object, field.getName(), metadata.get(WebExchange.LOCAL_VARIABLE));
             	} catch (InstantiationException e) {
             		log.error("ERROR ", e);
             	}
@@ -235,8 +222,8 @@ public class ContextLoader {
             	 fields.put(field.getName(), field.getAnnotation(Value.class).value());
             } else if (field.isAnnotationPresent(FetchSession.class)) {
             	try {
-                	if (!checkAssignableFrom(field.getType(), List.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be List");
-                	ReflectionUtils.setProperty(object, field.getName(), metadata.get("all_local_variable"));
+                	if (!ReflectionUtils.checkAssignableFrom(field.getType(), List.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be List");
+                	ReflectionUtils.setProperty(object, field.getName(), metadata.get(WebExchange.ALL_LOCAL_VARIABLE));
             	} catch (InstantiationException e) {
             		log.error("ERROR ", e);
             	}

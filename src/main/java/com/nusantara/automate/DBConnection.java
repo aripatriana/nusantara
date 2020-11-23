@@ -68,14 +68,24 @@ public class DBConnection {
 		return connection;
 	}
 	
+	public static void executeUpdate(String query) {
+		Statement stmt = null;
+		try {
+			stmt = getConnection().connect().createStatement();
+			stmt.executeUpdate(query);
+		} catch (SQLException e) {
+			log.error("ERROR ", e);
+		} finally {
+			if (stmt != null) try {stmt.close();} catch (Exception e) {}
+		}
+	}
+	
 	public static List<String[]> selectSimpleQuery(String simpleQuery, String[] columns) {
 		List<String[]> results = new ArrayList<String[]>();
-		//step3 create the statement object  
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
 			stmt = getConnection().connect().createStatement();
-			//step4 execute query  
 			rs=stmt.executeQuery(simpleQuery);  
 			while(rs.next()) {  
 				String[] result = new String[columns.length];
@@ -112,12 +122,10 @@ public class DBConnection {
 	@SuppressWarnings("rawtypes")
 	public static List<Object[]> selectSimpleQuery(String simpleQuery, String[] columns, Class[] clazz) {
 		List<Object[]> results = new ArrayList<Object[]>();
-		//step3 create the statement object  
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-			stmt = getConnection().connect().createStatement();
-			//step4 execute query  
+			stmt = getConnection().connect().createStatement(); 
 			rs=stmt.executeQuery(simpleQuery);  
 			while(rs.next()) {  
 				Object[] result = new Object[columns.length];

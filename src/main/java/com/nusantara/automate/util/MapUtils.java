@@ -1,7 +1,11 @@
 package com.nusantara.automate.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -9,6 +13,56 @@ import java.util.Map.Entry;
 
 public class MapUtils {
 
+	public static <T> List<T> combineValueAsList(Collection<? extends List<T>> mapValueList) {
+		List<T> list = new LinkedList<T>();
+		for(List<T> d : mapValueList) {
+			list.addAll(d);
+		}
+		return list;
+	}
+	
+	public static String listAsString(List<Object> list, String separator) {
+		String result = "";
+		for (Object o : list) {
+			if (!result.isBlank()) result += separator;
+			result+="'" + o.toString() + "'";
+		}
+		return result;
+	}
+	
+	public static <T> List<List<T>> arrayAsList(List<T[]> list) {
+		List<List<T>> data = new ArrayList<List<T>>();
+		for (T[] arr : list) {
+			data.add(Arrays.asList(arr));
+		}
+		return data;
+	}
+	
+	public static <K, V> Map<K, V> copyAsMap(K[] key, V[] value, Class<K> k, Class<V> v) {
+		Map<K, V> map = new HashMap<K, V>();
+		
+		for (int i=0; i<key.length; i++) {
+			map.put(key[i], value[i]);
+		}
+		return map;
+	}
+	
+	public static List<Object> mapAsList(List<Map<String, Object>> data, String key) {
+		List<Object> list = new ArrayList<Object>();
+		for (Map<String, Object> d : data) {
+			list.add(d.get(key));
+		}
+		return list;
+	}
+	
+	public static List<Object> matrixAsList(LinkedHashMap<Integer, LinkedHashMap<String, Object>> data, String key) {
+		List<Object> list = new LinkedList<Object>();
+		for (Map<String, Object> d : data.values()) {
+			list.add(d.get(key));
+		}
+		return list;
+	}
+	
 	public static void clearMapKey(String removed, Map<String, Object> data) {
 		Map<String, Object> temp = new LinkedHashMap<String, Object>(data);
 		data.clear();
@@ -42,5 +96,39 @@ public class MapUtils {
         for (int i=0; i<src.size(); i++) {
             di.add(new HashMap<String, Object>(si.next()));
         }
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void keyLowercase(Map<String, Object> map) {
+		Map<String, Object> copied = new LinkedHashMap<String, Object>();
+		for (Entry<String, Object> e : map.entrySet()) {
+			if (e.getValue() instanceof List) {
+				keyLowercase((List<Map<String, Object>>) e.getValue());
+				copied.put(e.getKey().toLowerCase(), e.getValue());
+			} else {
+				copied.put(e.getKey().toLowerCase(), e.getValue());				
+			}
+		}
+		map.clear();
+		map.putAll(copied);
+	}
+
+	public static void keyLowercase(List<Map<String, Object>> list) {
+		for (Map<String, Object> map : list) {
+			Map<String, Object> copied = new LinkedHashMap<String, Object>();
+			for (Entry<String, Object> e : map.entrySet()) {
+				copied.put(e.getKey().toLowerCase(), e.getValue());
+			}
+			map.clear();
+			map.putAll(copied);
+		}
+	}
+	
+	public static <K, V> void copyValueNotNull(Map<K, V> src, Map<K, V> dest) {
+		for (Entry<K, V> e : src.entrySet()) {
+			if (e.getValue() != null) {
+				dest.put(e.getKey(), e.getValue());
+			}
+		}
 	}
 }

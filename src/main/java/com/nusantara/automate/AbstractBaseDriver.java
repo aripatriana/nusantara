@@ -25,8 +25,10 @@ public abstract class AbstractBaseDriver {
 	
 	private final int TIMEOUT_IN_SECOND = 15;
 	
-	WebDriver wd;
-	WindowScreen ws;
+	protected Menu menu;
+	protected WebDriver wd;
+	protected WindowScreen ws;
+	protected Checkpoint cp;
 	
 	public AbstractBaseDriver() {
 		this(DriverManager.getDefaultDriver());
@@ -35,6 +37,18 @@ public abstract class AbstractBaseDriver {
 	public AbstractBaseDriver(WebDriver wd) {
 		this.wd = wd;
 		this.ws = new WindowScreen(wd);
+		this.cp = new Checkpoint();
+		
+		ContextLoader.setObject(ws);
+		ContextLoader.setObject(cp);
+	}
+	
+	public void takeElementsAsCheckPoint(WebElement wl, WebExchange we) {
+		cp.takeElements(wl, we);
+	}
+	
+	public void takeElementsAsCheckPoint(WebExchange we) {
+		cp.takeElements(wd, we);
 	}
 	
 	public void captureFullWindow() {
@@ -91,7 +105,7 @@ public abstract class AbstractBaseDriver {
 	public WebDriver getDriver() {
 		return wd;
 	}
-	
+		
 	protected WebElement findElementById(String id) {
 		return findElementById(id, TIMEOUT_IN_SECOND);
 	}

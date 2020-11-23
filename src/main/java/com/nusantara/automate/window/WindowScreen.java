@@ -35,8 +35,6 @@ public class WindowScreen {
 	private final static int SNAPSHOT_TEMP = 0;
 	private final static int SNAPSHOT_FINAL = 1;
 	
-	private final static String FORMAT_DATE_TIME = "yyyyMMdd_hhmmss";
-	
 	@Value("{tmp_dir}")
 	private String tmpDir;
 	
@@ -62,7 +60,6 @@ public class WindowScreen {
 	
 	public WindowScreen(WebDriver webDriver) {
 		this.webDriver = webDriver;
-		ContextLoader.setObject(this);
 	}
 	
 	public String getTargetFolder() {
@@ -126,8 +123,8 @@ public class WindowScreen {
 				outputFile = snapshot(WindowScreen.SNAPSHOT_FINAL);
 			}	
 			
-			ReportMonitor.logImageEntry(targetFolder, prefixFileName, 
-					outputFile.getAbsolutePath().replace((testCaseDir + "//" + DateUtils.format(new Date(Long.valueOf(startTimeMilis)), FORMAT_DATE_TIME)), ""), 
+			ReportMonitor.logSnapshotEntry(targetFolder, prefixFileName, 
+					outputFile.getAbsolutePath().replace((testCaseDir + "//" + DateUtils.format(Long.valueOf(startTimeMilis))), ""), 
 					(REMARK_FAILED.equals(remark) ? ReportManager.FAILED : ReportManager.PASSED));
 		}
 		resetRemark();
@@ -201,7 +198,7 @@ public class WindowScreen {
 	}
 	
 	private String constructOutputFileName() {
-		String targetFileName = testCaseDir + "\\" + DateUtils.format(new Date(Long.valueOf(startTimeMilis)), FORMAT_DATE_TIME) + "\\";
+		String targetFileName = testCaseDir + "\\" + DateUtils.format(Long.valueOf(startTimeMilis)) + "\\";
 		if (targetFolder != null)
 			targetFileName += targetFolder + "\\" + prefixFileName.replace(targetFolder + "_", "") + "\\";
 		if (prefixFileName != null)

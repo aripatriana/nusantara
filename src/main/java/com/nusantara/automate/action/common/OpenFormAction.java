@@ -37,11 +37,6 @@ public class OpenFormAction extends WebElementWrapper implements Actionable, Men
 		this.form = form;
 	}
 	
-	@Override
-	public void setMenu(Menu menu) {
-		this.menu = menu;
-	}
-	
 	public String getMenuId() {
 		return menuId;
 	}
@@ -52,6 +47,11 @@ public class OpenFormAction extends WebElementWrapper implements Actionable, Men
 	
 	public Menu getMenu() {
 		return menu;
+	}
+	
+	@Override
+	public void setMenu(Menu menu) {
+		this.menu = menu;
 	}
 	
 	@Override

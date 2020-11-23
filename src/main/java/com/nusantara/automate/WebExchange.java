@@ -2,12 +2,12 @@ package com.nusantara.automate;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -24,43 +24,68 @@ import com.nusantara.automate.util.MapUtils;
  */
 public class WebExchange {
 
-	Map<String, Map<String, Object>> holder = new HashMap<String, Map<String,Object>>();
-	LinkedList<Map<String, Object>> listMetaData = new LinkedList<Map<String,Object>>();
-	
-	// moduleid|value
-	Map<String, LinkedList<Map<String, Object>>> cachedMetaData = new HashMap<String, LinkedList<Map<String,Object>>>();
-	
-	// moduleid|moduleid$XXX
-	Map<String, LinkedList<String>> cachedMetaDataKey = new HashMap<String, LinkedList<String>>();
-	
-	// moduleid|session
-//	Map<String, String> cachedSessionMetaData = new HashMap<String, String>();
-	
-	// session
-	Set<String> cachedSession = new HashSet<String>();
+	public static final String PREFIX_TYPE_DATA = "data";
+	public static final String PREFIX_TYPE_ELEMENT = "element";
+	public static final String PREFIX_TYPE_SYSTEM = "system";
+
 	public static final String LOCAL_VARIABLE = "local_variable";
 	public static final String ALL_LOCAL_VARIABLE = "all_local_variable";
-	LinkedList<String> sessionList = new LinkedList<String>();
-	Set<String> failedSessionList = new HashSet<String>();
-	Map<String, Map<String, Object>> sessionHolder = new HashMap<String, Map<String,Object>>();
-	String transactionId = UUID.randomUUID().toString();
-	String sessionId = null;
-	boolean retention = false;
 	
-	private void reset() {
-		retention = false;
-		sessionId = null;
-		listMetaData.clear();
-		sessionList.clear();
-		failedSessionList.clear();
-		sessionHolder.clear();
-		cachedMetaData.clear();
-		cachedMetaDataKey.clear();
-		cachedSession.clear();
-		holder.remove(LOCAL_VARIABLE);
-		holder.remove(ALL_LOCAL_VARIABLE);
+	private Map<String, Map<String, Object>> holder = new HashMap<String, Map<String,Object>>();
+	private LinkedList<Map<String, Object>> listMetaData = new LinkedList<Map<String,Object>>();
+	private Map<String, Map<String, String>> elements = new HashMap<String, Map<String,String>>();
+	private Set<String> modules = new LinkedHashSet<String>();	
+	
+	// moduleid|value
+	private Map<String, LinkedList<Map<String, Object>>> cachedMetaData = new HashMap<String, LinkedList<Map<String,Object>>>();
+	
+	// moduleid|moduleid$XXX
+	private Map<String, LinkedList<String>> cachedMetaDataKey = new HashMap<String, LinkedList<String>>();
+	
+	// moduleid|session
+	//Map<String, String> cachedSessionMetaData = new HashMap<String, String>();
+	
+	// session
+	private Set<String> cachedSession = new HashSet<String>();
+	private String transactionId = UUID.randomUUID().toString();
+	private boolean retention = false;
+	private Session session = new Session();
+
+	
+	public void setSession(Session session) {
+		this.session = session;
+	}
+	
+	public Session getSession() {
+		return session;
+	}
+	
+	public void setModules(Set<String> modules) {
+		this.modules = modules;
+	}
+	
+	public Set<String> getModules() {
+		return modules;
+	}
+	
+	public void addModule(String module) {
+		this.modules.add(module);
+	}
+	
+	public void initSession(int count) {
+		if (count == 0) count++;
+		for (int index=0; index<count; index++) {
+			createSession(index);
+		}
 		
-		renewTransactionId();
+		for (String moduleId : modules) {
+			int i = 0;
+			for (Map<String, Object> metadata : getListMetaData(moduleId)) {
+				createSession(i);
+				putToSession(WebExchange.PREFIX_TYPE_DATA, moduleId, metadata);
+				i++;
+			}
+		}
 	}
 	
 	public void renewTransactionId() {
@@ -72,12 +97,30 @@ public class WebExchange {
 	
 	public void addMetadata(Map<String, Object> metadata) {
 		listMetaData.add(metadata);
+		String[] keys = metadata.keySet().iterator().next().split("\\.");
+		modules.add(keys[0].toLowerCase());
 	}
 	
-	public int getMetaDataSize() {
+	public int getTotalMetaData() {
 		return listMetaData.size();
 	}
 	
+	public int getMetaDataSize() {
+		return getMetaDataSize(modules.iterator().next());
+	}
+	
+	public int getMetaDataSize(String moduleId) {
+		int size = 0;
+		for (Map<String, Object> data : listMetaData) {
+			
+			Object moduleName = data.get(moduleId + "."+ "module_name");
+			if (moduleName != null) {
+				if (moduleName.toString().equals(moduleId))
+					size++;
+			}
+		}
+		return size;
+	}
 	public void clearCachedSession() {
 		cachedSession.clear();
 	}
@@ -87,7 +130,7 @@ public class WebExchange {
 		LinkedList<Map<String, Object>> bufferListMetaData = new LinkedList<Map<String,Object>>();
 		MapUtils.copyKeepOriginal(bufferListMetaData, listMetaData);
 		for (Map<String, Object> map : bufferListMetaData) {
-			if (map.keySet().toArray()[0].toString().toUpperCase().startsWith(cahcedMenuId+".")) {
+			if (map.keySet().toArray()[0].toString().toLowerCase().startsWith(cahcedMenuId+".")) {
 				MapUtils.clearMapKey(cahcedMenuId + ".", map);
 				tempListMetaData.add(map);
 			}
@@ -104,8 +147,8 @@ public class WebExchange {
 	 * @return
 	 */
 	public LinkedList<Map<String, Object>> getListMetaData(String moduleId, boolean checkNextMenuId) {
-		String mainMenu = moduleId.toUpperCase();
-		String cahcedMenuId = moduleId.toUpperCase();
+		String mainMenu = moduleId.toLowerCase();
+		String cahcedMenuId = moduleId.toLowerCase();
 		LinkedList<Map<String, Object>> metadata = new LinkedList<Map<String,Object>>();
 		int indexMenuId = 0;
 		
@@ -164,29 +207,24 @@ public class WebExchange {
 		}
 		return metadata;
 	}
-	
+			
 	public LinkedList<Map<String, Object>> getListMetaData(String moduleId) {
 		return getListMetaData(moduleId, false);
 	}
 	
-	public Map<String, Object> getMetaData(String menuId, int index, boolean checkNextMenuId) {
-		LinkedList<Map<String, Object>> tempListMetaData = getListMetaData(menuId, checkNextMenuId);
+	public Map<String, Object> getMetaData(String moduleId, int index, boolean checkNextMenuId) {
+		LinkedList<Map<String, Object>> tempListMetaData = getListMetaData(moduleId, checkNextMenuId);
 		if (tempListMetaData != null && tempListMetaData.size() > 0)
 			return tempListMetaData.get(index);
 		return null;
 	}
 	
-	public Map<String, Object> getMetaData(String menuId, int index) {
-		LinkedList<Map<String, Object>> tempListMetaData = getListMetaData(menuId, false);
+	public Map<String, Object> getMetaData(String moduleId, int index) {
+		LinkedList<Map<String, Object>> tempListMetaData = getListMetaData(moduleId, false);
 		if (tempListMetaData != null && tempListMetaData.size() > 0) {
 			return tempListMetaData.get(index);
 		}
 		return null;
-	}
-	
-	public LinkedList<Map<String, Object>> getMetaData(String menuId) {
-		LinkedList<Map<String, Object>> tempListMetaData = getListMetaData(menuId, false);
-		return tempListMetaData;
 	}
 	
 	public void clearMetaData() {
@@ -199,30 +237,15 @@ public class WebExchange {
 	
 	public void remove(String key) {
 		if (key.startsWith("@")) {
-			String session = getCurrentSession();
-			if (getCurrentSession() == null)
-				throw new RuntimeException("Session is not created");
-			
-			Map<String, Object> localVariable = sessionHolder.get(session);
-			if (localVariable != null) {
-				localVariable.remove(key);
-			}
+			getSession().remove(key);
 		} else {
 			holder.get(getTransactionId()).remove(key);
 		}
 	}
+	
 	public void put(String key, Object value) {
 		if (key.startsWith("@")) {
-			String session = getCurrentSession();
-			if (getCurrentSession() == null)
-				throw new RuntimeException("Session is not created");
-			
-			Map<String, Object> localVariable = sessionHolder.get(session);
-			if (localVariable == null) {
-				localVariable = new HashMap<String, Object>();
-			}
-			localVariable.put(key.replace("@", ""), value);
-			sessionHolder.put(session, localVariable);
+			getSession().put(key, value);
 		} else {
 			Map<String, Object> map = new HashMap<String, Object>();
 			if (holder.containsKey(getTransactionId())) {
@@ -233,15 +256,106 @@ public class WebExchange {
 		}
 	}
 	
+	public void putAll(Map<String, Object> data) {
+		for (Entry<String, Object> e : data.entrySet()) {
+			put(e.getKey(), e.getValue());
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void putToSession(String prefix, String moduleId, Map<String, Object> metadata) {
+		MapUtils.keyLowercase((Map<String, Object>)metadata);
+		for (Entry<String, Object> entry : metadata.entrySet()) {
+			if (entry.getValue() instanceof List) {
+				List<Object> subMetadataList = (List<Object>) entry.getValue();
+				int i = 0;
+				for (Object subMetadata : subMetadataList) {
+					if (subMetadata instanceof Map) {
+						
+						for (Entry<String, Object> subEntry : ((Map<String, Object>)subMetadata).entrySet()) {
+							if (subEntry.getKey().contains(moduleId)) {
+								put("@" + prefix + "." + entry.getKey().concat("[" + i + "]") + "." + subEntry.getKey(),
+										subEntry.getValue());						
+							} else {
+								put("@" + prefix + "." + moduleId + "." + entry.getKey().concat("[" + i + "]") + "." + subEntry.getKey(),
+										subEntry.getValue());													
+							}
+						}
+					} else {
+						if (entry.getKey().contains(moduleId)) {
+							put("@" + prefix + "." + entry.getKey().concat("[" + i + "]") ,
+									subMetadata);	
+						} else {
+							put("@" + prefix + "." + moduleId + "." + entry.getKey().concat("[" + i + "]") ,
+									subMetadata);	
+						}
+					}
+					i++;
+				}
+				
+				if (entry.getKey().contains(moduleId)) {
+					put("@" + prefix + "." + entry.getKey().concat("[]"),
+							entry.getValue());
+				} else {
+					put("@" + prefix + "." + moduleId + "." + entry.getKey().concat("[]"),
+							entry.getValue());							
+				}
+			} else {
+				if (entry.getKey().contains(moduleId)) {
+					put("@" + prefix +  "." + entry.getKey() , entry.getValue());				
+				} else {
+					put("@" + prefix +  "." + moduleId + "." + entry.getKey() , entry.getValue());									
+				}
+			}
+		}
+	}
+	
+	public static void main(String[] args) {
+		Map<String, Object> t = new LinkedHashMap<String, Object>();
+		t.put("contract", "REPO-XXX");
+		t.put("purchase", "REPO");
+		t.put("securityType", "STOCK");
+		
+		List<Map<String, Object>> l = new LinkedList<Map<String,Object>>();
+		Map<String, Object> tl1 = new LinkedHashMap<String, Object>();
+		tl1.put("instrument_code", "TLKM");
+		tl1.put("harga", "1000");
+		
+		Map<String, Object> tl2 = new LinkedHashMap<String, Object>();
+		tl2.put("instrument_code", "ASII");
+		tl2.put("harga", "1500");
+		
+		l.add(tl1);
+		l.add(tl2);
+		
+		t.put("instrument", l);
+		
+		List<String> a = new ArrayList<String>();
+		a.add("HALOO");
+		a.add("TESTHELOO");
+		t.put("test", a);
+		
+		WebExchange w = new WebExchange();
+		w.createSession();
+//		
+//		w.putAllToSession(PREFIX_TYPE_DATA,"order-repo", t);
+//		w.put("@test", "hallooo");
+//		
+//		for (Entry<String, Object> e : w.sessionHolder.get(w.getCurrentSession()).entrySet()) {
+//			System.out.println(e.getKey() + " -> " + e.getValue());
+//		}
+//		
+//		System.out.println(w.get("@test"));
+	}
+
+	
 	public Map<String, Object> getAll() {
 		return holder.get(getTransactionId());
 	}
 	
 	public Object get(String key) {
 		if (key.startsWith("@")) {
-			if (getCurrentSession() == null) 
-				throw new RuntimeException("Session is not created");
-			return getLocalVariable(key.replace("@", ""));
+			return getSession().get(key);
 		}
 		Map<String, Object> data = holder.get(getTransactionId());
 		if (data == null) return data;
@@ -249,12 +363,7 @@ public class WebExchange {
 	}
 	
 	public List<Map<String, Object>> getAllListLocalMap() {
-		List<Map<String, Object>> localMap = new LinkedList<Map<String, Object>>();		
-		for (Entry<String, Map<String, Object>> entry : sessionHolder.entrySet()) {
-			if (!failedSessionList.contains(entry.getKey()))
-				localMap.add(entry.getValue());
-		}
-		return localMap;
+		return getSession().getAllListLocalMap();
 	}
 	
 	public Map<String, Object> getLocalMap() {
@@ -262,17 +371,15 @@ public class WebExchange {
 	}
 	
 	public LinkedList<String> getSessionList() {
-		return sessionList;
+		return getSession().getSessionList();
 	}
 	
 	public Map<String, Map<String, Object>> getSessionHolder() {
-		return sessionHolder;
+		return getSession().getSessionHolder();
 	}
 	
 	public Map<String, Object> getLocalMap(String session) {
-		if (sessionHolder.get(session) == null)
-			return new HashMap<String, Object>();
-		return sessionHolder.get(session);
+		return getSession().getMap(session);
 	}
 	
 	public Object getLocalVariable(String key) {
@@ -283,31 +390,30 @@ public class WebExchange {
 		return getLocalMap(session).get(key);
 	}
 
+	public void setCurrentSession(int index) {
+		getSession().setCurrentSessionByIndex(index);
+	}
+
 	public void setCurrentSession(String sessionId) {
-		this.sessionId = sessionId;
+		getSession().setCurrentSession(sessionId);
 	}
 	
 	public String createSession() {
 		return createSession(999);
 	}
+	
 	public String createSession(int index) {
-		try {
-			sessionId = sessionList.get(index);
-			return sessionId;
-		} catch (IndexOutOfBoundsException e) {
-			// do nothing
-		}
-		
-		sessionId = UUID.randomUUID().toString();
-		sessionList.add(sessionId);		
-
-		return sessionId;
+		return getSession().createSession(index);
 	}
 	
 	public String getCurrentSession() {
-		return sessionId;
+		return getSession().getCurrentSession();
 	}
 	
+	public int getCountSession() {
+		return getSession().countSize();
+	}
+		
 	public String getTransactionId() {
 		return transactionId;
 	}
@@ -317,23 +423,62 @@ public class WebExchange {
 	}
 
 	public void addListFailedSession(Collection<String> failedSessionId) {
-		failedSessionList.addAll(failedSessionId);
+		getSession().addListFailedSession(failedSessionId);
 	}
 
 	
 	public void addFailedSession(String sessionId) {
-		failedSessionList.add(sessionId);
+		getSession().addFailedSession(sessionId);
 	}
 	
 	public Set<String> getFailedSessionList() {
-		return failedSessionList;
+		return getSession().getFailedSessionList();
 	}
 	
 	public boolean isSessionFailed(String sessionId) {
-		return failedSessionList.contains(sessionId);
+		return getSession().isSessionFailed(sessionId);
 	}
+	
 	public boolean isRetention() {
 		return retention;
+	}
+	
+	public void addElement(String moduleId, String key, String value) {
+		Map<String, String> map = elements.get(moduleId);
+		if (map == null)
+			map = new HashMap<String, String>();
+		map.put(key, value);
+	}
+	
+	public Map<String, String> getElements(String moduleId) {
+		return elements.get(moduleId);
+	}
+	
+	public Map<String, Map<String, String>> getElements() {
+		return elements;
+	}
+	
+	public void addElement(String moduleId, Map<String, String> data) {
+		Map<String, String> map = elements.get(moduleId);
+		if (map == null)
+			map = new HashMap<String, String>();
+		map.putAll(data);
+	}
+	
+	public void addElements(Map<String, Map<String, Object>> elements) {
+		elements.putAll(elements);
+	}
+	
+	private void reset() {
+		retention = false;
+		listMetaData.clear();
+		cachedMetaData.clear();
+		cachedMetaDataKey.clear();
+		cachedSession.clear();
+		holder.remove(LOCAL_VARIABLE);
+		holder.remove(ALL_LOCAL_VARIABLE);
+		getSession().clearSession();
+		renewTransactionId();
 	}
 
 }

@@ -1,8 +1,6 @@
 package com.nusantara.automate;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -18,13 +16,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.exception.ScriptInvalidException;
+import com.nusantara.automate.io.FileIO;
 import com.nusantara.automate.reader.WorkflowYReader;
-import com.nusantara.automate.report.ReportMonitor;
 import com.nusantara.automate.report.ReportManager;
+import com.nusantara.automate.report.ReportMonitor;
 import com.nusantara.automate.report.ScenEntry;
 import com.nusantara.automate.report.TestCaseEntry;
+import com.nusantara.automate.util.MapUtils;
 import com.nusantara.automate.util.ReflectionUtils;
 import com.nusantara.automate.util.SimpleEntry;
+import com.nusantara.automate.util.StringUtils;
 import com.nusantara.automate.workflow.WorkflowConfig;
 import com.nusantara.automate.workflow.WorkflowConfigAwareness;
 import com.nusantara.automate.workflow.WorkflowConfigInitializer;
@@ -41,9 +42,11 @@ import ch.qos.logback.classic.util.ContextInitializer;
 public class RunTestApplication {
 
 	private static final Logger log = LoggerFactory.getLogger(RunTestApplication.class);
+	private static final String CONFIG_FILENAME = "config.properties";
+	private static final String USER_FILENAME = "user.properties";
 	private static final String LOGBACK_FILE_PATH = "src/main/resources/logback.xml";
-	private static final String CONFIG_FILE_PATH = "/config/config.properties";
-	private static final String USER_FILE_PATH = "/config/user.properties";
+	private static final String CONFIG_FILE_PATH = "/config/" + CONFIG_FILENAME;
+	private static final String USER_FILE_PATH = "/config/" + USER_FILENAME;
 	private static final String DRIVER_FILE_PATH = "/lib/driver/bin/chromedriver.exe";
 
 	public final static String SUFFIX_USER = "user";
@@ -53,15 +56,16 @@ public class RunTestApplication {
 	public final static String PREFIX_KEYFILE = "keyFile";
 	public final static String PREFIX_TOKEN = "token";
 	
+	private static final String[] FILE_EXTENSTIONS = new String[] {".y", ".xlx", ".xlsx", ".sql", ".element"};
 	
 	public static void run(Class<? extends RunTestWorkflow> clazz, String[] args) {
 		System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, LOGBACK_FILE_PATH);
 		
 		WorkflowConfig workflowConfig = null;
 		try {
-			String driverPathFile = System.getProperty("user.dir") + DRIVER_FILE_PATH;
-			String configPathFile = System.getProperty("user.dir") + CONFIG_FILE_PATH;
-			String userPathFile = System.getProperty("user.dir") + USER_FILE_PATH;
+			String driverPathFile = StringUtils.path(System.getProperty("user.dir"),DRIVER_FILE_PATH);
+			String configPathFile = StringUtils.path(System.getProperty("user.dir"),CONFIG_FILE_PATH);
+			String userPathFile = StringUtils.path(System.getProperty("user.dir"),USER_FILE_PATH);
 			
 			String moduleName = null;
 			
@@ -105,7 +109,7 @@ public class RunTestApplication {
 			log.error("ERROR ", e);
 		} finally {
 			try {
-				FileUtils.cleanDirectory(new File(System.getProperty("user.dir") + "\\tmp"));
+				FileUtils.cleanDirectory(new File(StringUtils.path(System.getProperty("user.dir"),"tmp")));
 				if (workflowConfig != null)
 					workflowConfig.clear();
 				ConfigLoader.clear();
@@ -127,65 +131,66 @@ public class RunTestApplication {
 	private static void setConfig(String[] configPathFiles, String moduleName) throws IOException {
 		Map<String, Object> systemData = new HashMap<String, Object>();
 		
-		systemData.put("{base_dir}", System.getProperty("user.dir"));
-		systemData.put("{tmp_dir}", System.getProperty("user.dir") + "\\tmp");
-		systemData.put("{log_dir}", System.getProperty("user.dir") + "\\log");
-		systemData.put("{config_dir}", System.getProperty("user.dir") + "\\config");
-		systemData.put("{keyfile_dir}", System.getProperty("user.dir") + "\\config\\keyfile");
-		systemData.put("{template_dir}", System.getProperty("user.dir") + "\\config\\template");
-		systemData.put("{testcase_dir}", (moduleName != null ? moduleName : System.getProperty("user.dir")) + "\\testcase");
-		systemData.put("{report_dir}", (moduleName != null ? moduleName : System.getProperty("user.dir")) + "\\report");
+		systemData.put("{base_dir}", StringUtils.path(System.getProperty("user.dir")));
+		systemData.put("{tmp_dir}", StringUtils.path(System.getProperty("user.dir"),"tmp"));
+		systemData.put("{log_dir}", StringUtils.path(System.getProperty("user.dir") + "log"));
+		systemData.put("{config_dir}", StringUtils.path(System.getProperty("user.dir"),"config"));
+		systemData.put("{keyfile_dir}", StringUtils.path(System.getProperty("user.dir"),"config","keyfile"));
+		systemData.put("{template_dir}", StringUtils.path(System.getProperty("user.dir"),"config","template"));
+		systemData.put("{testcase_dir}", (moduleName != null ? moduleName : StringUtils.path(System.getProperty("user.dir"),"testcase")));
+		systemData.put("{report_dir}", (moduleName != null ? moduleName : StringUtils.path(System.getProperty("user.dir"),"report")));
 		ConfigLoader.getConfigMap().putAll(systemData);
 		
-		
-		for (String configPathFile : configPathFiles) {
-			if (configPathFile != null) {
-				Map<String, Object> metadata = new HashMap<String, Object>();
-				Map<String, Map<String, Object>> loginUser = new HashMap<String, Map<String, Object>>();
-				
-				log.info("Config Properties : " + configPathFile);
-	
-				File file = new File(configPathFile); 
-				Properties prop = new Properties();
-				try {
-					prop.load(new FileInputStream(file));
-				} catch (FileNotFoundException e) {
-					log.error("ERROR ", e);
-				} catch (IOException e) {
-					log.error("ERROR ", e);
-				}
-				
-				for (final String name: prop.stringPropertyNames()) {
-					String value = prop.getProperty(name);
-					if (value.toString().contains("{") && value.toString().contains("}")) {
-						value = replaceSystemVariable(systemData, value);
-					}
-				    metadata.put(name, value);
-				    if (name.contains("keyFile")) {
-						metadata.put(name.replace("keyFile", "token"), new String(Files.readAllBytes(Paths.get(value))));
-				    }
-				}
-				
-				for (Entry<String, Object> entry : metadata.entrySet()) {
-					if (entry.getKey().startsWith(SUFFIX_USER + ".") 
-							|| configPathFile.endsWith("user.properties")) {
-						
-						String key = entry.getKey().replace("." + PREFIX_MEMBER_CODE, "")
-								.replace("." + PREFIX_USERNAME, "")
-								.replace("." + PREFIX_PASSWORD, "")
-								.replace("." + PREFIX_KEYFILE, "")
-								.replace("." + PREFIX_TOKEN, "");
-						
-						Map<String, Object> login = loginUser.get(key);
-						if (login == null) login = new HashMap<String, Object>();
-						login.put(entry.getKey(), entry.getValue());
-						loginUser.put(key, login);
-					}
-				}
-				ConfigLoader.getConfigMap().putAll(metadata);
-				ConfigLoader.getLoginInfo().putAll(loginUser);
-			}
+		// element
+		File workflowDir = new File(ConfigLoader.getConfig("{config_dir}").toString());
+		Map<String , LinkedList<File>> mapFiles = new HashMap<String, LinkedList<File>>();
+		searchFile(workflowDir.listFiles(), "elements", mapFiles);
+		for (File file : MapUtils.combineValueAsList(mapFiles.values())) {
+			Map<String, Object> elements = FileIO.loadMapValueFile(file, "=");
+			MapUtils.concatMapKey(file.getName() + ".", elements);
+			ConfigLoader.setElementMap(file.getName(), elements);
 		}
+		
+		// config
+		String config = StringUtils.findContains(configPathFiles, CONFIG_FILENAME);
+		log.info("Config Properties : " + config);
+		Map<String, Object> metadata = new HashMap<String, Object>();
+		Properties prop = FileIO.loadProperties(config);
+		for (final String name: prop.stringPropertyNames()) {
+			String value = prop.getProperty(name);
+			if (value.toString().contains("{") && value.toString().contains("}")) {
+				value = replaceSystemVariable(systemData, value);
+			}
+		    metadata.put(name, value);
+		}
+		ConfigLoader.getConfigMap().putAll(metadata);
+		
+		// user
+		String user = StringUtils.findContains(configPathFiles, USER_FILENAME);
+		log.info("User Properties : " + user);
+		Map<String, Map<String, Object>> loginUser = new HashMap<String, Map<String, Object>>();
+		prop = FileIO.loadProperties(user);
+		
+		for (final String name: prop.stringPropertyNames()) {
+			String value = prop.getProperty(name);
+			if (value.toString().contains("{") && value.toString().contains("}")) {
+				value = replaceSystemVariable(systemData, value);
+			}
+			if (name.contains("keyFile")) {
+				metadata.put(name.replace("keyFile", "token"), new String(Files.readAllBytes(Paths.get(value))));
+		    }
+			String key = name.replace("." + PREFIX_MEMBER_CODE, "")
+					.replace("." + PREFIX_USERNAME, "")
+					.replace("." + PREFIX_PASSWORD, "")
+					.replace("." + PREFIX_KEYFILE, "")
+					.replace("." + PREFIX_TOKEN, "");
+			
+			Map<String, Object> login = loginUser.get(key);
+			if (login == null) login = new HashMap<String, Object>();
+			login.put(name, value);
+			loginUser.put(key, login);
+		}
+		ConfigLoader.getLoginInfo().putAll(loginUser);
 	}
 	
 	private static String replaceSystemVariable(Map<String, Object> systemData, String value) {
@@ -219,7 +224,7 @@ public class RunTestApplication {
 						WorkflowYReader reader = new WorkflowYReader(file);
 						LinkedList<WorkflowEntry> workFlowEntries = reader.read();
 						for (WorkflowEntry entry : workFlowEntries) {
-							if (entry.isLoadFile()) entry.setVariable(tscen.getKey());
+							if (entry.checkKeyword(BasicScript.LOAD_FILE)) entry.setVariable(tscen.getKey());
 						}
 						workflowConfig.addWorkflowEntry(workflowKey, workFlowEntries);
 						workflowConfig.addWorkflowScan(tscen.getKey(), workflowKey);
@@ -228,7 +233,10 @@ public class RunTestApplication {
 						log.info("Load data file " + tscen.getKey() + " -> " + file.getName());
 						workflowConfig.addWorkflowData(tscen.getKey(), file);
 						i++;
-					}					
+					} else if (file.getName().endsWith(".sql")) {
+						log.info("Load sql file " + tscen.getKey() + " -> " + file.getName());
+						workflowConfig.addWorkflowQuery(tscen.getKey(), file);
+					}
 				}
 			}			
 			
@@ -264,19 +272,24 @@ public class RunTestApplication {
 	}
 	
 	private static void verifyWorkflowy(WorkflowConfig workflowConfig) throws ScriptInvalidException {
-		for (LinkedList<WorkflowEntry> entryList : workflowConfig.getWorkflowEntries().values()) {
-			for (WorkflowEntry entry : entryList) {
-				if (entry.isActionMenu()) {
+		for (Entry<String, LinkedList<WorkflowEntry>> entryList : workflowConfig.getWorkflowEntries().entrySet()) {
+			for (WorkflowEntry entry : entryList.getValue()) {
+				if (entry.checkKeyword(BasicScript.OPEN_MENU)) {
 					Menu menu = workflowConfig.getMenu(entry.getVariable());
 					if (menu == null) {
 						throw new ScriptInvalidException("Menu not found for " + entry.getVariable());
 					}
-				} else if (entry.isFunction()) {
+				} else if (entry.checkKeyword(BasicScript.EXECUTE)) {
 					SimpleEntry<Class<?>, Object[]> function = workflowConfig.getFunction(entry.getVariable());
 					if (function == null) {
 						throw new ScriptInvalidException("Function not found for " + entry.getVariable());
 					}
-				} else if (entry.isLogin() || entry.isRelogin()) {
+				} else if (entry.checkKeyword(BasicScript.ASSERT_AGGREGATE)) {
+					File file = workflowConfig.getWorkflowQuery(workflowConfig.getWorkflowMapKey(entryList.getKey()), entry.getVariable());
+					if (file == null) {
+						throw new ScriptInvalidException("File not found for " + entry.getVariable());
+					}
+				} else if (entry.checkKeyword(BasicScript.LOGIN) || entry.checkKeyword(BasicScript.RELOGIN)) {
 					Map<String, Object> login = ConfigLoader.getLoginInfo(entry.getVariable());
 					if (login == null) {
 						throw new ScriptInvalidException("Login info not found for " + entry.getVariable());
@@ -291,7 +304,6 @@ public class RunTestApplication {
 				}
 			}
 		}
-		
 	}
 	
 	private static void searchFile(File[] files, String dir, Map<String, LinkedList<File>> mapFiles) {
@@ -301,9 +313,7 @@ public class RunTestApplication {
 			}
 			
 			if (file.isFile()) {
-				if (file.getName().endsWith(".y") 
-						|| file.getName().endsWith(".xlsx")
-						|| file.getName().endsWith(".xlx")) {
+				if (StringUtils.endsWith(file.getName(), FILE_EXTENSTIONS)) {
 					LinkedList<File> fileList = mapFiles.get(dir);
 					if (fileList == null) fileList = new LinkedList<File>();
 					fileList.add(file);

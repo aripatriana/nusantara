@@ -16,9 +16,12 @@ public class BasicScript {
 	public final static String LOAD_FILE = "loadFile";
 	public final static String OPEN_MENU = "openMenu";
 	public final static String EXECUTE = "execute";
+	public final static String EXECUTE_QUERY = "executeQuery";
 	public final static String CLEAR_SESSION = "clearSession";
 	public final static String SELECT_PRODUCT = "selectProduct";
-	
+	public final static String ASSERT = "assert";
+	public final static String ASSERT_QUERY = "assertQuery";
+	public final static String ASSERT_AGGREGATE = "assertAggregate";
 	
 	public final static String REJECT = "reject";
 	public final static String REJECT_DETAIL = "rejectDetail";
@@ -57,7 +60,11 @@ public class BasicScript {
 		BASIC_SCRIPT.add(LOAD_FILE);
 		BASIC_SCRIPT.add(OPEN_MENU);
 		BASIC_SCRIPT.add(EXECUTE);
+		BASIC_SCRIPT.add(EXECUTE_QUERY);
 		BASIC_SCRIPT.add(CLEAR_SESSION);
 		BASIC_SCRIPT.add(SELECT_PRODUCT);
+		BASIC_SCRIPT.add(ASSERT);
+		BASIC_SCRIPT.add(ASSERT_QUERY);
+		BASIC_SCRIPT.add(ASSERT_AGGREGATE);
 	}
 }

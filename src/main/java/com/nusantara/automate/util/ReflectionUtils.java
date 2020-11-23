@@ -11,6 +11,20 @@ public class ReflectionUtils {
 	
 	private static Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
 
+	public static boolean checkAssignableFrom(Class<?> sourceClass, Class<?> targetClass) {
+		if (sourceClass.isAssignableFrom(targetClass))
+			return true;
+		
+		boolean result = false;
+		for (Class<?> c : sourceClass.getInterfaces()) {
+			if (c.isAssignableFrom(Class.class))
+				return false;
+			result = checkAssignableFrom(c, targetClass);
+			if (result) break;
+		}
+		return result;
+	}
+	
 	public static void setProperty(Object object, String fieldName, Object data) {
 		setProperty(object, object.getClass(), fieldName, data);;
 	}
