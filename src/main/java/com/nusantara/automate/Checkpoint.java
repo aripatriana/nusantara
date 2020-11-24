@@ -1,6 +1,9 @@
 package com.nusantara.automate;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -10,10 +13,12 @@ import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.nusantara.automate.io.FileIO;
+import com.nusantara.automate.query.QueryEntry;
 import com.nusantara.automate.report.ReportManager;
 import com.nusantara.automate.report.ReportMonitor;
 import com.nusantara.automate.report.SnapshotEntry;
 import com.nusantara.automate.util.DateUtils;
+import com.nusantara.automate.util.FindElement;
 import com.nusantara.automate.util.IDUtils;
 import com.nusantara.automate.util.MapUtils;
 
@@ -40,27 +45,67 @@ public class Checkpoint {
 	@Value("start_time_milis")
 	private String startTimeMilis;
 	
+	@Value("element.table.skipLastRow")
+	private String skipLastRow = "true";
+	
 	public Checkpoint() {
 	}
 	
 	public void takeElements(WebDriver wd, WebExchange we) {
-		Map<String, String> elements = we.getElements(moduleId);
-		Map<String, Object> values = new HashMap<String, Object>();
-		for (Entry<String, String> entry : elements.entrySet()) {
-			values.put(entry.getKey(), wd.findElement(By.xpath(entry.getValue())).getText());
-		}
-		
-		putToSession(we, values);
+		putToSession(we, mapElements(new FindElement(wd), we.getElements(moduleId)));
+	}
+
+	public void takeElements(WebElement wl, WebExchange we) {
+		putToSession(we, mapElements(new FindElement(wl), we.getElements(moduleId)));
 	}
 	
-	public void takeElements(WebElement wl, WebExchange we) {
-		Map<String, String> elements = we.getElements(moduleId);
+	public Map<String, Object> mapElements(FindElement fe, Map<String, String> elements) {
 		Map<String, Object> values = new HashMap<String, Object>();
+		Map<String, Map<String, List<String>>> resultMap = new LinkedHashMap<String, Map<String,List<String>>>();
+		
 		for (Entry<String, String> entry : elements.entrySet()) {
-			values.put(entry.getKey(), wl.findElement(By.xpath(entry.getValue())).getText());
+			if (entry.getKey().contains(QueryEntry.SQUARE_BRACKET)) {
+				String[] keys = entry.getKey().split("\\"+QueryEntry.SQUARE_BRACKET);
+				
+				if (keys.length > 1) {
+					Map<String, List<String>> map = resultMap.get(keys[0]);
+					if (map == null) map = new LinkedHashMap<String, List<String>>();
+					List<String> l = new LinkedList<String>();
+
+					List<WebElement> wls = fe.findElements(By.xpath(entry.getValue())); 
+					for (int i=0; i<wls.size(); i++) {
+						if (skipLastRow.equals("true") && i==wls.size()-1) 
+							break;
+						
+						values.put(keys[0] +"[" + i + "]" + keys[1], wls.get(i).getText());
+						l.add(wls.get(i).getText());
+					}
+					map.put(keys[1].replace(".", ""), l);
+					
+					resultMap.put(keys[0], map);
+				} else {
+					List<String> l = new LinkedList<String>();
+					List<WebElement> wls = fe.findElements(By.xpath(entry.getValue())); 
+					for (int i=0; i<wls.size(); i++) {
+						if (skipLastRow.equals("true") && i==wls.size()-1) 
+							break;
+						
+						values.put(keys[0] +"[" + i + "]", wls.get(i).getText());
+						l.add(wls.get(i).getText());
+					}
+					values.put(keys[0]+QueryEntry.SQUARE_BRACKET, l);
+				}
+			} else {
+				values.put(entry.getKey(), fe.findElement(By.xpath(entry.getValue())).getText());	
+			}
 		}
 		
-		putToSession(we, values);
+		if (resultMap.size() > 0) {
+			for (Entry<String, Map<String, List<String>>> e : resultMap.entrySet()) {
+				values.put(e.getKey()+QueryEntry.SQUARE_BRACKET, MapUtils.transpose(e.getValue()));
+			}
+		}
+		return values;
 	}
 	
 	private void putToSession(WebExchange we, Map<String, Object> values) {

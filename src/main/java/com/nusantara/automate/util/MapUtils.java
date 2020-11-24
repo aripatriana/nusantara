@@ -74,6 +74,29 @@ public class MapUtils {
 		return list;
 	}
 	
+	/**
+	 * {instrument_code=[TLKM, ASII]
+	 * price=[100, 200]}
+	 *
+	 * [{instrument_code='TLKM', price=100}, 
+	 * [{instrument_code='ASII', price=200},
+	 * 
+	 * @param map
+	 * @return
+	 */
+	public static List<Map<String, String>> transpose(Map<String, List<String>> map) {
+		List<Map<String, String>> transpose = new LinkedList<Map<String,String>>();
+		int arrSize = combineValueAsList(map.values()).size()/map.size();
+		for (int i =0; i<arrSize; i++) {
+			Map<String, String> val = new LinkedHashMap<String, String>();
+			for (Entry<String, List<String>> entry : map.entrySet()) {
+				val.put(entry.getKey(), entry.getValue().get(i));
+			}
+			transpose.add(val);
+		}
+		return transpose;
+	}
+	
 	public static List<Object> matrixAsList(LinkedHashMap<Integer, LinkedHashMap<String, Object>> data, String key) {
 		List<Object> list = new LinkedList<Object>();
 		for (Map<String, Object> d : data.values()) {

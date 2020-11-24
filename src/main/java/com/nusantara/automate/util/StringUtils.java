@@ -198,7 +198,7 @@ public class StringUtils {
 		String val = "";
 		for (Object o : value) {
 			if (!val.isEmpty()) val = val + ",";
-			val = val + "[" + removeBracket(String.valueOf(o)) + "]";
+			val = val + "[" + removeCurlBracket(String.valueOf(o)) + "]";
 
 		}
 		return text.replace(var, val);
@@ -237,12 +237,11 @@ public class StringUtils {
 	
 	public static String replaceVar(String text, String var, Object value) {
 		if (value == null) return text;
-		return text.replace(var, removeBracket(value.toString()));
+		return text.replace(var, removeCurlBracket(value.toString()));
 	}
 	
-	public static String removeBracket(String val) {
-		return val;
-//		return val.replace("[", "").replace("]", "").replace("{", "").replace("}", "");
+	public static String removeCurlBracket(String val) {
+		return val.replace("{", "").replace("}", "");
 	}
 	
 	public static String replaceById(String text, String[] var, Map<String, String> ids) {
