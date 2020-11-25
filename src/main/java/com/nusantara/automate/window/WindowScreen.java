@@ -24,6 +24,7 @@ import com.nusantara.automate.report.ReportMonitor;
 import com.nusantara.automate.util.DateUtils;
 import com.nusantara.automate.util.IDUtils;
 import com.nusantara.automate.util.SimpleEntry;
+import com.nusantara.automate.util.StringUtils;
 
 public class WindowScreen {
 	
@@ -122,9 +123,7 @@ public class WindowScreen {
 				outputFile = snapshot(WindowScreen.SNAPSHOT_FINAL);
 			}	
 			
-			ReportMonitor.logSnapshotEntry(targetFolder, prefixFileName, 
-					outputFile.getAbsolutePath().replace((testCaseDir + "//" + DateUtils.format(Long.valueOf(startTimeMilis))), ""), 
-					ReportManager.PASSED);
+			ReportMonitor.logSnapshotEntry(targetFolder, prefixFileName, outputFile.getAbsolutePath(), ReportManager.PASSED);
 		}
 		resetRemark();
 	}
@@ -178,7 +177,7 @@ public class WindowScreen {
 	
 	public File putToTempFile(File sourceFile) throws IOException {
 		sourceFile = normalizeFile(sourceFile);
-		File destFile=new File(tmpDir + "\\" + IDUtils.getRandomId() + ".png");
+		File destFile=new File(StringUtils.path(tmpDir, IDUtils.getRandomId() + ".png"));
 		FileUtils.copyFile(sourceFile, destFile);
 		return destFile;
 	}
@@ -197,11 +196,11 @@ public class WindowScreen {
 	}
 	
 	private String constructOutputFileName() {
-		String targetFileName = testCaseDir + "\\" + DateUtils.format(Long.valueOf(startTimeMilis)) + "\\";
+		String targetFileName = StringUtils.path(testCaseDir, DateUtils.format(Long.valueOf(startTimeMilis)));
 		if (targetFolder != null)
-			targetFileName += targetFolder + "\\" + prefixFileName.replace(targetFolder + "_", "") + "\\";
+			targetFileName = StringUtils.path(targetFileName, targetFolder, prefixFileName.replace(targetFolder + "_", ""));
 		if (prefixFileName != null)
-			targetFileName += prefixFileName + "_";
+			targetFileName = StringUtils.path(targetFileName, prefixFileName + "_");
 		
 		if (remark != null) {
 			targetFileName += IDUtils.getRandomId() + "_" + remark + ".png";

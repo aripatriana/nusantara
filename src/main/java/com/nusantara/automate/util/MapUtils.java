@@ -173,4 +173,12 @@ public class MapUtils {
 			}
 		}
 	}
+	
+	public static <K, V> void copyStartWith(Map<K, V> src, Map<K, V> dest, String key) {
+		for (Entry<K, V> e : src.entrySet()) {
+			if (e.getKey().toString().startsWith(key)) {
+				dest.put(e.getKey(), e.getValue());
+			}
+		}
+	}
 }

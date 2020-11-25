@@ -147,8 +147,8 @@ public class RunTestApplication {
 		searchFile(workflowDir.listFiles(), "elements", mapFiles);
 		for (File file : MapUtils.combineValueAsList(mapFiles.values())) {
 			Map<String, Object> elements = FileIO.loadMapValueFile(file, "=");
-			MapUtils.concatMapKey(file.getName() + ".", elements);
-			ConfigLoader.setElementMap(file.getName(), elements);
+			MapUtils.concatMapKey(file.getName().replace(".element", "") + ".", elements);
+			ConfigLoader.setElementMap(file.getName().replace(".element", ""), elements);
 		}
 		
 		// config

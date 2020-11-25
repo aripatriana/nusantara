@@ -1,8 +1,10 @@
 package com.nusantara.automate.reader;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,13 +89,6 @@ public class WorkflowYReader {
 		
 	}
 	
-
-	public static void main(String[] args) throws ScriptInvalidException {
-		WorkflowYReader y = new WorkflowYReader(new File("D:/error.txt"));
-		System.out.println(y.read());
-		
-	}
-	
 	public LinkedList<WorkflowEntry> read() throws ScriptInvalidException {
 		while(fileReader.iterate()) {
 			String script = fileReader.read();
@@ -113,10 +108,16 @@ public class WorkflowYReader {
 	private WorkflowEntry translate(String script) throws ScriptInvalidException {
 		WorkflowEntry workflowEntry = new WorkflowEntry();
 		
+		// check semicolon
 		if (!script.endsWith(";")) throw new ScriptInvalidException("Missing semicolon " + script);
 		script = script.replace(";", "");
 		
+		// check variable
 		String variable = detectVariable(script);
+		checkVariable(variable);
+		workflowEntry.setVariable(variable);
+		
+		// check script
 		String simpleScript = script;
 		if (variable != null)
 			simpleScript = script.replace("\"" + variable + "\"", "");
@@ -133,21 +134,26 @@ public class WorkflowYReader {
 		if (simpleScripts[0].equals(basicScript)) 
 			throw new ScriptInvalidException("Missing or invalid bracket for " + script);
 		setBasicScript(basicScript, workflowEntry);
-		workflowEntry.setVariable(variable);
+	
 		return workflowEntry;
 	}
 	
-	public static void main1(String[] args) {
-		WorkflowYReader w = new WorkflowYReader(new File("D:\\Files\\1._General\\web-remote-as-1.1\\workflow.y"));
-	
-		try {
-			for (WorkflowEntry we : w.read()) {
-				System.out.println(we);
-			}
-		} catch (ScriptInvalidException e) {
-			log.error("ERROR ", e);
+	private void checkVariable(String script) throws ScriptInvalidException {
+		if (script == null)
+			return;
+		Map<String, Integer> counter = new HashMap<String, Integer>(); 
+		for (int i=0; i<script.length(); i++) {
+			if (script.charAt(i) == '(')
+				counter.put("c", (counter.get("c") == null ? 1 : counter.get("c") + 1));
+			if (script.charAt(i) == ')')
+				counter.put("c", (counter.get("c") == null ? -1 : counter.get("c") - 1));
+			if (script.charAt(i) == '\'')
+				counter.put("sq", (counter.get("sq") == null ? -1 : counter.get("sq") + 1));
 		}
-		
+		if (counter.get("c") != null && (counter.get("c") != 0))
+			throw new ScriptInvalidException("Missing or invalid bracket script for " + script);
+		if (counter.get("sq") != null && counter.get("sq") % 2 != 0)
+			throw new ScriptInvalidException("Invalid single quote for " + script);
 	}
 	
 	private String detectVariable(String script) throws ScriptInvalidException {

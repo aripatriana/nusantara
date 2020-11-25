@@ -118,7 +118,7 @@ public class ReportManager {
 			loopParam.put(EL_NUM_FAIL, testCaseEntry.getNumOfFailed());
 			loopParam.put(EL_NUM_DATA, testCaseEntry.getNumOfData());
 			loopParam.put(EL_STATUS, testCaseEntry.getStatus());
-			loopParam.put(EL_SCEN_HTML, "./" + testCaseEntry.getTestCaseId() + "/" + testCaseEntry.getTestCaseId() + ".html");
+			loopParam.put(EL_SCEN_HTML, StringUtils.path(".", testCaseEntry.getTestCaseId(), testCaseEntry.getTestCaseId() + ".html"));
 			if (testCaseEntry.getStatus().equals(FAILED) || testCaseEntry.getStatus().equals(HALTED)) {
 				loopParam.put(EL_CSS_FLAG, CSS_RED);
 			} else {
@@ -216,14 +216,14 @@ public class ReportManager {
 						Map<String, Object> loopParam = new HashMap<String, Object>();
 						
 						if (snapshotEntry.getSnapshotAs().equals(SnapshotEntry.SNAPSHOT_AS_IMAGE)) {
-							loopParam.put(EL_IMG_FILE, snapshotEntry.getImgFile());
+							loopParam.put(EL_IMG_FILE, "." + snapshotEntry.getImgFile().replace(StringUtils.path(reportDir , reportDateFolder, testCaseEntry.getTestCaseId()), ""));
 							loopParam.put(EL_TYPE_IMAGE, true);
 						} else if (snapshotEntry.getSnapshotAs().equals(SnapshotEntry.SNAPSHOT_AS_RAWTEXT)) {
 							loopParam.put(EL_RAWTEXT, snapshotEntry.getRawText());
 							loopParam.put(EL_TYPE_RAWTEXT, true);
 						} else if(snapshotEntry.getSnapshotAs().equals(SnapshotEntry.SNAPSHOT_AS_CHECKPOINT)) {
 							loopParam.put(EL_RAWTEXT, snapshotEntry.getRawText());
-							loopParam.put(EL_CHECKPOINT_FILE, snapshotEntry.getImgFile());
+							loopParam.put(EL_CHECKPOINT_FILE, "." + snapshotEntry.getImgFile().replace(StringUtils.path(reportDir , reportDateFolder, testCaseEntry.getTestCaseId()), ""));
 							loopParam.put(EL_TYPE_CHECKPOINT, true);
 						}
 						

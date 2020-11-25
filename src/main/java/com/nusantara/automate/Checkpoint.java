@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.SystemUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -21,6 +22,7 @@ import com.nusantara.automate.util.DateUtils;
 import com.nusantara.automate.util.FindElement;
 import com.nusantara.automate.util.IDUtils;
 import com.nusantara.automate.util.MapUtils;
+import com.nusantara.automate.util.StringUtils;
 
 public class Checkpoint {
 
@@ -31,10 +33,10 @@ public class Checkpoint {
 	private String scen;
 	
 	@Value("active_module_id")
-	private String moduleId;
+	private String moduleId = "order-repo";
 	
 	@Value("active_menu_id")
-	private String menuId;
+	private String menuId = "order-repo";
 	
 	@Value("{tmp_dir}")
 	private String tmpDir;
@@ -59,11 +61,11 @@ public class Checkpoint {
 		putToSession(we, mapElements(new FindElement(wl), we.getElements(moduleId)));
 	}
 	
-	public Map<String, Object> mapElements(FindElement fe, Map<String, String> elements) {
-		Map<String, Object> values = new HashMap<String, Object>();
+	public Map<String, Object> mapElements(FindElement fe, Map<String, Object> elements) {
+		Map<String, Object> values = new LinkedHashMap<String, Object>();
 		Map<String, Map<String, List<String>>> resultMap = new LinkedHashMap<String, Map<String,List<String>>>();
 		
-		for (Entry<String, String> entry : elements.entrySet()) {
+		for (Entry<String, Object> entry : elements.entrySet()) {
 			if (entry.getKey().contains(QueryEntry.SQUARE_BRACKET)) {
 				String[] keys = entry.getKey().split("\\"+QueryEntry.SQUARE_BRACKET);
 				
@@ -72,7 +74,7 @@ public class Checkpoint {
 					if (map == null) map = new LinkedHashMap<String, List<String>>();
 					List<String> l = new LinkedList<String>();
 
-					List<WebElement> wls = fe.findElements(By.xpath(entry.getValue())); 
+					List<WebElement> wls = fe.findElements(By.xpath(entry.getValue().toString())); 
 					for (int i=0; i<wls.size(); i++) {
 						if (skipLastRow.equals("true") && i==wls.size()-1) 
 							break;
@@ -85,7 +87,7 @@ public class Checkpoint {
 					resultMap.put(keys[0], map);
 				} else {
 					List<String> l = new LinkedList<String>();
-					List<WebElement> wls = fe.findElements(By.xpath(entry.getValue())); 
+					List<WebElement> wls = fe.findElements(By.xpath(entry.getValue().toString())); 
 					for (int i=0; i<wls.size(); i++) {
 						if (skipLastRow.equals("true") && i==wls.size()-1) 
 							break;
@@ -96,7 +98,7 @@ public class Checkpoint {
 					values.put(keys[0]+QueryEntry.SQUARE_BRACKET, l);
 				}
 			} else {
-				values.put(entry.getKey(), fe.findElement(By.xpath(entry.getValue())).getText());	
+				values.put(entry.getKey(), fe.findElement(By.xpath(entry.getValue().toString())).getText());	
 			}
 		}
 		
@@ -111,16 +113,15 @@ public class Checkpoint {
 	private void putToSession(WebExchange we, Map<String, Object> values) {
 		String filename = getOutputFile();
 		we.putToSession(WebExchange.PREFIX_TYPE_ELEMENT, moduleId, values);
-		MapUtils.clearMapKey("@" + WebExchange.PREFIX_TYPE_ELEMENT + "." + moduleId + ".", values);
+		MapUtils.clearMapKey(moduleId + ".", values);
 		FileIO.write(filename, values);
 		
 		ReportMonitor.logSnapshotEntry(testcase, scen, SnapshotEntry.SNAPSHOT_AS_CHECKPOINT, values.toString(), filename, ReportManager.PASSED);
 	}
 	
 	private String getOutputFile() {
-		String filename = menuId.replace(".", "_") + "_"+ IDUtils.getRandomId() + ".txt";
-		String fullpath = reportDir + "\\" + DateUtils.format(Long.valueOf(startTimeMilis)) + "\\" + testcase + "\\" + scen.replace(testcase + "_", "") + "\\" + filename;
-		return fullpath;
+		String filename = menuId.replace(".", "_") + "_checkpoint_"+ IDUtils.getRandomId() + ".txt";
+		return StringUtils.path(reportDir, DateUtils.format(Long.valueOf(startTimeMilis)), testcase, scen.replace(testcase + "_", ""), filename);
 	}
 
 }

@@ -45,24 +45,37 @@ public class FileIO {
 		try {
 			prop.load(new FileInputStream(file));
 		} catch (FileNotFoundException e) {
-			log.error("ERROR ", e);
+			log.error("Error load properties ", e);
 		} catch (IOException e) {
-			log.error("ERROR ", e);
+			log.error("Error load properties ", e);
 		}
 		return prop;
 	}
 	
 	public static void write(String path, Map<String, Object> data) {
-		FileWriter writer;
 		try {
-			writer = new FileWriter(path);
+			StringBuffer sb = new StringBuffer();
 			for (Entry<String, Object> e : data.entrySet()) {
-				writer.write(e.getKey() + "=" + e.getValue().toString());			
+				if (!sb.toString().isEmpty()) {
+					sb.append(",");
+				}
+				sb.append(e.getKey() + "=" + e.getValue().toString());
 			}
+			write(new FileWriter(path), sb.toString());
+		} catch (IOException e) {
+			log.error("Error writer file ", e);
+			e.printStackTrace();
+		}
+	}
+	
+	public static void write(FileWriter writer, String data) {
+		try {
+			writer.write(data);
 			writer.flush();
 			writer.close();
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (IOException e) {
+			log.error("Error writer file ", e);
+			e.printStackTrace();
 		}
 	}
 }

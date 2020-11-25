@@ -72,6 +72,8 @@ public class MultiLayerXlsFileReader extends MadnessXlsFileReader implements Fil
 				LinkedHashMap<Object, String> removed = new LinkedHashMap<Object, String>();
 				if (!skipHeader()) {
 					header = dataPerSheet.remove(0);
+					if (header == null)
+						throw new XlsSheetStyleException("No header found for " + sheetName);
 					normalizeHeader(removed, removedMap, header);	
 				}
 				

@@ -33,7 +33,7 @@ public class WebExchange {
 	
 	private Map<String, Map<String, Object>> holder = new HashMap<String, Map<String,Object>>();
 	private LinkedList<Map<String, Object>> listMetaData = new LinkedList<Map<String,Object>>();
-	private Map<String, Map<String, String>> elements = new HashMap<String, Map<String,String>>();
+	private Map<String, Map<String, Object>> elements = new HashMap<String, Map<String,Object>>();
 	private Set<String> modules = new LinkedHashSet<String>();	
 	
 	// moduleid|value
@@ -262,8 +262,19 @@ public class WebExchange {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void putToSession(String prefix, String moduleId, Map<String, Object> metadata) {
+		MapUtils.keyLowercase((Map<String, Object>)metadata);
+		for (Entry<String, Object> entry : metadata.entrySet()) {
+			if (entry.getKey().contains(moduleId)) {
+				put("@" + prefix +  "." + entry.getKey() , entry.getValue());				
+			} else {
+				put("@" + prefix +  "." + moduleId + "." + entry.getKey() , entry.getValue());									
+			}
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void putToSessionv2(String prefix, String moduleId, Map<String, Object> metadata) {
 		MapUtils.keyLowercase((Map<String, Object>)metadata);
 		for (Entry<String, Object> entry : metadata.entrySet()) {
 			if (entry.getValue() instanceof List) {
@@ -294,10 +305,10 @@ public class WebExchange {
 				}
 				
 				if (entry.getKey().contains(moduleId)) {
-					put("@" + prefix + "." + entry.getKey().concat("[]"),
+					put("@" + prefix + "." + entry.getKey(),
 							entry.getValue());
 				} else {
-					put("@" + prefix + "." + moduleId + "." + entry.getKey().concat("[]"),
+					put("@" + prefix + "." + moduleId + "." + entry.getKey(),
 							entry.getValue());							
 				}
 			} else {
@@ -364,6 +375,13 @@ public class WebExchange {
 	
 	public List<Map<String, Object>> getAllListLocalMap() {
 		return getSession().getAllListLocalMap();
+	}
+
+	public Map<String, Object> getLocalSystemMap() {
+		Map<String, Object> src = getLocalMap(getCurrentSession());
+		Map<String, Object> dest = new HashMap<String, Object>();
+		MapUtils.copyStartWith(src, dest, PREFIX_TYPE_SYSTEM);
+		return dest;
 	}
 	
 	public Map<String, Object> getLocalMap() {
@@ -444,29 +462,29 @@ public class WebExchange {
 	}
 	
 	public void addElement(String moduleId, String key, String value) {
-		Map<String, String> map = elements.get(moduleId);
+		Map<String, Object> map = elements.get(moduleId);
 		if (map == null)
-			map = new HashMap<String, String>();
+			map = new HashMap<String, Object>();
 		map.put(key, value);
 	}
 	
-	public Map<String, String> getElements(String moduleId) {
+	public Map<String, Object> getElements(String moduleId) {
 		return elements.get(moduleId);
 	}
 	
-	public Map<String, Map<String, String>> getElements() {
+	public Map<String, Map<String, Object>> getElements() {
 		return elements;
 	}
 	
 	public void addElement(String moduleId, Map<String, String> data) {
-		Map<String, String> map = elements.get(moduleId);
+		Map<String, Object> map = elements.get(moduleId);
 		if (map == null)
-			map = new HashMap<String, String>();
+			map = new HashMap<String, Object>();
 		map.putAll(data);
 	}
 	
 	public void addElements(Map<String, Map<String, Object>> elements) {
-		elements.putAll(elements);
+		this.elements.putAll(elements);
 	}
 	
 	private void reset() {

@@ -275,7 +275,7 @@ public abstract class Workflow {
 								((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 								
 								ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
-										getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalMap(), metadata);
+										getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(), metadata);
 							} catch (FailedTransactionException e) {
 								log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
 								log.error("ERROR ", e);
@@ -284,7 +284,7 @@ public abstract class Workflow {
 								((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 								
 								ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
-										getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalMap(),
+										getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(),
 										metadata, e.getMessage(), ReportManager.FAILED);
 							}
 						}
@@ -317,7 +317,7 @@ public abstract class Workflow {
 							((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 							
 							ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
-									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalMap(), metadata);
+									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(), metadata);
 						} catch (FailedTransactionException e) {
 							log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
 							log.error("ERROR ", e);
@@ -326,7 +326,7 @@ public abstract class Workflow {
 							((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 							
 							ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(), getWebExchange().get("active_scen").toString(),
-									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalMap(),
+									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(),
 									metadata, e.getMessage(), ReportManager.FAILED);
 						}
 					}

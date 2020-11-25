@@ -25,7 +25,6 @@ public abstract class AbstractBaseDriver {
 	
 	private final int TIMEOUT_IN_SECOND = 15;
 	
-	protected Menu menu;
 	protected WebDriver wd;
 	protected WindowScreen ws;
 	protected Checkpoint cp;
