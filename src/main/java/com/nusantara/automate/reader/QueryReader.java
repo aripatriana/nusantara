@@ -63,6 +63,8 @@ public class QueryReader {
 	
 	
 	public static String parseSelect(QueryEntry qe, String query) throws ScriptInvalidException {
+		if (query.contains("*"))
+			throw new ScriptInvalidException("It is forbidden using an asterisk in a select query");
 		query = query.replace(SELECT, "");
 		String[] headers = query.split(",");
 		String returnQuery = "";
