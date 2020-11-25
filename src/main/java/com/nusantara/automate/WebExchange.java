@@ -82,7 +82,7 @@ public class WebExchange {
 			int i = 0;
 			for (Map<String, Object> metadata : getListMetaData(moduleId)) {
 				createSession(i);
-				putToSession(WebExchange.PREFIX_TYPE_DATA, moduleId, metadata);
+				putToSessionAsList(WebExchange.PREFIX_TYPE_DATA, moduleId, metadata);
 				i++;
 			}
 		}
@@ -274,7 +274,7 @@ public class WebExchange {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void putToSessionv2(String prefix, String moduleId, Map<String, Object> metadata) {
+	public void putToSessionAsList(String prefix, String moduleId, Map<String, Object> metadata) {
 		MapUtils.keyLowercase((Map<String, Object>)metadata);
 		for (Entry<String, Object> entry : metadata.entrySet()) {
 			if (entry.getValue() instanceof List) {
@@ -305,11 +305,11 @@ public class WebExchange {
 				}
 				
 				if (entry.getKey().contains(moduleId)) {
-					put("@" + prefix + "." + entry.getKey(),
+					put("@" + prefix + "." + entry.getKey().concat("[]"),
 							entry.getValue());
 				} else {
-					put("@" + prefix + "." + moduleId + "." + entry.getKey(),
-							entry.getValue());							
+					put("@" + prefix + "." + moduleId + "." + entry.getKey().concat("[]"),
+							entry.getValue());						
 				}
 			} else {
 				if (entry.getKey().contains(moduleId)) {

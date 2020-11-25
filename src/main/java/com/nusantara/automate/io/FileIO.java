@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -22,12 +23,12 @@ public class FileIO {
 	
 	public static Map<String, Object> loadMapValueFile(File path, String separator) {
 		BufferedFileReader reader = new BufferedFileReader(path);
-		Map<String, Object> data = new HashMap<String, Object>();
+		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		while(reader.iterate()) {
 			String text = reader.read();
 			String last = StringUtils.removeCharIndex(text, separator, 0);
-			
-			data.put(text.replace(separator+last, ""), last);
+			if (!text.isEmpty() && !last.isEmpty())
+				data.put(text.replace(separator+last, ""), last);
 		}
 		return data;		
 	}

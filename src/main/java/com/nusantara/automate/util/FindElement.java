@@ -50,4 +50,26 @@ public class FindElement {
 		}
 		return null;
 	}
+	
+	public List<WebElement> findVisibleElements(String[] xpaths) {
+		for (String xpath : xpaths) {
+			List<WebElement> elements = findElements(By.xpath(xpath));
+			if (elements != null)
+				return elements;
+			
+		}
+		return null;
+	}
+	
+	public WebElement findVisibleElement(String[] xpaths) {
+		if (xpaths != null) {
+			for (String xpath : xpaths) {
+				WebElement element = findElement(By.xpath(xpath));
+				if (element != null)
+					return element;
+				
+			}
+		}
+		return null;
+	}
 }

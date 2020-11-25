@@ -74,7 +74,7 @@ public class Checkpoint {
 					if (map == null) map = new LinkedHashMap<String, List<String>>();
 					List<String> l = new LinkedList<String>();
 
-					List<WebElement> wls = fe.findElements(By.xpath(entry.getValue().toString())); 
+					List<WebElement> wls = fe.findVisibleElements(entry.getValue().toString().split(";"));
 					for (int i=0; i<wls.size(); i++) {
 						if (skipLastRow.equals("true") && i==wls.size()-1) 
 							break;
@@ -87,7 +87,7 @@ public class Checkpoint {
 					resultMap.put(keys[0], map);
 				} else {
 					List<String> l = new LinkedList<String>();
-					List<WebElement> wls = fe.findElements(By.xpath(entry.getValue().toString())); 
+					List<WebElement> wls = fe.findVisibleElements(entry.getValue().toString().split(";"));
 					for (int i=0; i<wls.size(); i++) {
 						if (skipLastRow.equals("true") && i==wls.size()-1) 
 							break;
@@ -98,7 +98,7 @@ public class Checkpoint {
 					values.put(keys[0]+QueryEntry.SQUARE_BRACKET, l);
 				}
 			} else {
-				values.put(entry.getKey(), fe.findElement(By.xpath(entry.getValue().toString())).getText());	
+				values.put(entry.getKey(), fe.findVisibleElement(entry.getValue().toString().split(";")).getText());	
 			}
 		}
 		

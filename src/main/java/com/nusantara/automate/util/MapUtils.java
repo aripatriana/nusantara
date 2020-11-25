@@ -74,6 +74,15 @@ public class MapUtils {
 		return list;
 	}
 	
+	public static int findMaxList(Map<String, List<String>> map) {
+		int i=0;
+		for (Entry<String, List<String>> e : map.entrySet()) {
+			if (e.getValue().size() > i)
+				i=e.getValue().size();
+		}
+		return i;
+	}
+	
 	/**
 	 * {instrument_code=[TLKM, ASII]
 	 * price=[100, 200]}
@@ -86,11 +95,15 @@ public class MapUtils {
 	 */
 	public static List<Map<String, String>> transpose(Map<String, List<String>> map) {
 		List<Map<String, String>> transpose = new LinkedList<Map<String,String>>();
-		int arrSize = combineValueAsList(map.values()).size()/map.size();
+		int arrSize = findMaxList(map);
 		for (int i =0; i<arrSize; i++) {
 			Map<String, String> val = new LinkedHashMap<String, String>();
 			for (Entry<String, List<String>> entry : map.entrySet()) {
-				val.put(entry.getKey(), entry.getValue().get(i));
+				try {
+					val.put(entry.getKey(), entry.getValue().get(i));
+				} catch (IndexOutOfBoundsException e) {				
+					val.put(entry.getKey(), "");
+				}
 			}
 			transpose.add(val);
 		}

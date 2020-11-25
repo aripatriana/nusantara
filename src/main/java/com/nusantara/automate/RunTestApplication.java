@@ -2,7 +2,6 @@ package com.nusantara.automate;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.exception.ScriptInvalidException;
 import com.nusantara.automate.io.FileIO;
-import com.nusantara.automate.query.QueryEntry;
 import com.nusantara.automate.reader.QueryReader;
 import com.nusantara.automate.reader.TemplateReader;
 import com.nusantara.automate.reader.WorkflowYReader;
