@@ -2,6 +2,8 @@ package com.nusantara.automate;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -140,13 +142,23 @@ public class RunTestApplication {
 		systemData.put("{config_dir}", StringUtils.path(System.getProperty("user.dir"),"config"));
 		systemData.put("{keyfile_dir}", StringUtils.path(System.getProperty("user.dir"),"config","keyfile"));
 		systemData.put("{template_dir}", StringUtils.path(System.getProperty("user.dir"),"config","template"));
+		systemData.put("{element_dir}", StringUtils.path(System.getProperty("user.dir"),"config","element"));
 		systemData.put("{testcase_dir}", (moduleName != null ? moduleName : StringUtils.path(System.getProperty("user.dir"),"testcase")));
 		systemData.put("{report_dir}", (moduleName != null ? moduleName : StringUtils.path(System.getProperty("user.dir"),"report")));
 		ConfigLoader.getConfigMap().putAll(systemData);
 		
+	
 		// element
-		File workflowDir = new File(ConfigLoader.getConfig("{config_dir}").toString());
 		Map<String , LinkedList<File>> mapFiles = new HashMap<String, LinkedList<File>>();
+		try {
+			URL url = RunTestApplication.class.getClassLoader().getResource("element");
+			File file = new File(url.toURI());
+			searchFile(file.listFiles(), "elements", mapFiles);
+		} catch (Exception e) {
+			log.error("Failed to load defined elements");
+		}
+		
+		File workflowDir = new File(ConfigLoader.getConfig("{element_dir}").toString());
 		searchFile(workflowDir.listFiles(), "elements", mapFiles);
 		for (File file : MapUtils.combineValueAsList(mapFiles.values())) {
 			Map<String, Object> elements = FileIO.loadMapValueFile(file, "=");
