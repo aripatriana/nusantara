@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.Menu;

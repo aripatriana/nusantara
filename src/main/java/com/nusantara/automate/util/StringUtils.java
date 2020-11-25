@@ -138,9 +138,9 @@ public class StringUtils {
 	
 	public static String[] parseStatement(String statement, String[] separator) throws ScriptInvalidException {
 		for (String s : separator) {
-			if (statement.contains(statement)) {
+			if (statement.contains(s)) {
 				String[] sh = statement.split(s);
-				if (sh.length !=  2)
+				if (sh.length >  2)
 					throw new ScriptInvalidException("Script not valid for " + statement);
 				return new String[] {sh[0], sh[1], s};				
 			}
@@ -156,7 +156,7 @@ public class StringUtils {
 	}
 	
 	public static String concatIfNotEmpty(String text, String concat) {
-		if (!text.isEmpty() && !text.isBlank()) 
+		if (!text.isEmpty()) 
 			text += ",";
 		return text;
 	}

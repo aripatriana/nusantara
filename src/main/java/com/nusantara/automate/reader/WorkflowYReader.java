@@ -83,7 +83,7 @@ public class WorkflowYReader {
 		}
 
 		public List<String> getScripts() throws ScriptInvalidException {
-			if (!tmp.toString().isBlank()) throw new ScriptInvalidException("Invalid script for " + tmp.toString().replace("#", ""));
+			if (!tmp.toString().isEmpty()) throw new ScriptInvalidException("Invalid script for " + tmp.toString().replace("#", ""));
 			return scripts;
 		}
 		

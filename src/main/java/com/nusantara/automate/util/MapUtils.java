@@ -43,7 +43,7 @@ public class MapUtils {
 	public static String listAsString(List<Object> list, String separator) {
 		String result = "";
 		for (Object o : list) {
-			if (!result.isBlank()) result += separator;
+			if (!result.isEmpty()) result += separator;
 			result+="'" + o.toString() + "'";
 		}
 		return result;

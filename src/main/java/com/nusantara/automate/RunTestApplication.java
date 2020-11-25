@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.exception.ScriptInvalidException;
 import com.nusantara.automate.io.FileIO;
+import com.nusantara.automate.query.QueryEntry;
+import com.nusantara.automate.reader.QueryReader;
+import com.nusantara.automate.reader.TemplateReader;
 import com.nusantara.automate.reader.WorkflowYReader;
 import com.nusantara.automate.report.ReportManager;
 import com.nusantara.automate.report.ReportMonitor;
@@ -284,11 +287,19 @@ public class RunTestApplication {
 					if (function == null) {
 						throw new ScriptInvalidException("Function not found for " + entry.getVariable());
 					}
-				} else if (entry.checkKeyword(BasicScript.ASSERT_AGGREGATE)) {
+				} else if (entry.checkKeyword(BasicScript.ASSERT)) {
+					StringUtils.parseStatement(entry.getVariable(), Statement.MARK);
+				} else if (entry.checkKeyword(BasicScript.ASSERT_QUERY)) {
+					QueryReader qr = new QueryReader(entry.getVariable());
+					qr.read();
+				}else if (entry.checkKeyword(BasicScript.ASSERT_AGGREGATE)) {
 					File file = workflowConfig.getWorkflowQuery(workflowConfig.getWorkflowMapKey(entryList.getKey()), entry.getVariable());
 					if (file == null) {
 						throw new ScriptInvalidException("File not found for " + entry.getVariable());
 					}
+					TemplateReader tr = new TemplateReader(file);
+					QueryReader qr = new QueryReader(tr.read().toString());
+					qr.read();
 				} else if (entry.checkKeyword(BasicScript.LOGIN) || entry.checkKeyword(BasicScript.RELOGIN)) {
 					Map<String, Object> login = ConfigLoader.getLoginInfo(entry.getVariable());
 					if (login == null) {
