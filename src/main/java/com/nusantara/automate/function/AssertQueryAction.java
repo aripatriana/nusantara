@@ -85,7 +85,7 @@ public class AssertQueryAction implements Actionable {
 				result = DBConnection.selectSimpleQuery(query, columns);
 			
 				if (result.size() ==0)
-					throw new FailedTransactionException("Result out of expected, row size " + result.size());
+					result.add(new String[columns.length]);
 					
 				Assertion assertion = new Assertion();
 				assertion.setQuery(query);
@@ -113,12 +113,12 @@ public class AssertQueryAction implements Actionable {
 							assertion.addStatement(statement);
 						}
 					}
+					i++;
 				}
 				asserts.add(assertion);
-				i++;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new FailedTransactionException(e.getMessage());
 		}
 		
 		String rawText = "";

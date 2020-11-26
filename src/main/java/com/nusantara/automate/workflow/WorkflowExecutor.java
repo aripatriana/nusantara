@@ -84,6 +84,7 @@ public class WorkflowExecutor {
 				
 				ReportMonitor.completeScen(workflowKey);
 			} catch (Exception e) {
+				e.printStackTrace();
 				log.error(e.toString());
 				// scenario halted caused by exception
 				ReportMonitor.scenHalted(scen, workflowKey, e.getMessage());

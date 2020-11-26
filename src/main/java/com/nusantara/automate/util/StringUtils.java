@@ -56,6 +56,19 @@ public class StringUtils {
 		return "'" + value + "'";
 	}
 	
+	public static int containsCharFollowingBy(String checked, Character findWith, Character following) {
+		int i = containsCharForward(checked, findWith);
+		if (i<0)
+			return checked.length();
+		if (i+1>checked.length())
+			return -1;
+		if (checked.charAt(i+1) != following)
+			return -1;
+		if (i+2>checked.length())
+			return i;
+		return containsCharFollowingBy(checked.substring(i+2, checked.length()), findWith, following);
+	}
+	
 	public static int containsCharForward(String checked, Character findWith, int index) {
 		for (int i=0; i<checked.length(); i++) {
 			if (i == index && checked.charAt(i) == findWith) {
@@ -145,6 +158,11 @@ public class StringUtils {
 				return new String[] {sh[0], sh[1], s};				
 			}
 		}
+		if (StringUtils.containsCharFollowingBy(statement, '=', '=') == -1)
+			throw new ScriptInvalidException("Missing equation of equality == for " + statement);
+		if (StringUtils.containsCharFollowingBy(statement, '<', '>') == -1
+			|| statement.contains(">"))
+			throw new ScriptInvalidException("Missing equation of inequality <> for " + statement);
 		throw new ScriptInvalidException("Script not valid for " + statement);
 	}
 	

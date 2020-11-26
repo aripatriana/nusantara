@@ -80,7 +80,7 @@ public class DBConnection {
 		}
 	}
 	
-	public static List<String[]> selectSimpleQuery(String simpleQuery, String[] columns) {
+	public static List<String[]> selectSimpleQuery(String simpleQuery, String[] columns) throws SQLException {
 		List<String[]> results = new ArrayList<String[]>();
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -96,6 +96,7 @@ public class DBConnection {
 			}
 		} catch (SQLException e) {
 			log.error("ERROR ", e);
+			throw e;
 		} finally {
 				if (stmt != null) try {stmt.close();} catch (Exception e) {}
 				if (rs != null) try {rs.close();} catch (Exception e) {}
@@ -104,7 +105,7 @@ public class DBConnection {
 	}
 	
 	
-	public static List<String[]> selectSimpleQueryAndWait(String simpleQuery, String[] columns, int timeoutInSecond) throws ReachTimeoutException {
+	public static List<String[]> selectSimpleQueryAndWait(String simpleQuery, String[] columns, int timeoutInSecond) throws ReachTimeoutException, SQLException {
 		List<String[]> resultList = selectSimpleQuery(simpleQuery, columns);
 		long start = System.currentTimeMillis();
 		while(resultList == null || resultList.isEmpty()) {
@@ -120,7 +121,7 @@ public class DBConnection {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public static List<Object[]> selectSimpleQuery(String simpleQuery, String[] columns, Class[] clazz) {
+	public static List<Object[]> selectSimpleQuery(String simpleQuery, String[] columns, Class[] clazz) throws SQLException {
 		List<Object[]> results = new ArrayList<Object[]>();
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -144,6 +145,7 @@ public class DBConnection {
 			}
 		} catch (SQLException e) {
 			log.error("ERROR ", e);
+			throw e;
 		}  finally {
 			if (stmt != null) try {stmt.close();} catch (Exception e) {}
 			if (rs != null) try {rs.close();} catch (Exception e) {}

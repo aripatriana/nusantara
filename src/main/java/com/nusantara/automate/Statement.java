@@ -88,6 +88,10 @@ public class Statement {
 		Object v1 = val1;
 		Object v2 = val2;
 		
+		if (v1 == null)
+			v1 ="null";
+		if (v2 == null)
+			v2 = "null";
 		if (v1 instanceof String)
 			v1 = v1.toString().replace("'", "").replace("\"", "");
 		if (v2 instanceof String)

@@ -36,6 +36,8 @@ public class QueryReader {
 			fileReader.close();
 			selectQuery = sb.toString();
 		} 
+		if (selectQuery.trim().endsWith(";"))
+			throw new ScriptInvalidException("Invalid character, semicolon not allowed in a query " + selectQuery);
 		QueryEntry qe = new QueryEntry();
 		String[] sq = splitQuery(selectQuery);
 		String query  = sq[0];
@@ -64,8 +66,17 @@ public class QueryReader {
 	
 	public static String parseSelect(QueryEntry qe, String query) throws ScriptInvalidException {
 		if (query.contains("*"))
-			throw new ScriptInvalidException("It is forbidden using an asterisk in a select query");
-		query = query.replace(SELECT, "");
+			throw new ScriptInvalidException("Not allowed using an asterisk in a select query for " + query);
+		if (!query.startsWith(SELECT))
+			throw new ScriptInvalidException("Missing select statement for " + query);
+		if (StringUtils.containsCharFollowingBy(query, '=', '=') == -1)
+			throw new ScriptInvalidException("Missing equation of equality == for " + query);
+		if (StringUtils.containsCharFollowingBy(query, '<', '>') == -1
+			|| query.contains(">"))
+			throw new ScriptInvalidException("Missing equation of inequality <> for " + query);
+		
+		int index = StringUtils.containsCharForward(query, ' ');
+		query = query.substring(index, query.length());
 		String[] headers = query.split(",");
 		String returnQuery = "";
 		for (String header : headers) {
@@ -105,7 +116,14 @@ public class QueryReader {
 		String[] result = new String[] {"", ""};
 		if (strs.length > 0) {
 			int count=0;
-			while(!strs[count].trim().equals(FROM)) {
+			int c = 0;
+			while((!strs[count].trim().startsWith(FROM)) || c>0) {
+				for (int i=0; i<strs[count].length(); i++) {
+					if (strs[count].charAt(i) == '(')
+						c++;
+					if ((strs[count].charAt(i) == ')'))
+						c--;
+				}
 				result[0] += strs[count] + " ";
 				count++;
 			}

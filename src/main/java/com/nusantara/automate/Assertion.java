@@ -53,7 +53,7 @@ public class Assertion {
 		if (query != null) sb.append("<b>Result</b>").append("<br>").append(getResult()).append("<br><br>");
 		if (statements.size() > 0) sb.append("<b>Assert</b>").append("<br>");		
 		for (Statement s : statements) {
-			sb.append(s.getStatement()).append("<br>");
+			sb.append("&raquo; " + s.getStatement()).append("<br>");
 		}
 		return sb.toString();
 	}

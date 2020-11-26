@@ -168,14 +168,18 @@ public class MapUtils {
 		map.putAll(copied);
 	}
 
-	public static void keyLowercase(List<Map<String, Object>> list) {
-		for (Map<String, Object> map : list) {
-			Map<String, Object> copied = new LinkedHashMap<String, Object>();
-			for (Entry<String, Object> e : map.entrySet()) {
-				copied.put(e.getKey().toLowerCase(), e.getValue());
+	@SuppressWarnings("unchecked")
+	public static void keyLowercase(List<?> list) {
+		for (Object o : list) {
+			if (o instanceof Map) {
+				Map<String, Object> map = (Map<String, Object>) o;
+				Map<String, Object> copied = new LinkedHashMap<String, Object>();
+				for (Entry<String, Object> e : map.entrySet()) {
+					copied.put(e.getKey().toLowerCase(), e.getValue());
+				}
+				map.clear();
+				map.putAll(copied);
 			}
-			map.clear();
-			map.putAll(copied);
 		}
 	}
 	

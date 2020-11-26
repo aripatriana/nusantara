@@ -100,6 +100,7 @@ public class ReportMonitor {
 	public static void logError(String testCaseId, String tscenId, String errorMessage) {
 		ScenEntry scenEntry =  getScenEntry(testCaseId, tscenId);
 		scenEntry.appendErrorLog(errorMessage);
+		scenEntry.setStatus(ReportManager.FAILED);
 	}
 	
 	public static void logSnapshotEntry(String testCaseId, String scenId, String as, String rawText, String filePath, String status) {

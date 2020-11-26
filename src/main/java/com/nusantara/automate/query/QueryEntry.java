@@ -119,7 +119,7 @@ public class QueryEntry {
 				List<String> r = rounded.get(s[0]);
 				if (r == null) r = new ArrayList<String>();
 				if (s.length == 2)
-					r.add(s[1].replace(".",""));
+					r.add(s[1].replace(".","").trim());
 				rounded.put(s[0], r);
 			} else if(p.contains(SQUARE_BRACKET)) {
 				String[] s = p.split("\\" + SQUARE_BRACKET);
@@ -128,7 +128,7 @@ public class QueryEntry {
 				List<String> r = squared.get(s[0]);
 				if (r == null) r = new ArrayList<String>();
 				if (s.length == 2)
-					r.add(s[1].replace(".",""));
+					r.add(s[1].replace(".","").trim());
 				squared.put(s[0], r);
 			} else {
 				query = query.replace(p, StringUtils.quote(webExchange.get(p).toString()));

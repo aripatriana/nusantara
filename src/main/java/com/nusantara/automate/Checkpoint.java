@@ -1,14 +1,11 @@
 package com.nusantara.automate;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang.SystemUtils;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +55,14 @@ public class Checkpoint {
 	}
 
 	public void takeElements(WebElement wl, WebExchange we) {
+		putToSession(we, mapElements(new FindElement(wl), we.getElements(moduleId)));
+	}
+	
+	public void takeElements(WebDriver wd, WebExchange we, String moduleId) {
+		putToSession(we, mapElements(new FindElement(wd), we.getElements(moduleId)));
+	}
+
+	public void takeElements(WebElement wl, WebExchange we, String moduleId) {
 		putToSession(we, mapElements(new FindElement(wl), we.getElements(moduleId)));
 	}
 	

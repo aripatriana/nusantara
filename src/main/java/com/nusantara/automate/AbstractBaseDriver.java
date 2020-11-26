@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Function;
 import com.nusantara.automate.window.WindowScreen;
@@ -24,6 +25,13 @@ public abstract class AbstractBaseDriver {
 	private Logger log = LoggerFactory.getLogger(AbstractBaseDriver.class);
 	
 	private final int TIMEOUT_IN_SECOND = 15;
+	
+	
+	@Value("active_module_id")
+	private String moduleId;
+	
+	@Value("active_menu_id")
+	private String menuId;
 	
 	protected WebDriver wd;
 	protected WindowScreen ws;
@@ -43,11 +51,20 @@ public abstract class AbstractBaseDriver {
 	}
 	
 	public void takeElementsAsCheckPoint(WebElement wl, WebExchange we) {
-		cp.takeElements(wl, we);
+		cp.takeElements(wl, we, moduleId);
+	}
+		
+	public void takeElementsAsCheckPoint(WebElement wl, WebExchange we, String moduleId) {
+		cp.takeElements(wl, we, moduleId);
 	}
 	
+	
 	public void takeElementsAsCheckPoint(WebExchange we) {
-		cp.takeElements(wd, we);
+		cp.takeElements(wd, we, moduleId);
+	}
+
+	public void takeElementsAsCheckPoint(WebExchange we, String moduleId) {
+		cp.takeElements(wd, we, moduleId);
 	}
 	
 	public void captureFullWindow() {
