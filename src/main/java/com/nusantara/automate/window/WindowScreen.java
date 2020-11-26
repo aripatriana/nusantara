@@ -191,6 +191,7 @@ public class WindowScreen {
 	
 	public File putToFile(BufferedImage bufferedImg) throws IOException {
 		File destFile=new File(constructOutputFileName());
+		destFile.mkdirs();
 		ImageIO.write(bufferedImg, "png", destFile);
 		return destFile;
 	}
