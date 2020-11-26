@@ -12,6 +12,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.Callback;
@@ -22,6 +23,8 @@ import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.exception.FailedTransactionException;
 import com.nusantara.automate.util.Sleep;
 
+import sun.awt.SunToolkit.OperationTimedOut;
+
 
 /**
  * The action for handling the modal page response 
@@ -31,6 +34,9 @@ import com.nusantara.automate.util.Sleep;
  */
 public class ModalSuccessAction extends WebElementWrapper implements Actionable {
 	Logger log = LoggerFactory.getLogger(ModalSuccessAction.class);
+	
+	@Value(value = "timeout.modal.callback")
+	private String timeoutModalCallback;
 	
 	private Callback callback;
 	private String successId;
@@ -81,7 +87,7 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 				@Override
 				public void run() {
 					try {
-						WebDriverWait wait = new WebDriverWait(getDriver(),180);
+						WebDriverWait wait = new WebDriverWait(getDriver(),Integer.valueOf(timeoutModalCallback));
 						wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(successId)));
 						modalSuccess.put(Boolean.TRUE, successId);
 						countDownOk.countDown();	
@@ -100,7 +106,7 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 					@Override
 					public void run() {
 						try {
-							WebDriverWait wait = new WebDriverWait(getDriver(),180);
+							WebDriverWait wait = new WebDriverWait(getDriver(),Integer.valueOf(timeoutModalCallback));
 							wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(failedModalId)));
 							modalSuccess.put(Boolean.FALSE, failedModalId);
 							countDownOk.countDown();	

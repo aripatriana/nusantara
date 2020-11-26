@@ -32,6 +32,10 @@ public class ExecuteQueryAction implements Actionable {
 		}
 		
 		if (executeBatch) {
+			if (webExchange.getCountSession() == 0) 
+				ReportMonitor.logError(webExchange.get("active_scen").toString(),
+						webExchange.get("active_workflow").toString(), "Session is needed when execute query using variable, see loadFile()");
+			
 			for (int i=0; i<webExchange.getCountSession(); i++) {
 				webExchange.setCurrentSession(i);
 				try {
