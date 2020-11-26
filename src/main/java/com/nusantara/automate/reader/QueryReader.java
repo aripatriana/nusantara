@@ -71,8 +71,9 @@ public class QueryReader {
 			throw new ScriptInvalidException("Missing select statement for " + query);
 		if (StringUtils.containsCharFollowingBy(query, '=', '=') == -1)
 			throw new ScriptInvalidException("Missing equation of equality == for " + query);
-		if (StringUtils.containsCharFollowingBy(query, '<', '>') == -1
-			|| query.contains(">"))
+		if (StringUtils.containsCharFollowingBy(query, '<', '>') == -1)
+			throw new ScriptInvalidException("Missing equation of inequality <> for " + query);
+		if (StringUtils.containsCharBackwardFollowingBy(query, '>', '<') == -1)
 			throw new ScriptInvalidException("Missing equation of inequality <> for " + query);
 		
 		int index = StringUtils.containsCharForward(query, ' ');
@@ -86,21 +87,31 @@ public class QueryReader {
 				String var1 = DataTypeUtils.checkColumnPrefix(sh[0]);
 				String var2 = DataTypeUtils.checkColumnPrefix(sh[1]);
 				if (DataTypeUtils.checkIsColumn(var1) && DataTypeUtils.checkIsColumn(var2)) {
+					// two columns defined
 					returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
 					returnQuery += var1 + " ";
-					qe.addStatement(var1, var2, mark);			
+					qe.addStatement(var1, var2, mark);
+					qe.addColumn(var1);
 				} else if (DataTypeUtils.checkIsColumn(var1)) {
+					// column defined in the left side
 					returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
 					returnQuery += var1 + " ";
-					qe.addStatement(var1, var2, mark);			
+					qe.addStatement(var1, var2, mark);
+					qe.addColumn(var1);
 				} else if (DataTypeUtils.checkIsColumn(var2)) {
+					// column defined in the right side
 					returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
 					returnQuery += var2 + " ";
-					qe.addStatement(var2, var1, mark);			
+					qe.addStatement(var2, var1, mark);
+					qe.addColumn(var2);
+				} else {
+					// no column defined
+					qe.addStatement(var1, var2, mark);
 				}
 			} else {
 				returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
 				qe.addStatement(header.trim(), null, null);
+				qe.addColumn(header.trim());
 				returnQuery += header.trim() + " ";
 			}
 			

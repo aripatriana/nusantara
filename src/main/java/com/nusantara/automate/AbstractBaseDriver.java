@@ -28,11 +28,7 @@ public abstract class AbstractBaseDriver {
 	
 	
 	@Value("active_module_id")
-	private String moduleId;
-	
-	@Value("active_menu_id")
-	private String menuId;
-	
+	private String activeModuleId;
 	protected WebDriver wd;
 	protected WindowScreen ws;
 	protected Checkpoint cp;
@@ -51,7 +47,7 @@ public abstract class AbstractBaseDriver {
 	}
 	
 	public void takeElementsAsCheckPoint(WebElement wl, WebExchange we) {
-		cp.takeElements(wl, we, moduleId);
+		cp.takeElements(wl, we, activeModuleId);
 	}
 		
 	public void takeElementsAsCheckPoint(WebElement wl, WebExchange we, String moduleId) {
@@ -60,7 +56,7 @@ public abstract class AbstractBaseDriver {
 	
 	
 	public void takeElementsAsCheckPoint(WebExchange we) {
-		cp.takeElements(wd, we, moduleId);
+		cp.takeElements(wd, we, activeModuleId);
 	}
 
 	public void takeElementsAsCheckPoint(WebExchange we, String moduleId) {

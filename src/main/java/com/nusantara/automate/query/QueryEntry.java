@@ -24,6 +24,7 @@ public class QueryEntry {
 	
 	private String query;
 	private Map<String, Statement> statements = new LinkedHashMap<String, Statement>();
+	private List<String> columns = new LinkedList<String>();
 	private List<String> parameters = new ArrayList<String>();
 	
 	public QueryEntry() {
@@ -37,28 +38,36 @@ public class QueryEntry {
 		return query;
 	}
 	
-	public void addStatement(String column, String variable, String equality) {
-		int counter = 0;
-		String columnIndex = column;
-		while (statements.containsKey(columnIndex)) {
-			counter++;
-			columnIndex=column +"#"+counter;
-		}
-		
-		if (variable != null && equality != null)
-			statements.put(columnIndex, new Statement(column, variable, equality));
+	public void addColumn(String column) {
+//		int counter = 0;
+//		String columnIndex = column;
+//		
+//		while (MapUtils.findEquals(columns, columnIndex) != null) {
+//			counter++;
+//			columnIndex=column +"#"+counter;
+//		}
+//		
+		columns.add(column);
+	}
+	public void addStatement(String var1, String var2, String equality) {
+		if (var1 != null && equality != null)
+			statements.put(var1, new Statement(var1, var2, equality));
 		else
-			statements.put(columnIndex, null);
+			statements.put(var1, null);
 	}
 	
 	public List<String> getColumns() {
-		List<String> columns = new LinkedList<String>();
-		for (String column : statements.keySet()) {
-			column = com.nusantara.automate.util.StringUtils.removeLastChar(column, "#");
-			columns.add(column);
-		}
 		return columns;
 	}
+	
+//	public List<String> getColumns() {
+//		List<String> columns = new LinkedList<String>();
+//		for (String column : statements.keySet()) {
+//			column = com.nusantara.automate.util.StringUtils.removeLastChar(column, "#");
+//			columns.add(column);
+//		}
+//		return columns;
+//	}
 	
 	public Map<String, Statement> getStatements() {
 		Map<String, Statement> temp = new LinkedHashMap<String, Statement>();

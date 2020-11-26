@@ -56,6 +56,19 @@ public class StringUtils {
 		return "'" + value + "'";
 	}
 	
+	public static int containsCharBackwardFollowingBy(String checked, Character findWith, Character following) {
+		int i = containsCharBackward(checked, findWith);
+		if (i<0)
+			return checked.length();
+		if (i-1<0)
+			return -1;
+		if (checked.charAt(i-1) != following)
+			return -1;
+		if (i-2<0)
+			return i;
+		return containsCharFollowingBy(checked.substring(0, i-2), findWith, following);
+	}
+	
 	public static int containsCharFollowingBy(String checked, Character findWith, Character following) {
 		int i = containsCharForward(checked, findWith);
 		if (i<0)
