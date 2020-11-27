@@ -1,5 +1,7 @@
 package com.nusantara.automate.workflow;
 
+import java.util.Map;
+
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.ConfigLoader;
 import com.nusantara.automate.ContextLoader;
@@ -23,6 +25,10 @@ public class ParalelizedWorkflow extends Workflow {
 		WebExchange webExchange = new WebExchange();
 		webExchange.putAll(ConfigLoader.getConfigMap());
 		webExchange.addElements(ConfigLoader.getElementMap());
+		for (Map<String, Object> login : ConfigLoader.getLoginInfos()) {
+			webExchange.putAll(login);			
+		}
+		
 		ContextLoader.setWebExchange(webExchange);
 		return new ParalelizedWorkflow(webExchange);
 	}

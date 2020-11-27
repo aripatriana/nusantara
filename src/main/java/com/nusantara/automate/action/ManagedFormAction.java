@@ -9,6 +9,7 @@ import com.nusantara.automate.Actionable;
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.exception.FailedTransactionException;
+import com.nusantara.automate.exception.ModalFailedException;
 
 /**
  * The action is managed by the session
@@ -38,7 +39,7 @@ public class ManagedFormAction extends AbstractBaseDriver implements Actionable 
 	}
 	
 	@Override
-	public void submit(WebExchange webExchange) throws FailedTransactionException {
+	public void submit(WebExchange webExchange) throws FailedTransactionException, ModalFailedException {
 		for (Actionable actionable : actionableList) {
 			setObject(actionable, metadata);
 			actionable.submit(webExchange);

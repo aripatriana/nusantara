@@ -14,6 +14,7 @@ import com.nusantara.automate.MenuAwareness;
 import com.nusantara.automate.WebElementWrapper;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.exception.FailedTransactionException;
+import com.nusantara.automate.exception.ModalFailedException;
 import com.nusantara.automate.util.Sleep;
 
 /**
@@ -68,7 +69,7 @@ public class OpenFormAction extends WebElementWrapper implements Actionable, Men
 						|| prevMenu instanceof OpenSubMenuAction) {
 					try {
 						prevMenu.submit(webExchange);
-					} catch (FailedTransactionException e1) {
+					} catch (FailedTransactionException | ModalFailedException e1) {
 						// do nothing
 					}
 				}

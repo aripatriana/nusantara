@@ -30,6 +30,7 @@ import com.nusantara.automate.action.common.OpenFormAction;
 import com.nusantara.automate.action.common.OpenMenuAction;
 import com.nusantara.automate.action.common.OpenSubMenuAction;
 import com.nusantara.automate.exception.FailedTransactionException;
+import com.nusantara.automate.exception.ModalFailedException;
 import com.nusantara.automate.report.ReportManager;
 import com.nusantara.automate.report.ReportMonitor;
 
@@ -120,7 +121,9 @@ public abstract class Workflow {
 				executeSafeActionable(actionable);
 			}
 		} catch (FailedTransactionException e) {
-			log.error("ERROR ", e);
+			log.error("Failed for transaction ", e);
+		} catch (ModalFailedException e) {
+			log.error("Modal failed ", e);
 		}
 		return this;
 	}
@@ -141,7 +144,9 @@ public abstract class Workflow {
 					executeSafeActionable(actionable);
 				}
 			} catch (FailedTransactionException e) {
-				log.error("ERROR ", e);
+				log.error("Failed for transaction ", e);
+			} catch (ModalFailedException e) {
+				log.error("Modal failed ", e);
 			}
 		} else {
 			if (scopedAction) {
@@ -244,11 +249,18 @@ public abstract class Workflow {
 					} catch (FailedTransactionException e) {
 						webExchange.addListFailedSession(webExchange.getSessionList());
 						log.info("Transaction is not completed, skipped for further processes");
-						log.error("ERROR ", e);
+						log.error("Failed for transaction ", e);
 						
 						ReportMonitor.logDataEntry(getWebExchange().getSessionList(),getWebExchange().get("active_scen").toString(),
 								getWebExchange().get("active_workflow").toString(), null, null, 
 								e.getMessage(), ReportManager.FAILED);
+					} catch (ModalFailedException e) {
+						log.info("Modal failed, skipped for further processes");
+						webExchange.addListFailedSession(webExchange.getSessionList());
+						
+						ReportMonitor.logDataEntry(getWebExchange().getSessionList(),getWebExchange().get("active_scen").toString(),
+								getWebExchange().get("active_workflow").toString(), null, null, 
+								e.getMessage(), ReportManager.PASSED);
 					}
 				} else {
 					int i = 0;
@@ -278,7 +290,7 @@ public abstract class Workflow {
 										getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(), metadata);
 							} catch (FailedTransactionException e) {
 								log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
-								log.error("ERROR ", e);
+								log.error("Failed for transaction ", e);
 
 								webExchange.addFailedSession(sessionId);
 								((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
@@ -286,6 +298,13 @@ public abstract class Workflow {
 								ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
 										getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(),
 										metadata, e.getMessage(), ReportManager.FAILED);
+							} catch (ModalFailedException e) {
+								log.info("Modal failed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
+								webExchange.addListFailedSession(webExchange.getSessionList());
+								
+								ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
+										getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(),
+										metadata, e.getMessage(), ReportManager.PASSED);
 							}
 						}
 						i++;
@@ -320,10 +339,17 @@ public abstract class Workflow {
 									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(), metadata);
 						} catch (FailedTransactionException e) {
 							log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
-							log.error("ERROR ", e);
+							log.error("Failed for transaction ", e);
 							
 							webExchange.addFailedSession(sessionId);
 							((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
+							
+							ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(), getWebExchange().get("active_scen").toString(),
+									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(),
+									metadata, e.getMessage(), ReportManager.FAILED);
+						} catch (ModalFailedException e) {
+							log.info("Modal failed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
+							webExchange.addListFailedSession(webExchange.getSessionList());
 							
 							ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(), getWebExchange().get("active_scen").toString(),
 									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(),
@@ -344,7 +370,7 @@ public abstract class Workflow {
 		}
 	}
 	
-	public void executeSafeActionable(Actionable actionable) throws FailedTransactionException {
+	public void executeSafeActionable(Actionable actionable) throws FailedTransactionException, ModalFailedException {
 		int retry = 1;
 		try {
 			actionable.submit(webExchange);
@@ -353,7 +379,7 @@ public abstract class Workflow {
 		}
 	}
 	
-	private void retryWhenException(Actionable actionable, int retry) throws FailedTransactionException {
+	private void retryWhenException(Actionable actionable, int retry) throws FailedTransactionException, ModalFailedException {
 		try {
 			log.info("Something happened, be calm! we still loving you!");
 
@@ -369,7 +395,7 @@ public abstract class Workflow {
 					((AbstractBaseDriver)actionable).captureFailedFullWindow();
 				}
 				
-				log.error("ERROR ", e);
+				log.error("Failed for transaction ", e);
 				throw new FailedTransactionException("Failed for transaction, " + e.getMessage());
 			}	
 		}
@@ -380,7 +406,9 @@ public abstract class Workflow {
 			try {
 				actionable.submit(webExchange);
 			} catch (FailedTransactionException e) {
-				log.error("ERROR ", e);
+				log.error("Failed for transaction ", e);
+			} catch (ModalFailedException e) {
+				log.error("Modal failed ", e);
 			}
 		} else {
 			if (scopedAction) {

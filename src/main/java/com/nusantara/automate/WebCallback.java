@@ -3,6 +3,7 @@ package com.nusantara.automate;
 import org.openqa.selenium.WebElement;
 
 import com.nusantara.automate.exception.FailedTransactionException;
+import com.nusantara.automate.exception.ModalFailedException;
 
 /**
  * The implementation of callback that support browser manager
@@ -41,7 +42,7 @@ public abstract class WebCallback extends WebElementWrapper implements Callback 
 	}
 	
 	@Override
-	public void callback(WebElement webElement, WebExchange webExchange) throws FailedTransactionException {
+	public void callback(WebElement webElement, WebExchange webExchange) throws FailedTransactionException, ModalFailedException {
 		if (webElement.getAttribute("id").equals(successId)) {
 			webExchange.put("@response_modal", "success");
 			ok(webElement, webExchange);
@@ -53,14 +54,17 @@ public abstract class WebCallback extends WebElementWrapper implements Callback 
 	
 	public abstract void ok(WebElement webElement, WebExchange webExchange) throws FailedTransactionException ;
 	
-	public void notOk(WebElement webElement, WebExchange webExchange) throws FailedTransactionException{
-		captureFailedWindow();
+	public void notOk(WebElement webElement, WebExchange webExchange) throws FailedTransactionException, ModalFailedException{
+//		captureFailedWindow();
+		captureWindow();
 		clickButton(webElement, "failedOk");
 		try {
-			captureFailedFullModal(getModalId());			
+			captureFullModal(getModalId());
+//			captureFailedFullModal(getModalId());			
 		} catch (Exception e) {
-			captureFailedFullWindow();
+//			captureFailedFullWindow();
+			captureFullWindow();
 		}
-		throw new FailedTransactionException("Failed for transaction");
+		throw new ModalFailedException("Modal failed");
 	}
 }

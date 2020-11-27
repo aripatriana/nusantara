@@ -83,9 +83,9 @@ public class ContextLoader {
 		Map<String, Object> map = new HashMap<String, Object>();
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
-			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalMap());
-//			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalMap());		
-			map.putAll(getWebExchange().getLocalMap());
+			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalSystemMap());
+//			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalSystemMap());		
+			map.putAll(getWebExchange().getLocalSystemMap());
 		}
 		setObject(object, map);
 	}
@@ -94,9 +94,9 @@ public class ContextLoader {
 		Map<String, Object> map = new HashMap<String, Object>();
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
-			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalMap());
-			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalMap());		
-			map.putAll(getWebExchange().getLocalMap());
+			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalSystemMap());
+			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalSystemMap());		
+			map.putAll(getWebExchange().getLocalSystemMap());
 		}
 		setObject(object, map);
 	}
@@ -109,9 +109,9 @@ public class ContextLoader {
 		
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
-			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalMap());
-//			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalMap());	
-			map.putAll(getWebExchange().getLocalMap());
+			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalSystemMap());
+//			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalSystemMap());	
+			map.putAll(getWebExchange().getLocalSystemMap());
 		}
 		setObject(object, map);
 	}
@@ -125,8 +125,8 @@ public class ContextLoader {
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
 			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalMap());
-			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalMap());	
-			map.putAll(getWebExchange().getLocalMap());
+			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalSystemMap());	
+			map.putAll(getWebExchange().getLocalSystemMap());
 		}
 		setObject(object, map);
 	}

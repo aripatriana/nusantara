@@ -21,6 +21,7 @@ import com.nusantara.automate.WebCallback;
 import com.nusantara.automate.WebElementWrapper;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.exception.FailedTransactionException;
+import com.nusantara.automate.exception.ModalFailedException;
 import com.nusantara.automate.util.Sleep;
 
 import sun.awt.SunToolkit.OperationTimedOut;
@@ -73,7 +74,7 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 	}
 	
 	@Override
-	public void submit(WebExchange webExchange) throws FailedTransactionException {
+	public void submit(WebExchange webExchange) throws FailedTransactionException, ModalFailedException {
 		log.info("Waiting modal success open");
 		int totalThread = failedId.length+1; 
 		try {
@@ -140,7 +141,7 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 					}).start();
 					
 					if (countDownLatch.getCount() == 0)
-						throw new FailedTransactionException("All modal window not open");
+						throw new FailedTransactionException("All window modal not open");
 					break;
 				}
 
@@ -158,84 +159,12 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 				
 		} catch (FailedTransactionException e) {
 			throw e;
+		} catch (ModalFailedException e) {
+			throw e;
 		} catch (Exception e) {
 			throw e;
 		}
 		
-	}
-	
-	
-	public static void main(String[] args) throws InterruptedException {
-		ExecutorService executor = Executors.newFixedThreadPool(2);
-		CountDownLatch latch = new CountDownLatch(2);
-		
-		executor.execute(new Runnable() {
-			
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				System.out.println("COUNT DOWN 1");
-				latch.countDown();
-				
-			}
-		});
-		
-		
-		executor.execute(new Runnable() {
-			
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.out.println("COUNT DOWN 2");
-				latch.countDown();
-				
-			}
-		});
-		
-		System.out.println(Thread.currentThread());
-//		
-//		System.out.println("FOR LOOP");
-//		for (;;) {
-//			long countdown = latch.getCount();
-//			if (countdown == 1) {
-//
-//				System.out.println("LATCH 1");
-//				// shutdown thread
-//				new Thread(new Runnable() {
-//					
-//					@Override
-//					public void run() {
-//
-//						System.out.println("SHUTDOWN");
-//						executor.shutdown();
-//						// Wait until all threads are finish
-//						// safe mode 
-//						try {
-//							executor.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
-//						} catch (InterruptedException e1) {
-//							e1.printStackTrace();
-//						}
-//
-//						System.out.println("SHUTDOWN DONE");
-//						
-//					}
-//				}).start();
-//				
-//				break;
-//			}
-//		}
-		
-
-		System.out.println("DONEE");
 	}
 
 }

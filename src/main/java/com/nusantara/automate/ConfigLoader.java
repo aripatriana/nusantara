@@ -1,5 +1,6 @@
 package com.nusantara.automate;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +43,11 @@ public class ConfigLoader {
 	public static Map<String, Map<String, Object>> getLoginInfo() {
 		return ConfigLoader.loginMap;
 	}
+	
+	public static Collection<Map<String, Object>> getLoginInfos() {
+		return ConfigLoader.loginMap.values();
+	}
+
 	
 	public static Object getConfig(String key) {
 		return ConfigLoader.configMap.get(key);

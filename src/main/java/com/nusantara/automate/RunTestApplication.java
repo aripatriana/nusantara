@@ -189,9 +189,7 @@ public class RunTestApplication {
 			if (value.toString().contains("{") && value.toString().contains("}")) {
 				value = replaceSystemVariable(systemData, value);
 			}
-			if (name.contains("keyFile")) {
-				metadata.put(name.replace("keyFile", "token"), new String(Files.readAllBytes(Paths.get(value))));
-		    }
+			
 			String key = name.replace("." + PREFIX_MEMBER_CODE, "")
 					.replace("." + PREFIX_USERNAME, "")
 					.replace("." + PREFIX_PASSWORD, "")
@@ -201,6 +199,10 @@ public class RunTestApplication {
 			Map<String, Object> login = loginUser.get(key);
 			if (login == null) login = new HashMap<String, Object>();
 			login.put(name, value);
+			if (name.contains("keyFile")) {
+				login.put(name.replace("keyFile", "token"), new String(Files.readAllBytes(Paths.get(value))));
+				login.put(name, StringUtils.path(value));
+			}
 			loginUser.put(key, login);
 		}
 		ConfigLoader.getLoginInfo().putAll(loginUser);

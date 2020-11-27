@@ -85,6 +85,7 @@ public class WebExchange {
 				putToSessionAsList(WebExchange.PREFIX_TYPE_DATA, moduleId, metadata);
 				i++;
 			}
+			clearCachedSession();
 		}
 	}
 	
@@ -321,45 +322,6 @@ public class WebExchange {
 		}
 	}
 	
-	public static void main(String[] args) {
-		Map<String, Object> t = new LinkedHashMap<String, Object>();
-		t.put("contract", "REPO-XXX");
-		t.put("purchase", "REPO");
-		t.put("securityType", "STOCK");
-		
-		List<Map<String, Object>> l = new LinkedList<Map<String,Object>>();
-		Map<String, Object> tl1 = new LinkedHashMap<String, Object>();
-		tl1.put("instrument_code", "TLKM");
-		tl1.put("harga", "1000");
-		
-		Map<String, Object> tl2 = new LinkedHashMap<String, Object>();
-		tl2.put("instrument_code", "ASII");
-		tl2.put("harga", "1500");
-		
-		l.add(tl1);
-		l.add(tl2);
-		
-		t.put("instrument", l);
-		
-		List<String> a = new ArrayList<String>();
-		a.add("HALOO");
-		a.add("TESTHELOO");
-		t.put("test", a);
-		
-		WebExchange w = new WebExchange();
-		w.createSession();
-//		
-//		w.putAllToSession(PREFIX_TYPE_DATA,"order-repo", t);
-//		w.put("@test", "hallooo");
-//		
-//		for (Entry<String, Object> e : w.sessionHolder.get(w.getCurrentSession()).entrySet()) {
-//			System.out.println(e.getKey() + " -> " + e.getValue());
-//		}
-//		
-//		System.out.println(w.get("@test"));
-	}
-
-	
 	public Map<String, Object> getAll() {
 		return holder.get(getTransactionId());
 	}
@@ -372,7 +334,18 @@ public class WebExchange {
 		if (data == null) return data;
 		return holder.get(getTransactionId()).get(key);
 	}
-	
+
+	public List<Map<String, Object>> getAllListLocalSystemMap() {
+		List<Map<String, Object>> result = new LinkedList<Map<String,Object>>();
+		for (Map<String, Object> src : getSession().getAllListLocalMap()) {
+			Map<String, Object> dest = new HashMap<String, Object>();
+			MapUtils.copyStartWith(src, dest, PREFIX_TYPE_SYSTEM);
+			MapUtils.clearMapKey(PREFIX_TYPE_SYSTEM+".", dest);
+			result.add(dest);
+		}
+		return result;
+	}
+
 	public List<Map<String, Object>> getAllListLocalMap() {
 		return getSession().getAllListLocalMap();
 	}
@@ -381,6 +354,7 @@ public class WebExchange {
 		Map<String, Object> src = getLocalMap(getCurrentSession());
 		Map<String, Object> dest = new HashMap<String, Object>();
 		MapUtils.copyStartWith(src, dest, PREFIX_TYPE_SYSTEM);
+		MapUtils.clearMapKey(PREFIX_TYPE_SYSTEM+".", dest);
 		return dest;
 	}
 	

@@ -123,7 +123,7 @@ public class WindowScreen {
 				outputFile = snapshot(WindowScreen.SNAPSHOT_FINAL);
 			}	
 			
-			ReportMonitor.logSnapshotEntry(targetFolder, prefixFileName, outputFile.getAbsolutePath(), ReportManager.PASSED);
+			ReportMonitor.logSnapshotEntry(targetFolder, prefixFileName, outputFile.getAbsolutePath(), (REMARK_FAILED.equals(remark) ? ReportManager.FAILED : ReportManager.PASSED));
 		}
 		resetRemark();
 	}
