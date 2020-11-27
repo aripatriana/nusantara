@@ -98,14 +98,14 @@ public class AssertQueryAction implements Actionable {
 							if (statement.isArg1(DataTypeUtils.TYPE_OF_COLUMN)) {
 								statement.setVal1(resultMap.get(statement.getArg1()));
 							} else if (statement.isArg1(DataTypeUtils.TYPE_OF_VARIABLE)) {
-								statement.setVal1(webExchange.get(statement.getArg1()).toString());
+								statement.setVal1(StringUtils.nvl(webExchange.get(statement.getArg1()),"null"));
 							} else {
 								statement.setVal1(statement.getArg1());
 							}
 							if (statement.isArg2(DataTypeUtils.TYPE_OF_COLUMN)) {
 								statement.setVal2(resultMap.get(statement.getArg2()));
 							} else if (statement.isArg2(DataTypeUtils.TYPE_OF_VARIABLE)) {
-								statement.setVal2(webExchange.get(statement.getArg2()).toString());
+								statement.setVal2(StringUtils.nvl(webExchange.get(statement.getArg2()),"null"));
 							} else {
 								statement.setVal2(statement.getArg2());
 							}
@@ -118,6 +118,7 @@ public class AssertQueryAction implements Actionable {
 				asserts.add(assertion);
 			}
 		} catch (Exception e) {
+			log.error("Failed execute query ", e);
 			throw new FailedTransactionException(e.getMessage());
 		}
 		

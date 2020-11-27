@@ -47,14 +47,14 @@ public class AssertStatementAction  implements Actionable {
 		if (statement.isArg1(DataTypeUtils.TYPE_OF_COLUMN)) {
 			statement.setVal1("");
 		} else if (statement.isArg1(DataTypeUtils.TYPE_OF_VARIABLE)) {
-			statement.setVal1(StringUtils.nvl(webExchange.get(statement.getArg1())).toString());
+			statement.setVal1(StringUtils.nvl(webExchange.get(statement.getArg1()),"null"));
 		} else {
 			statement.setVal1(statement.getArg1());
 		}
 		if (statement.isArg2(DataTypeUtils.TYPE_OF_COLUMN)) {
 			statement.setVal2("");
 		} else if (statement.isArg2(DataTypeUtils.TYPE_OF_VARIABLE)) {
-			statement.setVal2(StringUtils.nvl(webExchange.get(statement.getArg2())).toString());
+			statement.setVal2(StringUtils.nvl(webExchange.get(statement.getArg2()), "null"));
 		} else {
 			statement.setVal2(statement.getArg2());
 		}

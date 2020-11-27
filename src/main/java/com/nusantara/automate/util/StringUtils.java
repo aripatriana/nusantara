@@ -284,9 +284,13 @@ public class StringUtils {
 		return text;
 	}
 	
-	public static Object nvl(Object obj) {
-		if (obj == null) return "";
+	public static Object nvl(Object obj, String val) {
+		if (obj == null) return val;
 		return obj;
+	}
+	
+	public static Object nvl(Object obj) {
+		return nvl(obj, "");
 	}
 	
 	public static String substringUntil(String text, char[] vars) {
