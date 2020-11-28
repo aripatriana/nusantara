@@ -91,12 +91,12 @@ public abstract class Workflow {
 		OpenSubMenuAction subMenuAction = new OpenSubMenuAction(menuAction, menu.getSubMenu(), menu.getMenuId());
 		OpenFormAction formAction = new OpenFormAction((menu.getSubMenu() != null ? subMenuAction : menuAction), menu.getMenuId(), menu.getForm());
 		((MenuAwareness) formAction).setMenu(menu);
+		activeMenu = menu;
 		
 		if (!activeLoop) {
 			menuAction.submit(webExchange);
 			subMenuAction.submit(webExchange);
-			formAction.submit(webExchange);
-			activeMenu = menu;
+			formAction.submit(webExchange);	
 		} else {
 			actionableForLoop.add(menuAction);
 			actionableForLoop.add(subMenuAction);

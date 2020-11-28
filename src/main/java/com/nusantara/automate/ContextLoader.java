@@ -16,8 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import com.nusantara.automate.annotation.FetchSession;
 import com.nusantara.automate.annotation.MapAction;
 import com.nusantara.automate.annotation.MapActionList;
-import com.nusantara.automate.annotation.MapEntity;
-import com.nusantara.automate.annotation.MapEntityList;
+import com.nusantara.automate.annotation.MapJoin;
+import com.nusantara.automate.annotation.MapJoinList;
 import com.nusantara.automate.annotation.MapField;
 import com.nusantara.automate.annotation.MapSerializable;
 import com.nusantara.automate.annotation.MapSession;
@@ -197,9 +197,9 @@ public class ContextLoader {
 				} catch (IllegalAccessException e1) {
 					log.error("ERROR ", e1);
 				}
-            } else if (field.isAnnotationPresent(MapEntity.class)) {
+            } else if (field.isAnnotationPresent(MapJoin.class)) {
 				try {
-					Class<?> c = field.getAnnotation(MapEntity.class).clazz();
+					Class<?> c = field.getAnnotation(MapJoin.class).clazz();
 					Object d = c.newInstance();
 					setObject(d, (Map<String, Object>)metadata.get(field.getAnnotation(MapAction.class).name()));
 					ReflectionUtils.setProperty(object, field.getName(), d);
@@ -223,11 +223,11 @@ public class ContextLoader {
 				} catch (IllegalAccessException e1) {
 					log.error("ERROR ", e1);
 				}
-            } else if (field.isAnnotationPresent(MapEntityList.class)) {
+            } else if (field.isAnnotationPresent(MapJoinList.class)) {
             	try {
-	            	Class<?> c = field.getAnnotation(MapEntityList.class).clazz();
+	            	Class<?> c = field.getAnnotation(MapJoinList.class).clazz();
 	            	LinkedList<Object> list = new LinkedList<Object>();
-	            	for (LinkedHashMap<String, Object> md : (Collection<LinkedHashMap<String, Object>>)metadata.get(field.getAnnotation(MapEntityList.class).name())) {
+	            	for (LinkedHashMap<String, Object> md : (Collection<LinkedHashMap<String, Object>>)metadata.get(field.getAnnotation(MapJoinList.class).name())) {
 	            		Object d = c.newInstance();
 	            		setObjectWithCustom(d, md);
 	            		list.add(d);

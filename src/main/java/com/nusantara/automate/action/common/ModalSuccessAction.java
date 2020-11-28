@@ -126,12 +126,17 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 					try {
 						WebDriverWait wait = new WebDriverWait(getDriver(),Integer.valueOf(timeoutModalCallback));
 						wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div/div[@class='tooltip fade top in']")));
-						try {
-							modalSuccess.put(Boolean.FALSE, findElementByXpath(WebElementWrapper.DEFAULT_MODAL, 1).getAttribute("id"));
-						} catch (Exception e) {
-							modalSuccess.put(Boolean.FALSE, WebElementWrapper.DEFAULT_MAIN);
+						
+						// sleep 3 seconds, to make sure for modal failed to open
+						Sleep.wait(3000);
+						if (modalSuccess.size() ==0 ) {
+							try {
+								modalSuccess.put(Boolean.FALSE, findElementByXpath(WebElementWrapper.DEFAULT_MODAL, 1).getAttribute("id"));
+							} catch (Exception e) {
+								modalSuccess.put(Boolean.FALSE, WebElementWrapper.DEFAULT_MAIN);
+							}
 						}
-				
+						
 						countDownOk.countDown();	
 						log.info("Tooltip error open");
 						
