@@ -24,8 +24,6 @@ import com.nusantara.automate.exception.FailedTransactionException;
 import com.nusantara.automate.exception.ModalFailedException;
 import com.nusantara.automate.util.Sleep;
 
-import sun.awt.SunToolkit.OperationTimedOut;
-
 
 /**
  * The action for handling the modal page response 
@@ -76,7 +74,7 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 	@Override
 	public void submit(WebExchange webExchange) throws FailedTransactionException, ModalFailedException {
 		log.info("Waiting modal success open");
-		int totalThread = failedId.length+1; 
+		int totalThread = failedId.length+2; 
 		try {
 			ExecutorService executor = Executors.newFixedThreadPool(totalThread);
 			CountDownLatch countDownOk = new CountDownLatch(totalThread);
@@ -121,6 +119,31 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 				});
 			}
 			
+			executor.execute(new Runnable() {
+				
+				@Override
+				public void run() {
+					try {
+						WebDriverWait wait = new WebDriverWait(getDriver(),Integer.valueOf(timeoutModalCallback));
+						wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div/div[@class='tooltip fade top in']")));
+						try {
+							modalSuccess.put(Boolean.FALSE, findElementByXpath(WebElementWrapper.DEFAULT_MODAL, 1).getAttribute("id"));
+						} catch (Exception e) {
+							modalSuccess.put(Boolean.FALSE, WebElementWrapper.DEFAULT_MAIN);
+						}
+				
+						countDownOk.countDown();	
+						log.info("Tooltip error open");
+						
+					} catch (TimeoutException e) {
+						// do nothing
+					} finally {
+						countDownLatch.countDown();			
+					}
+					
+				}
+			});
+			
 			for (;;) {
 				if (countDownOk.getCount() == (totalThread-1) || countDownLatch.getCount() == 0) {
 					// shutdown thread
@@ -156,7 +179,7 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 			} else {
 				callback.callback(findElementById(modalSuccess.get(Boolean.FALSE)), webExchange);				
 			}
-				
+	
 		} catch (FailedTransactionException e) {
 			throw e;
 		} catch (ModalFailedException e) {

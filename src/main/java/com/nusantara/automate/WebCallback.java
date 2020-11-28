@@ -43,7 +43,7 @@ public abstract class WebCallback extends WebElementWrapper implements Callback 
 	
 	@Override
 	public void callback(WebElement webElement, WebExchange webExchange) throws FailedTransactionException, ModalFailedException {
-		if (webElement.getAttribute("id").equals(successId)) {
+		if (webElement.getAttribute("id") != null && webElement.getAttribute("id").equals(successId)) {
 			webExchange.put("@response_modal", "success");
 			ok(webElement, webExchange);
 		} else {
@@ -55,15 +55,22 @@ public abstract class WebCallback extends WebElementWrapper implements Callback 
 	public abstract void ok(WebElement webElement, WebExchange webExchange) throws FailedTransactionException ;
 	
 	public void notOk(WebElement webElement, WebExchange webExchange) throws FailedTransactionException, ModalFailedException{
-//		captureFailedWindow();
-		captureWindow();
-		clickButton(webElement, "failedOk");
 		try {
-			captureFullModal(getModalId());
-//			captureFailedFullModal(getModalId());			
+			if (findElementById("failedOk",1) != null) {
+				captureWindow();
+				clickButton(webElement, "failedOk");
+				try {
+					captureFullModal(getModalId());			
+				} catch (Exception e) {
+					captureFullWindow();
+				}				
+			}
 		} catch (Exception e) {
-//			captureFailedFullWindow();
-			captureFullWindow();
+			try {
+				captureFullModal(getModalId());			
+			} catch (Exception e1) {
+				captureFullWindow();
+			}	
 		}
 		throw new ModalFailedException("Modal failed");
 	}

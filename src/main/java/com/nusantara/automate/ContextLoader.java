@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import com.nusantara.automate.annotation.FetchSession;
 import com.nusantara.automate.annotation.MapAction;
 import com.nusantara.automate.annotation.MapActionList;
+import com.nusantara.automate.annotation.MapEntity;
+import com.nusantara.automate.annotation.MapEntityList;
 import com.nusantara.automate.annotation.MapField;
 import com.nusantara.automate.annotation.MapSerializable;
 import com.nusantara.automate.annotation.MapSession;
@@ -84,7 +86,7 @@ public class ContextLoader {
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
 			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalSystemMap());
-//			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalSystemMap());		
+			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalSystemMap());		
 			map.putAll(getWebExchange().getLocalSystemMap());
 		}
 		setObject(object, map);
@@ -110,7 +112,7 @@ public class ContextLoader {
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
 			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalSystemMap());
-//			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalSystemMap());	
+			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalSystemMap());	
 			map.putAll(getWebExchange().getLocalSystemMap());
 		}
 		setObject(object, map);
@@ -118,16 +120,17 @@ public class ContextLoader {
 	
 	public static void setObjectLocalWithCustom(Object object, Map<String, Object> metadata) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		
-		if (metadata != null && metadata.size() > 0)
-			map.putAll(metadata);
-		
+	
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
 			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalMap());
 			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalSystemMap());	
 			map.putAll(getWebExchange().getLocalSystemMap());
 		}
+		
+		// if there is the same object within metadata and session, then the session will be overridden by metadata
+		if (metadata != null && metadata.size() > 0)
+			map.putAll(metadata);
 		setObject(object, map);
 	}
 
@@ -189,13 +192,23 @@ public class ContextLoader {
 					Object d = c.newInstance();
 					setObject(d, (Map<String, Object>)metadata.get(field.getAnnotation(MapAction.class).name()));
 					ReflectionUtils.setProperty(object, field.getName(), d);
-//					BeanUtils.setProperty(object, field.getName(), d);
 				} catch (InstantiationException e) {
 					log.error("ERROR ", e);
 				} catch (IllegalAccessException e1) {
 					log.error("ERROR ", e1);
 				}
-            } else if (field.isAnnotationPresent(MapActionList.class)) {
+            } else if (field.isAnnotationPresent(MapEntity.class)) {
+				try {
+					Class<?> c = field.getAnnotation(MapEntity.class).clazz();
+					Object d = c.newInstance();
+					setObject(d, (Map<String, Object>)metadata.get(field.getAnnotation(MapAction.class).name()));
+					ReflectionUtils.setProperty(object, field.getName(), d);
+				} catch (InstantiationException e) {
+					log.error("ERROR ", e);
+				} catch (IllegalAccessException e1) {
+					log.error("ERROR ", e1);
+				}
+			} else if (field.isAnnotationPresent(MapActionList.class)) {
             	try {
 	            	Class<?> c = field.getAnnotation(MapActionList.class).clazz();
 	            	LinkedList<Object> list = new LinkedList<Object>();
@@ -205,19 +218,40 @@ public class ContextLoader {
 	            		list.add(d);
 	            	};
 	            	ReflectionUtils.setProperty(object, field.getName(), list);
-//	            	BeanUtils.setProperty(object, field.getName(), list);
+    			} catch (InstantiationException e) {
+    				log.error("ERROR ", e);
+				} catch (IllegalAccessException e1) {
+					log.error("ERROR ", e1);
+				}
+            } else if (field.isAnnotationPresent(MapEntityList.class)) {
+            	try {
+	            	Class<?> c = field.getAnnotation(MapEntityList.class).clazz();
+	            	LinkedList<Object> list = new LinkedList<Object>();
+	            	for (LinkedHashMap<String, Object> md : (Collection<LinkedHashMap<String, Object>>)metadata.get(field.getAnnotation(MapEntityList.class).name())) {
+	            		Object d = c.newInstance();
+	            		setObjectWithCustom(d, md);
+	            		list.add(d);
+	            	};
+	            	ReflectionUtils.setProperty(object, field.getName(), list);
     			} catch (InstantiationException e) {
     				log.error("ERROR ", e);
 				} catch (IllegalAccessException e1) {
 					log.error("ERROR ", e1);
 				}
             } else if (field.isAnnotationPresent(MapSession.class)) {
+            	Map<String, Object> session = (Map<String, Object>) metadata.get(WebExchange.LOCAL_VARIABLE);
+            	if (session.get(field.getAnnotation(MapSession.class).name()) != null)
+            		ReflectionUtils.setProperty(object, field.getName(), String.valueOf(session.get(field.getAnnotation(MapSession.class).name())));
+            	 fields.put(field.getName(), field.getAnnotation(MapSession.class).name());
+            	
+            // map session is from now used to map from session value
+            /*} else if (field.isAnnotationPresent(MapSession.class)) {
             	try {
                 	if (!ReflectionUtils.checkAssignableFrom(field.getType(), Map.class)) throw new InstantiationException("Exception for initialize field " + field.getName()  + " must be Map");
                 	ReflectionUtils.setProperty(object, field.getName(), metadata.get(WebExchange.LOCAL_VARIABLE));
             	} catch (InstantiationException e) {
             		log.error("ERROR ", e);
-            	}
+            	}*/
             } else if (field.isAnnotationPresent(Value.class)) {
             	 fields.put(field.getName(), field.getAnnotation(Value.class).value());
             } else if (field.isAnnotationPresent(FetchSession.class)) {
@@ -243,6 +277,13 @@ public class ContextLoader {
 	private static void setFields(Object object, Map<String, String> fields, Map<String, Object> metadata) {
 		for (Entry<String, String> entry : fields.entrySet()) {
 			Object value = metadata.get(entry.getValue());
+			
+			// handling if upper case map field exists
+			// uppercase exists in nusantara versi 0.0.2
+			if (value == null)
+				value = metadata.get(entry.getValue().toLowerCase());
+			// end
+			
 			if (value != null)
 				ReflectionUtils.setProperty(object, entry.getKey(), String.valueOf(value));
 		}        

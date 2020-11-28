@@ -13,12 +13,11 @@ import com.nusantara.automate.util.Sleep;
  */
 public abstract class WebElementWrapper extends AbstractBaseDriver {
 
-	protected void setInputFieldLike(String id, String value) {
-		findElementByXpath("//input[contains(@id,'" + id + "')]").clear();
-		findElementByXpath("//input[contains(@id,'" + id + "')]").sendKeys(value);
-		Sleep.wait(200);
-	}
-
+	public static final String DEFAULT_MAIN = "main";
+	
+	public static final String DEFAULT_MODAL = "//div[@class='modal fade modal-wide in']";
+	
+	public static final String DEFAULT_TOOLTIP = "//div/div[@class=tooltip fade top in]";
 	
 	protected void setInputField(String id, String value) {
 		findElementById(id).clear();
@@ -179,9 +178,12 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	}
 	
 	public WebElement getModalElement() {
-		return findElementByXpath("//div[@class='modal fade modal-wide in']");
+		return findElementByXpath(DEFAULT_MODAL);
 	}
 	
+	public WebElement getTooltipElement() {
+		return findElementByXpath(DEFAULT_TOOLTIP);
+	}
 	public String getModalId() {
 		return getModalElement().getAttribute("id");
 	}
