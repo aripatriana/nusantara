@@ -1,5 +1,6 @@
 package com.nusantara.automate.util;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -12,17 +13,20 @@ public class StringUtils {
 	public static final String SLASH_ON_LINUX = "/";
 	public static final String SLASH_ON_WINDOW = "\\";
 	public static final String SLASH_ON_UNKNOWN_OS = "/";
+	public static final String SLASH_ON_MACOS = "/";
 	
 	public static String getOsSlash() {
 		if (SystemUtils.IS_OS_LINUX) {
 			return SLASH_ON_LINUX;
+		} else if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_MAC_OSX) {
+			return SLASH_ON_MACOS;
 		} else {
 			return SLASH_ON_WINDOW;
 		}
 	}
 	
 	public static String path(String...args){
-		return path(args, getOsSlash());
+		return Paths.get(path(args, getOsSlash())).toString();
 	}
 	
 	public static String path(String[] args, String slash) {
@@ -30,7 +34,10 @@ public class StringUtils {
 		for (String arg: args) {
 			if (!path.isEmpty())
 				path += slash;
-			path += repath(arg);;
+			if (arg.isEmpty())
+				path +=slash;
+			else
+				path += repath(arg);;
 		}
 		return path;
 	}
@@ -39,7 +46,7 @@ public class StringUtils {
 		String slash = getSlash(path, new String[] {SLASH_ON_LINUX, SLASH_ON_WINDOW, SLASH_ON_UNKNOWN_OS});
 		if (slash != null) {
 			String[] arr = path.split("\\"+slash);
-			return path(arr, getOsSlash());
+			path(arr, getOsSlash());
 		}
 		return path;
 	}
