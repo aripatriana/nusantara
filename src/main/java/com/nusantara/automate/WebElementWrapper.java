@@ -17,7 +17,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	
 	public static final String DEFAULT_MODAL = "//div[@class='modal fade modal-wide in']";
 	
-	public static final String DEFAULT_TOOLTIP = "//div/div[@class=tooltip fade top in]";
+	public static final String DEFAULT_TOOLTIP = "//div/div[contains(@id,'tooltip') and contains(@class,'tooltip')]";
 	
 	protected void setInputField(String id, String value) {
 		findElementById(id).clear();
