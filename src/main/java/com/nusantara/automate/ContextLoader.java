@@ -210,29 +210,34 @@ public class ContextLoader {
 				}
 			} else if (field.isAnnotationPresent(MapActionList.class)) {
             	try {
-	            	Class<?> c = field.getAnnotation(MapActionList.class).clazz();
-	            	LinkedList<Object> list = new LinkedList<Object>();
-	            	for (LinkedHashMap<String, Object> md : (Collection<LinkedHashMap<String, Object>>)metadata.get(field.getAnnotation(MapActionList.class).name())) {
-	            		Object d = c.newInstance();
-	            		setObjectWithCustom(d, md);
-	            		list.add(d);
-	            	};
-	            	ReflectionUtils.setProperty(object, field.getName(), list);
+		            Class<?> c = field.getAnnotation(MapActionList.class).clazz();
+		            LinkedList<Object> list = new LinkedList<Object>();
+
+	            	if (metadata.get(field.getAnnotation(MapActionList.class).name()) != null) {
+		            	for (LinkedHashMap<String, Object> md : (Collection<LinkedHashMap<String, Object>>)metadata.get(field.getAnnotation(MapActionList.class).name())) {
+		            		Object d = c.newInstance();
+		            		setObjectWithCustom(d, md);
+		            		list.add(d);
+		            	};
+	            	}
+		            ReflectionUtils.setProperty(object, field.getName(), list);
     			} catch (InstantiationException e) {
     				log.error("ERROR ", e);
 				} catch (IllegalAccessException e1) {
 					log.error("ERROR ", e1);
 				}
             } else if (field.isAnnotationPresent(MapJoinList.class)) {
-            	try {
+            	try {	
 	            	Class<?> c = field.getAnnotation(MapJoinList.class).clazz();
 	            	LinkedList<Object> list = new LinkedList<Object>();
-	            	for (LinkedHashMap<String, Object> md : (Collection<LinkedHashMap<String, Object>>)metadata.get(field.getAnnotation(MapJoinList.class).name())) {
-	            		Object d = c.newInstance();
-	            		setObjectWithCustom(d, md);
-	            		list.add(d);
-	            	};
-	            	ReflectionUtils.setProperty(object, field.getName(), list);
+	            	if (metadata.get(field.getAnnotation(MapJoinList.class).name()) != null) {
+		            	for (LinkedHashMap<String, Object> md : (Collection<LinkedHashMap<String, Object>>)metadata.get(field.getAnnotation(MapJoinList.class).name())) {
+		            		Object d = c.newInstance();
+		            		setObjectWithCustom(d, md);
+		            		list.add(d);
+		            	};
+		            }
+		            ReflectionUtils.setProperty(object, field.getName(), list);
     			} catch (InstantiationException e) {
     				log.error("ERROR ", e);
 				} catch (IllegalAccessException e1) {
