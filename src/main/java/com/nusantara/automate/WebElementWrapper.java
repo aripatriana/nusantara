@@ -19,6 +19,12 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	
 	public static final String DEFAULT_TOOLTIP = "//div/div[contains(@id,'tooltip') and contains(@class,'tooltip')]";
 	
+	protected void setInputFieldLike(String id, String value) {
+		findElementByXpath("//input[contains(@id,'" + id + "')]").clear();
+		findElementByXpath("//input[contains(@id,'" + id + "')]").sendKeys(value);
+		Sleep.wait(200);
+	}
+	
 	protected void setInputField(String id, String value) {
 		findElementById(id).clear();
 		findElementById(id).sendKeys(value);
