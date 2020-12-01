@@ -175,7 +175,8 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 							
 						list.add(values);
 					} else {
-//						arraySize.put(removedMap.get(entry.getKey()), 0);
+						if (arraySize.get(removedMap.get(entry.getKey())) == null)
+							arraySize.put(removedMap.get(entry.getKey()), 0);
 						list.add(new String[] {});
 					}
 					arrayList.put(removedMap.get(entry.getKey()), list);

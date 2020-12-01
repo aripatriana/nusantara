@@ -24,7 +24,9 @@ public class XlsSheetReader<T> {
 				rw.skipRow();
 			} else {
 				T t = rw.readRow();
-				map.put(i, t);	
+				if (t != null) {
+					map.put(i, t);
+				}
 			}
 				
 			i++;

@@ -13,6 +13,15 @@ import java.util.Map.Entry;
 
 public class MapUtils {
 
+	public static <K, V> boolean checkAllNull(Map<K, V> map) {
+		boolean nulls = true;
+		for (Map.Entry<K, V> e : map.entrySet()) {
+			if (e.getValue() != null)
+				nulls = false;
+		}
+		return nulls;
+	}
+	
 	public static <T> T findEquals(List<T> list, String key) {
 		for (T t : list) {
 			if (t.equals(key))

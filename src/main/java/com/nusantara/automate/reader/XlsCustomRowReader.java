@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
+import com.nusantara.automate.util.MapUtils;
 import com.nusantara.automate.util.XlsUtils;
 
 
@@ -30,6 +31,10 @@ public class XlsCustomRowReader extends XlsRowReader<LinkedHashMap<String, Objec
 		for (int index = 0; index<lastColumnIndex; index++) {
 			dataPerRow.put(index+"", XlsUtils.getCellValue(currentRow.getCell(index)));
 		}
+		
+		if (MapUtils.checkAllNull(dataPerRow))
+			return null;
+		
 		return dataPerRow;
 	}
 
