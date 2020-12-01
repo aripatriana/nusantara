@@ -163,7 +163,16 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 					if (entry.getValue() != null) {
 						String value = entry.getValue().toString();	
 						String[] values = value.split("\\|");
-						arraySize.put(removedMap.get(entry.getKey()), values.length);
+						
+						// keeps size maximum
+						if (arraySize.get(removedMap.get(entry.getKey())) == null) {
+							arraySize.put(removedMap.get(entry.getKey()), values.length);							
+						} else {
+							Integer size = arraySize.get(removedMap.get(entry.getKey()));
+							if (values.length > size)
+								arraySize.put(removedMap.get(entry.getKey()), values.length);
+						}
+							
 						list.add(values);
 					} else {
 //						arraySize.put(removedMap.get(entry.getKey()), 0);
@@ -179,7 +188,16 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 					
 					String value = entry.getValue().toString();	
 					String[] values = value.split("\\|");
-					arraySize.put(removedMap.get(entry.getKey()), values.length);
+					
+					// keeps size maximum
+					if (arraySize.get(removedMap.get(entry.getKey())) == null) {
+						arraySize.put(removedMap.get(entry.getKey()), values.length);							
+					} else {
+						Integer size = arraySize.get(removedMap.get(entry.getKey()));
+						if (values.length > size)
+							arraySize.put(removedMap.get(entry.getKey()), values.length);
+					}
+					
 					list.add(values);
 					arrayList.put(removedMap.get(entry.getKey()), list);
 					simpleList.put(entry.getKey(), removedMap.get(entry.getKey()));
@@ -198,10 +216,10 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 				for (String[] arr : arrayList.get(values.getKey())) {
 					for (int i=0; i< arraySize.get(values.getKey()); i++) {
 						Map<String, Object> d = normalize.get(i);
-						if (arr.length == 0) {
+						try {
+							d.put(z+"", arr[i]);	
+						} catch (IndexOutOfBoundsException e) {
 							d.put(z+"", null);
-						} else {
-							d.put(z+"", arr[i]);
 						}
 					}
 					z++;
