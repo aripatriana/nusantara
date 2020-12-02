@@ -59,9 +59,9 @@ public class RunTestWorkflowExecutable implements RunTestWorkflow, WorkflowConfi
 				report.createReport();
 			} catch (IOException e) {
 				log.error("FATAL ERROR ", e);
-			}			
+			}		
+
+			log.info("Finished in "  + (System.currentTimeMillis()-startExeDate)/1000  + " seconds");
 		}
-		
-		log.info("Finished in "  + (System.currentTimeMillis()-startExeDate)/1000  + " seconds");
 	}
 }
