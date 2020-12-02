@@ -246,7 +246,7 @@ public abstract class Workflow {
 						
 						ReportMonitor.logDataEntry(getWebExchange().getSessionList(),getWebExchange().get("active_scen").toString(),
 								getWebExchange().get("active_workflow").toString(), null, null);
-					} catch (FailedTransactionException e) {
+					} catch (FailedTransactionException | IndexOutOfBoundsException e) {
 						webExchange.addListFailedSession(webExchange.getSessionList());
 						log.info("Transaction is not completed, skipped for further processes");
 						log.error("Failed for transaction ", e);
@@ -270,9 +270,10 @@ public abstract class Workflow {
 							log.info("Execute data-row index " + i + " with session " + sessionId);
 							webExchange.setCurrentSession(sessionId);
 							
-							Map<String, Object> metadata = webExchange.getMetaData(getActiveMenu().getModuleId(), i);
-							
+							Map<String, Object> metadata = null;
 							try {	
+								metadata = webExchange.getMetaData(getActiveMenu().getModuleId(), i);
+								
 								if (isCompositeVariable(actionable)) {
 									if (actionable instanceof ManagedFormAction) {
 										((ManagedFormAction) actionable).setMetadata(metadata);
@@ -288,7 +289,7 @@ public abstract class Workflow {
 								
 								ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
 										getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(), metadata);
-							} catch (FailedTransactionException e) {
+							} catch (FailedTransactionException | IndexOutOfBoundsException e) {
 								log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
 								log.error("Failed for transaction ", e);
 
@@ -321,11 +322,13 @@ public abstract class Workflow {
 				while(true) {
 					String sessionId = webExchange.createSession(i);
 					if (!webExchange.isSessionFailed(sessionId)) {
-						Map<String, Object> metadata = webExchange.getMetaData(getActiveMenu().getModuleId(),i, true);
+						Map<String, Object> metadata = null;
 						
 						log.info("Execute data-row index " + i + " with session " + sessionId);
 					
 						try {
+							metadata = webExchange.getMetaData(getActiveMenu().getModuleId(),i, true);
+							
 							if (actionable instanceof ManagedFormAction) {
 								((ManagedFormAction) actionable).setMetadata(metadata);
 							} else {
@@ -337,7 +340,7 @@ public abstract class Workflow {
 							
 							ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
 									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(), metadata);
-						} catch (FailedTransactionException e) {
+						} catch (FailedTransactionException | IndexOutOfBoundsException e) {
 							log.info("Transaction is not completed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
 							log.error("Failed for transaction ", e);
 							

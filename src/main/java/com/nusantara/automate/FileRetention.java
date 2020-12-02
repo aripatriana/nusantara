@@ -79,8 +79,6 @@ public class FileRetention implements Retention {
 				setHeaderInfo(fileReader.getHeader(), metadata);
 			MapUtils.keyLowercase(metadata);
 			webExchange.addMetadata(metadata);
-
-			log.info("Read metadata : " + metadata);
 		}
 		
 		fileReader.close();

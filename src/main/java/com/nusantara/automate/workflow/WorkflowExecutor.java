@@ -52,6 +52,8 @@ public class WorkflowExecutor {
 			try {
 				log.info("Execute workflow " + workflowKey);
 				ContextLoader.getWebExchange().put("active_workflow", workflowKey);
+				if (config.getWorkflowModule(workflowKey) != null)
+					ContextLoader.getWebExchange().setModules(config.getWorkflowModule(workflowKey));
 				
 				for (WorkflowEntry entry : config.getWorkflowEntries(workflowKey)) {
 					if (entry.checkKeyword(BasicScript.LOAD_FILE)) {
@@ -108,7 +110,7 @@ public class WorkflowExecutor {
 			.action(new LogoutFormAction())
 			.action(new LoginFormAction(getLoginInfo(we.getVariable())))
 			.action(new ProductSelectorAction(productType));
-	 if (workflow.getWebExchange().get("token") == null)
+	 if (!workflow.activeLoop && workflow.getWebExchange().get("token") == null)
 		 throw new Exception("Workflow halted caused by login failed");
 	}
 	
@@ -120,7 +122,7 @@ public class WorkflowExecutor {
 		 workflow
 			.openPage(loginUrl)
 			.action(new LoginFormAction(getLoginInfo(we.getVariable())));
-		 if (workflow.getWebExchange().get("token") == null)
+		 if (!workflow.activeLoop && workflow.getWebExchange().get("token") == null)
 			 throw new Exception("Workflow halted caused by login failed");
 	}
 	
@@ -145,8 +147,6 @@ public class WorkflowExecutor {
 			workflow
 			 	.load(retention)
 				.loop();
-			
-			ReportMonitor.getScenEntry(workflowKey).setNumOfData(retention.getSize());
 		} catch (XlsSheetStyleException e) {
 			throw new Exception(e);
 		}

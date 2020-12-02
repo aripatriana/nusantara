@@ -2,8 +2,12 @@ package com.nusantara.automate.workflow;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.Menu;
@@ -24,6 +28,7 @@ public class WorkflowConfig {
 	private Map<String, File> workflowDatas = new HashMap<String, File>();
 	private Map<String, Map<String, File>> workflowQueries = new HashMap<String, Map<String, File>>();
 	private Map<String, Menu> menuMap = new HashMap<String, Menu>();
+	private Map<String, Set<String>> workflowModules = new HashMap<String, Set<String>>();
 	private LinkedList<String> workflowKeys = new LinkedList<String>();
 	private LinkedList<String> workflowScens = new LinkedList<String>();
 	private Map<String, LinkedList<String>> workflowMapScens = new HashMap<String, LinkedList<String>>();
@@ -150,12 +155,25 @@ public class WorkflowConfig {
 		return workflowMapScens.get(scen);
 	}
 	
+	public void addWorkflowModule(String scen, Set<String> moduleId) {
+		workflowModules.put(scen, moduleId);
+	}
+	
+	public Map<String, Set<String>> getWorkflowModules() {
+		return workflowModules;
+	}
+	
+	public Set<String> getWorkflowModule(String scen) {
+		return workflowModules.get(scen);
+	}
+	
 	public void clear() {
 		functionMap.clear();
 		handlerMap.clear();
 		workflowEntries.clear();
 		workflowDatas.clear();
 		menuMap.clear();
+		workflowModules.clear();
 		workflowKeys.clear();
 		workflowScens.clear();
 		workflowMapScens.clear();

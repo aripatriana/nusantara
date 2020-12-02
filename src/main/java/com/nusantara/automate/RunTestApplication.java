@@ -7,10 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -288,12 +290,14 @@ public class RunTestApplication {
 	
 	private static void verifyWorkflowy(WorkflowConfig workflowConfig) throws ScriptInvalidException {
 		for (Entry<String, LinkedList<WorkflowEntry>> entryList : workflowConfig.getWorkflowEntries().entrySet()) {
+			Set<String> moduleIdList = new LinkedHashSet<String>();
 			for (WorkflowEntry entry : entryList.getValue()) {
 				if (entry.checkKeyword(BasicScript.OPEN_MENU)) {
 					Menu menu = workflowConfig.getMenu(entry.getVariable());
 					if (menu == null) {
 						throw new ScriptInvalidException("Menu not found for " + entry.getVariable());
 					}
+					moduleIdList.add(menu.getModuleId());
 				} else if (entry.checkKeyword(BasicScript.EXECUTE)) {
 					SimpleEntry<Class<?>, Object[]> function = workflowConfig.getFunction(entry.getVariable());
 					if (function == null) {
@@ -326,6 +330,8 @@ public class RunTestApplication {
 					}
 				}
 			}
+			
+			workflowConfig.addWorkflowModule(entryList.getKey(), moduleIdList);
 		}
 	}
 	

@@ -1,10 +1,8 @@
 package com.nusantara.automate;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +10,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.util.MapUtils;
 
@@ -24,6 +25,8 @@ import com.nusantara.automate.util.MapUtils;
  */
 public class WebExchange {
 
+	private static final Logger log = LoggerFactory.getLogger(RunTestApplication.class);
+	
 	public static final String PREFIX_TYPE_DATA = "data";
 	public static final String PREFIX_TYPE_ELEMENT = "element";
 	public static final String PREFIX_TYPE_SYSTEM = "system";
@@ -72,7 +75,9 @@ public class WebExchange {
 		this.modules.add(module);
 	}
 	
-	public void initSession(int count) {
+	public void initSession(int count) throws Exception {
+		if (getTotalMetaData()%modules.size()!=0)
+			throw new Exception("The number of row not balance for " + modules);
 		if (count == 0) count++;
 		for (int index=0; index<count; index++) {
 			createSession(index);
@@ -97,9 +102,14 @@ public class WebExchange {
 	}
 	
 	public void addMetadata(Map<String, Object> metadata) {
-		listMetaData.add(metadata);
 		String[] keys = metadata.keySet().iterator().next().split("\\.");
-		modules.add(keys[0].toLowerCase());
+		if (modules.contains(keys[0])) {
+			listMetaData.add(metadata);	
+
+			log.info("Read metadata : " + metadata);
+		} else {
+			log.info("Skip metadata : " + metadata);
+		}
 	}
 	
 	public int getTotalMetaData() {
@@ -463,6 +473,7 @@ public class WebExchange {
 	
 	private void reset() {
 		retention = false;
+		listMetaData.clear();
 		listMetaData.clear();
 		cachedMetaData.clear();
 		cachedMetaDataKey.clear();

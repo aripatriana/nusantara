@@ -7,6 +7,7 @@ import com.nusantara.automate.ConfigLoader;
 import com.nusantara.automate.ContextLoader;
 import com.nusantara.automate.MenuAwareness;
 import com.nusantara.automate.WebExchange;
+import com.nusantara.automate.report.ReportMonitor;
 
 /**
  * Workflow that supports for session operation
@@ -41,6 +42,9 @@ public class ParalelizedWorkflow extends Workflow {
 		try {
 			if (webExchange.getTotalMetaData() > 0) {
 				webExchange.initSession(webExchange.getMetaDataSize());
+
+				ReportMonitor.getScenEntry(webExchange.get("active_workflow").toString())
+						.setNumOfData(webExchange.getMetaDataSize());
 				
 				log.info("Total data-row " + webExchange.getTotalMetaData());
 				try {

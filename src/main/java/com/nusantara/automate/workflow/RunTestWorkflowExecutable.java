@@ -61,5 +61,7 @@ public class RunTestWorkflowExecutable implements RunTestWorkflow, WorkflowConfi
 				log.error("FATAL ERROR ", e);
 			}			
 		}
+		
+		log.info("Finished in "  + (System.currentTimeMillis()-startExeDate)/1000  + " seconds");
 	}
 }
