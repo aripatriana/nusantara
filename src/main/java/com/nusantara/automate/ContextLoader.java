@@ -16,9 +16,9 @@ import org.springframework.beans.factory.annotation.Value;
 import com.nusantara.automate.annotation.FetchSession;
 import com.nusantara.automate.annotation.MapAction;
 import com.nusantara.automate.annotation.MapActionList;
+import com.nusantara.automate.annotation.MapField;
 import com.nusantara.automate.annotation.MapJoin;
 import com.nusantara.automate.annotation.MapJoinList;
-import com.nusantara.automate.annotation.MapField;
 import com.nusantara.automate.annotation.MapSerializable;
 import com.nusantara.automate.annotation.MapSession;
 import com.nusantara.automate.annotation.MapType;
@@ -66,21 +66,6 @@ public class ContextLoader {
 		return isLocalVariable(clazz);
 	}
 	
-	@Deprecated
-	public static boolean isCompositeVariable(Class<?> clazz) {
-		if (clazz.isAnnotationPresent(MapSerializable.class)) {
-			MapType type = clazz.getAnnotation(MapSerializable.class).type();
-			return type.equals(MapType.COMPOSITE);					
-		}
-		return false;
-	}
-	
-	@Deprecated
-	public static boolean isCompositeVariable(Object object) {
-		Class<?> clazz = object.getClass();
-		return isCompositeVariable(clazz);
-	}
-	
 	public static void setObject(Object object) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		if (getWebExchange() != null) {
@@ -106,15 +91,16 @@ public class ContextLoader {
 	public static void setObjectWithCustom(Object object, Map<String, Object> metadata) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		
-		if (metadata != null && metadata.size() > 0)
-			map.putAll(metadata);
-		
 		if (getWebExchange() != null) {
 			map.putAll(getWebExchange().getAll());
 			map.put(WebExchange.ALL_LOCAL_VARIABLE, getWebExchange().getAllListLocalSystemMap());
 			map.put(WebExchange.LOCAL_VARIABLE, getWebExchange().getLocalSystemMap());	
 			map.putAll(getWebExchange().getLocalSystemMap());
 		}
+
+		if (metadata != null && metadata.size() > 0)
+			map.putAll(metadata);
+		
 		setObject(object, map);
 	}
 	
@@ -131,6 +117,7 @@ public class ContextLoader {
 		// if there is the same object within metadata and session, then the session will be overridden by metadata
 		if (metadata != null && metadata.size() > 0)
 			map.putAll(metadata);
+		
 		setObject(object, map);
 	}
 
@@ -245,9 +232,13 @@ public class ContextLoader {
 				}
             } else if (field.isAnnotationPresent(MapSession.class)) {
             	Map<String, Object> session = (Map<String, Object>) metadata.get(WebExchange.LOCAL_VARIABLE);
-            	if (session.get(field.getAnnotation(MapSession.class).name()) != null)
+            	if (session.get(field.getAnnotation(MapSession.class).name()) != null) {
             		ReflectionUtils.setProperty(object, field.getName(), String.valueOf(session.get(field.getAnnotation(MapSession.class).name())));
-            	 fields.put(field.getName(), field.getAnnotation(MapSession.class).name());
+            	} else {
+            		ReflectionUtils.setProperty(object, field.getName(), null);
+            	}
+            		
+//            	 fields.put(field.getName(), field.getAnnotation(MapSession.class).name());
             	
             // map session is from now used to map from session value
             /*} else if (field.isAnnotationPresent(MapSession.class)) {
@@ -289,8 +280,12 @@ public class ContextLoader {
 				value = metadata.get(entry.getValue().toLowerCase());
 			// end
 			
-			if (value != null)
+			if (value != null) {
 				ReflectionUtils.setProperty(object, entry.getKey(), String.valueOf(value));
+			} else {
+				ReflectionUtils.setProperty(object, entry.getKey(), null);
+			}
+					
 		}        
 	}
 	

@@ -226,18 +226,10 @@ public abstract class Workflow {
 		return ContextLoader.isLocalVariable(object);
 	}
 	
-	@Deprecated
-	private boolean isCompositeVariable(Object object) {
-		if (object instanceof ManagedFormAction) {
-			return ContextLoader.isCompositeVariable(((ManagedFormAction) object).getInheritClass());
-		}
-		return ContextLoader.isCompositeVariable(object);
-	}
-	
 	public void executeActionableWithSession(Actionable actionable) throws Exception {
 		if (isPersistentSerializable(actionable)) {
 			// execute map serializable
-			if (isLocalVariable(actionable) || isCompositeVariable(actionable)) {
+			if (isLocalVariable(actionable)) {
 				if (actionable instanceof ManagedMultipleFormAction) {
 					try {
 						ContextLoader.setObjectLocal(actionable);	
@@ -250,6 +242,9 @@ public abstract class Workflow {
 						webExchange.addListFailedSession(webExchange.getSessionList());
 						log.info("Transaction is not completed, skipped for further processes");
 						log.error("Failed for transaction ", e);
+						
+						captureFailedWindow(actionable);
+						((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 						
 						ReportMonitor.logDataEntry(getWebExchange().getSessionList(),getWebExchange().get("active_scen").toString(),
 								getWebExchange().get("active_workflow").toString(), null, null, 
@@ -274,12 +269,8 @@ public abstract class Workflow {
 							try {	
 								metadata = webExchange.getMetaData(getActiveMenu().getModuleId(), i);
 								
-								if (isCompositeVariable(actionable)) {
-									if (actionable instanceof ManagedFormAction) {
-										((ManagedFormAction) actionable).setMetadata(metadata);
-									} else {
-										ContextLoader.setObjectLocalWithCustom(actionable, metadata);	
-									}
+								if (actionable instanceof ManagedFormAction) {
+									((ManagedFormAction) actionable).setMetadata(metadata);
 								} else {
 									ContextLoader.setObjectLocal(actionable);	
 								}
@@ -294,6 +285,7 @@ public abstract class Workflow {
 								log.error("Failed for transaction ", e);
 
 								webExchange.addFailedSession(sessionId);
+								captureFailedWindow(actionable);
 								((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 								
 								ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
@@ -301,7 +293,7 @@ public abstract class Workflow {
 										metadata, e.getMessage(), ReportManager.FAILED);
 							} catch (ModalFailedException e) {
 								log.info("Modal failed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
-								webExchange.addListFailedSession(webExchange.getSessionList());
+								webExchange.addFailedSession(sessionId);
 								
 								ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
 										getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(),
@@ -345,6 +337,7 @@ public abstract class Workflow {
 							log.error("Failed for transaction ", e);
 							
 							webExchange.addFailedSession(sessionId);
+							captureFailedWindow(actionable);
 							((AbstractBaseDriver) actionable).getDriver().navigate().refresh();
 							
 							ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(), getWebExchange().get("active_scen").toString(),
@@ -352,7 +345,7 @@ public abstract class Workflow {
 									metadata, e.getMessage(), ReportManager.FAILED);
 						} catch (ModalFailedException e) {
 							log.info("Modal failed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
-							webExchange.addListFailedSession(webExchange.getSessionList());
+							webExchange.addFailedSession(sessionId);
 							
 							ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(), getWebExchange().get("active_scen").toString(),
 									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(),
@@ -392,15 +385,22 @@ public abstract class Workflow {
 			if (retry < MAX_RETRY_LOAD_PAGE) {
 				retryWhenException(actionable, ++retry);
 			} else {
-				try {
-					((AbstractBaseDriver)actionable).captureFailedFullModal(((WebElementWrapper)actionable).getModalId());
-				} catch (Exception e1) {
-					((AbstractBaseDriver)actionable).captureFailedFullWindow();
-				}
-				
 				log.error("Failed for transaction ", e);
 				throw new FailedTransactionException("Failed for transaction, " + e.getMessage());
 			}	
+		}
+	}
+	
+	private void captureFailedWindow(Actionable actionable) {
+		try {
+			try {
+				((WebElementWrapper)actionable).getModalConfirmationId(1);
+				((AbstractBaseDriver)actionable).captureFailedWindow();
+			} catch (Exception e) {
+				((AbstractBaseDriver)actionable).captureFailedFullModal(((WebElementWrapper)actionable).getModalId(1));
+			}
+		} catch (Exception e1) {
+			((AbstractBaseDriver)actionable).captureFailedFullWindow();
 		}
 	}
 		

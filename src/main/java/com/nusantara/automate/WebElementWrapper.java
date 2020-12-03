@@ -17,6 +17,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	
 	public static final String DEFAULT_MODAL = "//div[@class='modal fade modal-wide in']";
 	
+	public static final String DEFAULT_MODAL_CONFIRMATION = "//div[contains(@class, 'modal') and @role='dialog' and contains(@style,'block') and ./div[contains(@class, 'modal-sm')]]";
+	
 	public static final String DEFAULT_TOOLTIP = "//div/div[contains(@id,'tooltip') and contains(@class,'tooltip')]";
 	
 	protected void setInputFieldLike(String id, String value) {
@@ -159,6 +161,14 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		return findElementByXpath("//p[contains(@id,'" + id + "')]").getText();
 	}
 
+	public String getTextDropdownLike(String id) {
+		return findElementByXpath("//div[contains(@id,'" + id + "') and not(contains(@style,'none'))]//span[contains(@id,'" + id + "')]").getText();		
+	}
+	
+	public String getTextDropdown(String id) {
+		return findElementByXpath("//div[@id='detailInstructionTypeFull' and not(contains(@style,'none'))]//span[@id='detailInstructionTypeFull']").getText();		
+	}
+	
 	public String getTextById(String id) {
 		return findElementById(id).getText();
 	}
@@ -182,14 +192,39 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	public String getTextByXPath(WebElement webElement, String xpath) {
 		return findElementByXpath(webElement, xpath).getText();
 	}
+
+	public WebElement getModalConfirmationElement(int timeout) {
+		return findElementByXpath(DEFAULT_MODAL_CONFIRMATION, timeout);
+	}
 	
+	public WebElement getModalConfirmationElement() {
+		return findElementByXpath(DEFAULT_MODAL_CONFIRMATION);
+	}
+
 	public WebElement getModalElement() {
 		return findElementByXpath(DEFAULT_MODAL);
+	}
+	
+	public WebElement getModalElement(int timeout) {
+		return findElementByXpath(DEFAULT_MODAL, timeout);
 	}
 	
 	public WebElement getTooltipElement() {
 		return findElementByXpath(DEFAULT_TOOLTIP);
 	}
+
+	public String getModalConfirmationId() {
+		return getModalConfirmationElement().getAttribute("id");
+	}
+	
+	public String getModalConfirmationId(int timeout) {
+		return getModalConfirmationElement(timeout).getAttribute("id");
+	}
+	
+	public String getModalId(int timeout) {
+		return getModalElement(timeout).getAttribute("id");
+	}
+	
 	public String getModalId() {
 		return getModalElement().getAttribute("id");
 	}

@@ -135,10 +135,11 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 							} catch (Exception e) {
 								modalSuccess.put(Boolean.FALSE, WebElementWrapper.DEFAULT_MAIN);
 							}
+
+							countDownOk.countDown();	
+							log.info("Tooltip error open");
 						}
 						
-						countDownOk.countDown();	
-						log.info("Tooltip error open");
 						
 					} catch (TimeoutException e) {
 						// do nothing

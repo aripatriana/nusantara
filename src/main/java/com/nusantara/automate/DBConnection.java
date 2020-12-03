@@ -154,13 +154,15 @@ public class DBConnection {
 	}
 	
 	public static void close() {
-		try {
-			if (!getConnection().connect().isClosed()) {
-				getConnection().connect().close();
-				dbConnection = null;
+		if (dbConnection != null) {
+			try {
+				if (!getConnection().connect().isClosed()) {
+					getConnection().connect().close();
+					dbConnection = null;
+				}
+			} catch (SQLException e) {
+				log.error("ERROR ", e);
 			}
-		} catch (SQLException e) {
-			log.error("ERROR ", e);
 		}
 	}
 }

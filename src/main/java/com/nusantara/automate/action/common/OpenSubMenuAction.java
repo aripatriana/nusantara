@@ -61,7 +61,7 @@ public class OpenSubMenuAction extends WebElementWrapper implements Actionable {
 			webElement.click();
 		} catch (TimeoutException e) {
 			if (prevMenu != null) {
-				prevMenu.setTimeout(3);
+				prevMenu.setTimeout(1);
 				prevMenu.submit(webExchange);
 				this.submit(webExchange);
 			} else {

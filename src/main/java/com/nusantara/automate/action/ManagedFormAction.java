@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import com.nusantara.automate.AbstractBaseDriver;
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.ContextLoader;
+import com.nusantara.automate.WebElementWrapper;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.exception.FailedTransactionException;
 import com.nusantara.automate.exception.ModalFailedException;
@@ -16,7 +16,7 @@ import com.nusantara.automate.exception.ModalFailedException;
  * @author ari.patriana
  *
  */
-public class ManagedFormAction extends AbstractBaseDriver implements Actionable {
+public class ManagedFormAction extends WebElementWrapper implements Actionable {
 
 	private LinkedList<Actionable> actionableList = new LinkedList<Actionable>();
 	private Class<?> inheritClass;
@@ -51,8 +51,6 @@ public class ManagedFormAction extends AbstractBaseDriver implements Actionable 
 			// execute map serializable
 			if (ContextLoader.isLocalVariable(actionable)) {
 				ContextLoader.setObjectLocal(actionable);
-			} else if (ContextLoader.isCompositeVariable(actionable)) {
-				ContextLoader.setObjectLocalWithCustom(actionable, metadata);
 			} else {
 				ContextLoader.setObjectWithCustom(actionable, metadata);
 			}

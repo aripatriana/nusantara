@@ -55,23 +55,27 @@ public abstract class WebCallback extends WebElementWrapper implements Callback 
 	public abstract void ok(WebElement webElement, WebExchange webExchange) throws FailedTransactionException ;
 	
 	public void notOk(WebElement webElement, WebExchange webExchange) throws FailedTransactionException, ModalFailedException{
+		
 		try {
 			if (findElementById(webElement, "failedOk",1) != null) {
 				captureWindow();
 				clickButton(webElement, "failedOk");
-				try {
-					captureFullModal(getModalId());			
-				} catch (Exception e) {
-					captureFullWindow();
-				}				
 			}
 		} catch (Exception e) {
-			try {
-				captureFullModal(getModalId());			
-			} catch (Exception e1) {
-				captureFullWindow();
-			}	
+			// do nothing
 		}
+		
+		try {
+			try {
+				getModalConfirmationId(1);
+				captureWindow();
+			} catch (Exception e) {
+				captureFullModal(getModalId(1));
+			}
+		} catch (Exception e1) {
+			captureFullWindow();
+		}
+		
 		throw new ModalFailedException("Modal failed");
 	}
 }
