@@ -1,7 +1,10 @@
 package com.nusantara.automate;
 
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import com.nusantara.automate.util.Sleep;
 
@@ -21,6 +24,16 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	
 	public static final String DEFAULT_TOOLTIP = "//div/div[contains(@id,'tooltip') and contains(@class,'tooltip')]";
 	
+	protected void setFocusOn(String id) {
+		WebElement element = findElementById(id);
+		if("input".equals(element.getTagName())) {
+			element.sendKeys("");
+		} else{
+			JavascriptExecutor jse = (JavascriptExecutor) getDriver();
+			jse.executeScript("document.getElementById('"+id+"').focus();");
+		}
+	}
+	
 	protected void setInputFieldLike(String id, String value) {
 		findElementByXpath("//input[contains(@id,'" + id + "')]").clear();
 		findElementByXpath("//input[contains(@id,'" + id + "')]").sendKeys(value);
@@ -28,6 +41,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	}
 	
 	protected void setInputField(String id, String value) {
+		findElementById(id).sendKeys(Keys.chord(Keys.CONTROL, "a"));
 		findElementById(id).clear();
 		findElementById(id).sendKeys(value);
 		Sleep.wait(200);

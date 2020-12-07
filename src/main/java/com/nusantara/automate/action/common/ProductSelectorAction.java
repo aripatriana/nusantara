@@ -42,7 +42,7 @@ public class ProductSelectorAction extends WebElementWrapper implements Actionab
 		log.info("Open Product " + getProductType());
 		
 		Sleep.wait(1000);
-		findElementByClassName("divProductTypeSelector").click();
+		findElementByXpath("//div[@class='divProductTypeSelector']/span[@id='project-selector']").click();
 		findElementByXpath("//*[contains(@href,'" + getProductType() + "')]").click();
 	}
 
