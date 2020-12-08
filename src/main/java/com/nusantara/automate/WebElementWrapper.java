@@ -86,10 +86,20 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		Sleep.wait(1000);
 	}
 	
+	/**
+	 * Input text pada field lookup tanpa membuka dialog pencariannya
+	 * @param id
+	 * @param value
+	 */
 	protected void selectSimpleLookupSearch(String id, String value) {
 		setInputField("textInput_" + id, value);
 	}
 	
+	/**
+	 * Input text pada field lookup dengan membuka dialog pencariannya
+	 * @param id
+	 * @param value
+	 */
 	protected void selectLookupSearch(String id, String value) {
 		clickButtonLookup(id);
 		Sleep.wait(1000);
@@ -112,6 +122,12 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		Sleep.wait(200);
 	}
 	
+	/**
+	 * Digunakan untuk mencari data pada tabel pencarian yang terdapat pada modal terpisah
+	 * @param modalId
+	 * @param tableId
+	 * @param value
+	 */
 	protected void clickCustomTableSearch(String modalId, String tableId, String value) {
 		findElementByXpath("//div[@id='" + modalId + "']//div//div//div//div//div[contains(@class,'search')]//input").sendKeys(value);
 		Sleep.wait(3000);
@@ -128,28 +144,73 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		}
 	}
 	
+	/**
+	 * Klik checkbox row pertama pada tabel pencarian
+	 * @param id
+	 */
 	protected void clickCheckBoxTableSearch(String id) {
 		clickCheckBoxTableSearch(id, 0);
 	}
 	
+	/**
+	 * Klik checkbox pada tabel pencarian sesuai dengan index yg dipassing
+	 * @param id
+	 * @param index
+	 */
 	protected void clickCheckBoxTableSearch(String id, int index) {
 		findElementByXpath("//table[@id='" + id + "']/tbody/tr[@data-index='" + index +"']/td/input[@type='checkbox']").click();
 		Sleep.wait(2000);
 	}
 	
+	/**
+	 * Klik checkbox pada tabel pencarian sesuain dengan query yang match
+	 * @param id
+	 * @param query
+	 */
 	protected void clickCheckBoxTableSearch(String id, String query) {
 		WebElement webElement = findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']");
 		String index = webElement.getAttribute("data-index");
 		clickCheckBoxTableSearch(id, Integer.valueOf(index));
 	}
 	
+	/**
+	 * Digunakan untuk klik data row pertama pada tabel pencarian 
+	 * @param id
+	 */
 	protected void clickTableSearch(String id) {
 		clickTableSearch(id, 0);
 	}
 	
+	/**
+	 * Digunakan untuk klik data row pada tabel pencarian sesuai dengan index yg dipassing
+	 * @param id
+	 * @param index
+	 */
 	protected void clickTableSearch(String id, int index) {
 		findElementByXpath("//table[contains(@id,'" + id + "')]//tbody//tr[@data-index='" + index + "']//td//a").click();
 		Sleep.wait(2000);
+	}
+	
+	
+	/**
+	 * Digunakan untuk klik data row pada tabel pencarian sesuai dengan query yang match
+	 * @param id
+	 * @param index
+	 */
+	protected void clickTableSearch(String id, String query) {
+		WebElement webElement = findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']");
+		String index = webElement.getAttribute("data-index");
+		clickTableSearch(id, index);
+	}
+	
+	protected boolean searchOnTable(String id, String query) {
+		try {
+			findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']");
+			return true;
+		} catch (Exception e) {
+			// do nothing
+		}
+		return false;
 	}
 	
 	protected void clickPageNo(String formId, String value) {
