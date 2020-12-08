@@ -57,7 +57,7 @@ public class FileRetention implements Retention {
 						setHeaderInfo(h, v);
 					}
 	
-					data.put(entry.getKey(), d);
+					data.put(entry.getKey().replace(" ", "_"), d);
 				} else {
 					if (key.length > 1) {
 						title = key[0].concat(".".concat(title.toString()));

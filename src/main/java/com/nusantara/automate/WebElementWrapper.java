@@ -4,7 +4,6 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 
 import com.nusantara.automate.util.Sleep;
 
@@ -200,12 +199,12 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	protected void clickTableSearch(String id, String query) {
 		WebElement webElement = findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']");
 		String index = webElement.getAttribute("data-index");
-		clickTableSearch(id, index);
+		clickTableSearch(id, Integer.valueOf(index));
 	}
 	
 	protected boolean searchOnTable(String id, String query) {
 		try {
-			findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']");
+			findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']", 1);
 			return true;
 		} catch (Exception e) {
 			// do nothing
