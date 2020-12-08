@@ -24,6 +24,7 @@ public class ReportManager {
 	private static final String SCEN_TEMPLATE = "scen.template";
 	private static final String DATA_TEMPLATE = "data.template";
 	private static final String SNAPSHOT_TEMPLATE = "snapshot.template";
+	private static final String LOG_TEMPLATE = "log.template";
 	
 	private static final String EL_TEST_CASE_ID = "${testcase_id}";
 	private static final String EL_NUM_SCEN = "${num_of_scen}";
@@ -45,12 +46,13 @@ public class ReportManager {
 	private static final String EL_META_DATA = "${meta_data}";
 	private static final String EL_FAILED_DATA = "${failed_data}";
 	private static final String EL_LOG_ERROR = "${log_error}";
+	private static final String EL_LOG_FULL_TEXT = "${log_full_text}";
 
-	
 	private static final String EL_DATA_HTML = "${data_html}";
 	private static final String EL_SCRIPT_HTML = "${script_html}";
 	private static final String EL_SNAPHSOT_HTML = "${snapshot_html}";
 	private static final String EL_SCEN_HTML = "${scen_html}";
+	private static final String EL_LOG_HTML = "${log_html}";
 	
 	private static final String FN_IF = "@if";
 	private static final String FN_END_IF = "@endif";
@@ -77,6 +79,9 @@ public class ReportManager {
 	@Value("{template_dir}")
 	private String templateDir;
 	
+	@Value("{tmp_dir}")
+	private String tmpDir;
+	
 	@Value("{report_dir}")
 	private String reportDir;
 	
@@ -102,6 +107,7 @@ public class ReportManager {
 		createScenHtml(getTemplate(SCEN_TEMPLATE));
 		createDataHtml(getTemplate(DATA_TEMPLATE));
 		createSnapshotHtml(getTemplate(SNAPSHOT_TEMPLATE));
+		createLogHtml(getTemplate(LOG_TEMPLATE));
 		
 		for (String banner : banners) {
 			FileUtils.copyFile(new File(StringUtils.path(templateDir, banner)), new File(StringUtils.path(reportDir, reportDateFolder, banner)));			
@@ -143,6 +149,7 @@ public class ReportManager {
 				loopParam.put(EL_DATA_HTML, (ReportMonitor.getDataEntries(scenEntry.getTscanId()) != null 
 						&& ReportMonitor.getDataEntries(scenEntry.getTscanId()).size() > 0 ? scenEntry.getTscanId()+ "_data.html" : "#"));
 				loopParam.put(EL_SCRIPT_HTML, scenEntry.getTscanId().replace(scenEntry.getTestCaseId() + "_", "") + ".y");
+				loopParam.put(EL_LOG_HTML, scenEntry.getTscanId() + "_log.html");
 				loopParam.put(EL_TSCEN_ID, scenEntry.getTscanId());
 				loopParam.put(EL_NUM_DATA, scenEntry.getNumOfData());
 				loopParam.put(EL_FAILED_DATA, scenEntry.getFailedRow());
@@ -243,11 +250,78 @@ public class ReportManager {
 		}
 	}
 	
+	public void createLogHtml(String template) throws IOException {
+		for (TestCaseEntry testCaseEntry :  ReportMonitor.getTestCaseEntries()) {
+			for (ScenEntry scenEntry : ReportMonitor.getScenEntries(testCaseEntry.getTestCaseId())) {	
+				// copy y script file
+				FileUtils.copyFile(
+						new File(StringUtils.path(tmpDir, scenEntry.getTscanId() + ".log")),
+						new File(StringUtils.path(reportDir, reportDateFolder, testCaseEntry.getTestCaseId(), scenEntry.getTscanId() + ".log")));
+
+				TextParser parser = new TextParser(new LogColorRender(), template);
+				parser.addParam(EL_TIMESTAMP, startDate);
+				parser.addParam(EL_TEST_CASE_ID, testCaseEntry.getTestCaseId());
+				parser.addParam(EL_TSCEN_ID, scenEntry.getTscanId());
+				parser.addParam(EL_LOG_FULL_TEXT, FileUtils.readFileToString(new File(StringUtils.path(tmpDir, scenEntry.getTscanId() + ".log")), "UTF-8"));
+				
+				
+				FileUtils.writeStringToFile(new File(StringUtils.path(reportDir, reportDateFolder, testCaseEntry.getTestCaseId(), scenEntry.getTscanId()+ "_log.html")), 
+						parser.parse(), "UTF-8");		
+			}
+		}
+	}
+	
+	interface Render {
+		public String process(String text);
+	}
+	class LogColorRender implements Render {
+		@Override
+		
+		public String process(String text) {
+			StringBuffer sb = new StringBuffer();
+			String[] rows = text.split("\n");
+			boolean error = false;
+			for (String r : rows) {
+				if (r.contains("ERROR")) {
+					error=true;
+					sb.append("<p style=\"color:red\">");
+				} else {
+					if (error) {
+						try {
+							DateUtils.parse(r.substring(0, 9), "yyyy-MM-dd");
+							sb.append("</p>");
+							error = false;
+						} catch (Exception e) {
+							// do nothing
+						}
+					}
+				}
+				
+				if (!sb.toString().isEmpty())
+					sb.append("<br>");
+				sb.append(r);
+				
+			}
+			return sb.toString();
+		}
+	}
+	
 	class TextParser {
 		
 		String template;
 		Map<String, String> param  = new HashMap<String, String>();
 		List<Map<String, Object>> loopParam = new ArrayList<Map<String,Object>>();
+		Render render = new Render() {
+			@Override
+			public String process(String text) {
+				return text;
+			}
+		};
+		
+		public TextParser(Render render, String template) {
+			this.render = render;
+			this.template = template;
+		}
 		
 		public TextParser(String template) {
 			this.template = template;
@@ -281,7 +355,7 @@ public class ReportManager {
 			
 			// update param
 			for (Entry<String, String> entry : param.entrySet()) {
-				template = StringUtils.replaceVar(template, entry.getKey(), entry.getValue());		
+				template = StringUtils.replaceVar(template, entry.getKey(), render.process(entry.getValue()));		
 			}
 			
 			// remove temp
@@ -318,7 +392,7 @@ public class ReportManager {
 					
 					// update param
 					for (Entry<String, Object> entry : loop.entrySet()) {
-						temp = StringUtils.replaceVar(temp, entry.getKey(), entry.getValue());
+						temp = StringUtils.replaceVar(temp, entry.getKey(), render.process(entry.getValue().toString()));
 					}
 					
 					// remove temp
@@ -346,15 +420,5 @@ public class ReportManager {
 			}
 			return text;
 		}
-	}
-	
-	public static void main(String[] args) {
-		String test = "select * from gen_Tx_ @if test @endif halo halo @if sehingga @endif lebih canggih";
-		String temp = test.substring(test.indexOf("@if"), (test.indexOf("@endif")+"@endif".length()));
-		System.out.println(temp);
-		test = test.replace(temp, "");
-		
-		test = test.substring(test.indexOf("@if"), (test.indexOf("@endif")+"@endif".length()));
-		System.out.println(test);
 	}
 }

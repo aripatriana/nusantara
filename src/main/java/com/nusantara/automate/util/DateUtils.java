@@ -18,13 +18,12 @@ public class DateUtils {
 		return df.format(date);
 	}
 	
-	public static Date parse(String date, String format) {
+	public static Date parse(String date, String format) throws ParseException {
 		DateFormat df = new SimpleDateFormat(format);
 		try {
 			return df.parse(date);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			throw e;
 		}
-		return null;
 	}
 }

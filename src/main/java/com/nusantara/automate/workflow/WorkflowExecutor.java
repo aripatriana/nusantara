@@ -2,6 +2,7 @@ package com.nusantara.automate.workflow;
 
 import java.util.Map;
 
+import org.apache.log4j.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +50,8 @@ public class WorkflowExecutor {
 	public void execute(String scen, Workflow workflow, WorkflowConfig config) throws Exception {
 		String productType = null;
 		for (String workflowKey : config.getWorkflowKey(scen)) {
+	        MDC.put("testcase", workflowKey);
+	        
 			try {
 				log.info("Execute workflow " + workflowKey);
 				ContextLoader.getWebExchange().put("active_workflow", workflowKey);
@@ -100,7 +103,8 @@ public class WorkflowExecutor {
 						 DriverManager.close();
 					 }
 				 }
-					 
+					
+				 MDC.remove("testcase");
 			}
 		}
 	}

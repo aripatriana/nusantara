@@ -66,6 +66,8 @@ public class RunTestApplication {
 	public static void run(Class<? extends RunTestWorkflow> clazz, String[] args) {
 		System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, LOGBACK_FILE_PATH);
 		
+	
+		
 		WorkflowConfig workflowConfig = null;
 		try {
 			String driverPathFile = StringUtils.path(System.getProperty("user.dir"),DRIVER_FILE_PATH);
@@ -88,6 +90,8 @@ public class RunTestApplication {
 				}
 			}
 	
+			cleanUpTempDir();
+			
 			setDriver(driverPathFile);
 			
 			setConfig(new String[] {configPathFile, userPathFile}, moduleName);
@@ -113,15 +117,18 @@ public class RunTestApplication {
 		} catch (Exception e) {
 			log.error("ERROR ", e);
 		} finally {
-			try {
-				FileUtils.cleanDirectory(new File(StringUtils.path(System.getProperty("user.dir"),"tmp")));
-				if (workflowConfig != null)
-					workflowConfig.clear();
-				ConfigLoader.clear();
-				ContextLoader.clear();
-			} catch (IOException e1) {
-				log.error("ERROR ", e1);
-			}
+			if (workflowConfig != null)
+				workflowConfig.clear();
+			ConfigLoader.clear();
+			ContextLoader.clear();
+		}
+	}
+	
+	private static void cleanUpTempDir() {
+		try {
+			FileUtils.cleanDirectory(new File(StringUtils.path(System.getProperty("user.dir"),"tmp")));		
+		} catch (IOException e1) {
+			log.error("ERROR ", e1);
 		}
 	}
 	
@@ -155,7 +162,7 @@ public class RunTestApplication {
 			File file = new File(url.toURI());
 			searchFile(file.listFiles(), "elements", mapFiles);
 		} catch (Exception e) {
-			log.error("Failed to load defined elements");
+			log.warn("Failed to load defined elements");
 		}
 		
 		File workflowDir = new File(ConfigLoader.getConfig("{element_dir}").toString());

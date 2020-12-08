@@ -8,6 +8,44 @@
     </encoder>
   </appender>
 
+  <appender name="FILE-TESTCASE" class="ch.qos.logback.classic.sift.SiftingAppender">
+
+        <!-- This is MDC value -->
+        <!-- We will assign a value to 'logFileName' via Java code -->
+        <discriminator>
+            <key>testcase</key>
+            <defaultValue>testcase0</defaultValue>
+        </discriminator>
+
+        <sift>
+
+          <!-- A standard RollingFileAppender, the log file is based on 'logFileName' at runtime  -->
+          <appender name="FILE-${testcase}"
+            class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${user.dir}/tmp/${testcase}.log</file>
+
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>
+                    %d{yyyy-MM-dd HH:mm:ss} [%thread] %level %logger{35} - %msg%n
+                </Pattern>
+            </encoder>
+			<rollingPolicy
+                class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+                <FileNamePattern>${user.dir}/tmp/${testcase}.%i.log.zip
+                </FileNamePattern>
+                <MinIndex>1</MinIndex>
+                <MaxIndex>10</MaxIndex>
+            </rollingPolicy>
+
+            <triggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                <MaxFileSize>10MB</MaxFileSize>
+            </triggeringPolicy>
+
+          </appender>
+
+        </sift>
+    </appender>
 
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <!-- encoders are assigned the type
@@ -18,21 +56,25 @@
   </appender>
   <logger name="com.nusantara" level="debug" additivity="false">
   	<appender-ref ref="FILE"/>
+  	<appender-ref ref="FILE-TESTCASE"/>
     <appender-ref ref="CONSOLE"/>
   </logger>
 
   <root level="error">
   	<appender-ref ref="FILE"/>
+  	<appender-ref ref="FILE-TESTCASE"/>
     <appender-ref ref="CONSOLE"/>
   </root>
 
   <root level="debug">
     <appender-ref ref="CONSOLE" />
+    <appender-ref ref="FILE-TESTCASE"/>
     <appender-ref ref="FILE" />
   </root>
   
   <root level="info">
   	<appender-ref ref="CONSOLE" />
+  	<appender-ref ref="FILE-TESTCASE"/>
     <appender-ref ref="FILE" />
   </root>
 </configuration>
