@@ -81,7 +81,7 @@ public class AssertQueryAction implements Actionable {
 					}
 				} catch (FailedTransactionException e) {
 					webExchange.addFailedSession(webExchange.getCurrentSession());
-
+					log.error("Failed for transaction ", e);
 					ReportMonitor.logDataEntry(webExchange.getCurrentSession(),webExchange.get("active_scen").toString(),
 							webExchange.get("active_workflow").toString(), null, null, 
 							e.getMessage(), ReportManager.FAILED);
@@ -92,6 +92,7 @@ public class AssertQueryAction implements Actionable {
 				assertQuery(webExchange);
 			} catch (FailedTransactionException e) {
 				webExchange.addFailedSession(webExchange.getCurrentSession());
+				log.error("Failed for transaction ", e);
 				ReportMonitor.logError(webExchange.get("active_scen").toString(),
 						webExchange.get("active_workflow").toString(), e.getMessage());
 			}

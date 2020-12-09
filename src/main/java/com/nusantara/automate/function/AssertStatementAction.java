@@ -77,7 +77,7 @@ public class AssertStatementAction  implements Actionable {
 					}
 				} catch (FailedTransactionException e) {
 					webExchange.addFailedSession(webExchange.getCurrentSession());
-
+					log.error("Failed for transaction ", e);
 					ReportMonitor.logDataEntry(webExchange.getCurrentSession(),webExchange.get("active_scen").toString(),
 							webExchange.get("active_workflow").toString(), null, null, 
 							e.getMessage(), ReportManager.FAILED);
@@ -88,6 +88,7 @@ public class AssertStatementAction  implements Actionable {
 				assertStatement(variables, webExchange);
 			} catch (FailedTransactionException e) {
 				webExchange.addFailedSession(webExchange.getCurrentSession());
+				log.error("Failed for transaction ", e);
 				ReportMonitor.logError(webExchange.get("active_scen").toString(),
 						webExchange.get("active_workflow").toString(), e.getMessage());
 			}

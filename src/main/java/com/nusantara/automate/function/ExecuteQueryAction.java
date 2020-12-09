@@ -42,6 +42,7 @@ public class ExecuteQueryAction implements Actionable {
 					executeQuery(webExchange);			
 				} catch (FailedTransactionException e) {
 					webExchange.addFailedSession(webExchange.getCurrentSession());
+					log.error("Failed for transaction ", e);
 					ReportMonitor.logError(webExchange.get("active_scen").toString(),
 							webExchange.get("active_workflow").toString(), e.getMessage());
 				}
@@ -51,6 +52,7 @@ public class ExecuteQueryAction implements Actionable {
 				executeQuery(webExchange);
 			} catch (FailedTransactionException e) {
 				webExchange.addFailedSession(webExchange.getCurrentSession());
+				log.error("Failed for transaction ", e);
 				ReportMonitor.logError(webExchange.get("active_scen").toString(),
 						webExchange.get("active_workflow").toString(), e.getMessage());
 					throw e;
