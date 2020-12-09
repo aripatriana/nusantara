@@ -9,7 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;
 import com.nusantara.automate.window.WindowScreen;
@@ -26,11 +26,12 @@ public abstract class AbstractBaseDriver {
 	
 	private final int TIMEOUT_IN_SECOND = 15;
 	
-	
-	@Value("active_module_id")
-	private String activeModuleId;
 	protected WebDriver wd;
+	
+	@Autowired
 	protected WindowScreen ws;
+	
+	@Autowired
 	protected Checkpoint cp;
 	
 	public AbstractBaseDriver() {
@@ -40,29 +41,16 @@ public abstract class AbstractBaseDriver {
 	public AbstractBaseDriver(WebDriver wd) {
 		this.wd = wd;
 		this.ws = new WindowScreen(wd);
-		this.cp = new Checkpoint();
-		
-		ContextLoader.setObject(ws);
-		ContextLoader.setObject(cp);
 	}
 	
 	public void takeElementsAsCheckPoint(WebElement wl, WebExchange we) {
-		cp.takeElements(wl, we, activeModuleId);
+		cp.takeElements(wl, we);
 	}
 		
-	public void takeElementsAsCheckPoint(WebElement wl, WebExchange we, String moduleId) {
-		cp.takeElements(wl, we, moduleId);
-	}
-	
-	
 	public void takeElementsAsCheckPoint(WebExchange we) {
-		cp.takeElements(wd, we, activeModuleId);
+		cp.takeElements(wd, we);
 	}
 
-	public void takeElementsAsCheckPoint(WebExchange we, String moduleId) {
-		cp.takeElements(wd, we, moduleId);
-	}
-	
 	public void captureFullWindow() {
 		try {
 			ws.capture(WindowScreen.CAPTURE_FULL_WINDOW);

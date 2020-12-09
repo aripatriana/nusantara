@@ -10,6 +10,8 @@ public class SnapshotEntry {
 	
 	private String tscenId;
 	
+	private String sessionId;
+	
 	private String row;
 	
 	private String snapshotAs;
@@ -22,6 +24,14 @@ public class SnapshotEntry {
 
 	public SnapshotEntry() {
 		this.snapshotAs = SNAPSHOT_AS_IMAGE;
+	}
+	
+	public String getSessionId() {
+		return sessionId;
+	}
+	
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 	
 	public String getTestCaseId() {
@@ -82,8 +92,8 @@ public class SnapshotEntry {
 
 	@Override
 	public String toString() {
-		return "ImageEntry [testCaseId=" + testCaseId + ", tscenId=" + tscenId + ", row=" + row + ", snapshotAs=" + snapshotAs
-				+ ", rawText=" + rawText + ", imgFile=" + imgFile + ", status=" + status + "]";
+		return "SnapshotEntry [testCaseId=" + testCaseId + ", tscenId=" + tscenId + ", sessionId=" + sessionId
+				+ ", row=" + row + ", snapshotAs=" + snapshotAs + ", rawText=" + rawText + ", imgFile=" + imgFile
+				+ ", status=" + status + "]";
 	}
-
 }

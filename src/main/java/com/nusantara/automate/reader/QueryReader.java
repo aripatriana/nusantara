@@ -54,11 +54,11 @@ public class QueryReader {
 
 		for (int i=0; i<query.length(); i++) {
 			if (query.charAt(i) == '@') {
-				String param = StringUtils.substringUntil(query.substring(i, query.length()), new char[] {')',' '});
+				String param = StringUtils.substringUntil(query.substring(i, query.length()), new char[] {')',' ','\''});
 				for (Entry<String, String> id : temp.entrySet()) {
 					param = param.replace(id.getKey(), id.getValue());
 				}
-				qe.addParameter(param);
+				qe.addParameter(param.trim());
 			} 
 		}
 	}

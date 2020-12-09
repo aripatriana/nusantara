@@ -1,16 +1,17 @@
 package com.nusantara.automate.workflow;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.Menu;
+import com.nusantara.automate.exception.ScriptInvalidException;
 import com.nusantara.automate.handler.SubmitHandler;
 import com.nusantara.automate.util.SimpleEntry;
 
@@ -28,6 +29,7 @@ public class WorkflowConfig {
 	private Map<String, File> workflowDatas = new HashMap<String, File>();
 	private Map<String, Map<String, File>> workflowQueries = new HashMap<String, Map<String, File>>();
 	private Map<String, Menu> menuMap = new HashMap<String, Menu>();
+	private Set<String> modules = new HashSet<String>();
 	private Map<String, Set<String>> workflowModules = new HashMap<String, Set<String>>();
 	private LinkedList<String> workflowKeys = new LinkedList<String>();
 	private LinkedList<String> workflowScens = new LinkedList<String>();
@@ -52,6 +54,7 @@ public class WorkflowConfig {
 	
 	public void addHandler(Menu[] menuList, Class<? extends SubmitHandler> actionable) {
 		for (Menu menu : menuList) {
+			modules.add(menu.getModuleId());
 			menuMap.put(menu.getId(), menu);
 			handlerMap.put(menu.getId(), actionable);
 		}
@@ -165,6 +168,17 @@ public class WorkflowConfig {
 	
 	public Set<String> getWorkflowModule(String scen) {
 		return workflowModules.get(scen);
+	}
+	
+	public void checkModule(Set<String> modules) throws ScriptInvalidException {
+		List<String> notExists = new ArrayList<String>();
+		for (String module : modules) {
+			if (!this.modules.contains(module))
+				notExists.add(module);
+		}
+		
+		if (notExists.size() > 0)
+			throw new ScriptInvalidException("Module not exists for " + notExists.toString());
 	}
 	
 	public void clear() {

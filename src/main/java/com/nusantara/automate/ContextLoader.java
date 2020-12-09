@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.nusantara.automate.annotation.FetchSession;
@@ -137,6 +139,7 @@ public class ContextLoader {
 		return recognizeValue(object, object.getClass(), metadata);
 	}
 	
+	@SuppressWarnings("deprecation")
 	private static Map<String, String> recognizeValue(Object object, Class<?> clazz, Map<String, Object> metadata) {
 		Map<String, String> fields  = new HashMap<String, String>();    
         for (Field field : clazz.getDeclaredFields()) {
@@ -150,6 +153,20 @@ public class ContextLoader {
             	} catch (InstantiationException e) {
             		log.error("ERROR ", e);
             	}
+            } else if (field.isAnnotationPresent(Autowired.class)) {
+            	try {
+            		Object d = field.get(object);
+            		if (d == null) {
+	            		Class<?> c = field.getType();
+						d = c.newInstance();
+            		}
+					setObject(d, metadata);
+					ReflectionUtils.setProperty(object, field.getName(), d);
+				} catch (IllegalAccessException e) {
+					log.error("ERROR ", e);
+				} catch (InstantiationException e) {
+					log.error("ERROR ", e);
+				}
             }
         }
         if (!Object.class.equals(clazz.getSuperclass())) {
@@ -257,6 +274,20 @@ public class ContextLoader {
             	} catch (InstantiationException e) {
             		log.error("ERROR ", e);
             	}
+            } else if (field.isAnnotationPresent(Autowired.class)) {
+            	try {
+            		Object d = field.get(object);
+            		if (d == null) {
+	            		Class<?> c = field.getType();
+						d = c.newInstance();
+            		}
+					setObject(d, metadata);
+					ReflectionUtils.setProperty(object, field.getName(), d);
+				} catch (IllegalAccessException e) {
+					log.error("ERROR ", e);
+				} catch (InstantiationException e) {
+					log.error("ERROR ", e);
+				}
             }
             
         }

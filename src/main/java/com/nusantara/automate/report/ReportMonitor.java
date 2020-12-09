@@ -89,7 +89,7 @@ public class ReportMonitor {
 				data.appendErrorLog(dataEntry.getErrorLog());
 				if (dataEntry.getSessionData() != null)
 					data.setSessionData(dataEntry.getSessionData());
-				if(dataEntry.getMetaData().size() > 0)
+				if(dataEntry.getMetaData() != null && dataEntry.getMetaData().size() > 0)
 					if (!data.checkMetaData(dataEntry.getMetaData().get(0))) {
 						data.addAllMetaData(dataEntry.getMetaData());
 					}
@@ -103,10 +103,11 @@ public class ReportMonitor {
 		scenEntry.setStatus(ReportManager.FAILED);
 	}
 	
-	public static void logSnapshotEntry(String testCaseId, String scenId, String as, String rawText, String filePath, String status) {
+	public static void logSnapshotEntry(String testCaseId, String scenId, String sessionId, String as, String rawText, String filePath, String status) {
 		SnapshotEntry snapshotEntry = new SnapshotEntry();
 		snapshotEntry.setTscenId(scenId);
 		snapshotEntry.setTestCaseId(testCaseId);
+		snapshotEntry.setSessionId(sessionId);
 		snapshotEntry.setSnapshotAs(as);
 		snapshotEntry.setRawText(rawText);
 		snapshotEntry.setImgFile(filePath);
@@ -114,13 +115,14 @@ public class ReportMonitor {
 		logSnapshotEntry(snapshotEntry);
 	}
 	
-	public static void logSnapshotEntry(String testCaseId, String scenId, String filePath, String status) {
-		SnapshotEntry imageEntry = new SnapshotEntry();
-		imageEntry.setTscenId(scenId);
-		imageEntry.setTestCaseId(testCaseId);
-		imageEntry.setImgFile(filePath);
-		imageEntry.setStatus(status);
-		logSnapshotEntry(imageEntry);	
+	public static void logSnapshotEntry(String testCaseId, String scenId, String sessionId, String filePath, String status) {
+		SnapshotEntry snapshotEntry = new SnapshotEntry();
+		snapshotEntry.setTscenId(scenId);
+		snapshotEntry.setTestCaseId(testCaseId);
+		snapshotEntry.setSessionId(sessionId);
+		snapshotEntry.setImgFile(filePath);
+		snapshotEntry.setStatus(status);
+		logSnapshotEntry(snapshotEntry);	
 	}
 	
 	public static void logSnapshotEntry(SnapshotEntry imageEntry) {

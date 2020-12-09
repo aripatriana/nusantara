@@ -12,6 +12,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.nusantara.automate.Actionable;
@@ -37,6 +38,7 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 	@Value(value = "timeout.modal.callback")
 	private String timeoutModalCallback;
 	
+	@Autowired
 	private Callback callback;
 	private String successId;
 	private String[] failedId;
@@ -48,8 +50,6 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 		this.callback = callback;
 		this.successId = successId;
 		this.failedId = new String[] {failedId};
-		
-		ContextLoader.setObject(callback);
 	}
 	
 	public ModalSuccessAction(String successId, String[] failedId, WebCallback callback) {

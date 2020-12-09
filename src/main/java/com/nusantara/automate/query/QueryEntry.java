@@ -26,6 +26,7 @@ public class QueryEntry {
 	private Map<String, Statement> statements = new LinkedHashMap<String, Statement>();
 	private List<String> columns = new LinkedList<String>();
 	private List<String> parameters = new ArrayList<String>();
+	private List<String> variables = new ArrayList<String>();
 	
 	public QueryEntry() {
 	}
@@ -54,10 +55,19 @@ public class QueryEntry {
 			statements.put(var1, new Statement(var1, var2, equality));
 		else
 			statements.put(var1, null);
+		
+		if (var1 != null && var1.startsWith("@"))
+			variables.add(var1);
+		if (var2 != null && var2.startsWith("@"))
+			variables.add(var2);
 	}
 	
 	public List<String> getColumns() {
 		return columns;
+	}
+	
+	public List<String> getVariables() {
+		return variables;
 	}
 	
 //	public List<String> getColumns() {
@@ -104,6 +114,7 @@ public class QueryEntry {
 	
 	public void addParameter(String parameter) {
 		parameters.add(parameter);
+		variables.add(parameter);
 	}
 	
 	public List<String> getParameters() {
@@ -117,7 +128,6 @@ public class QueryEntry {
 	@SuppressWarnings("unchecked")
 	public String[] getParsedQuery(WebExchange webExchange) throws Exception {
 		String query = getQuery();
-		String[] parsedQuery = new String[] {query};
 		Map<String, List<String>> rounded = new HashMap<String, List<String>>();
 		Map<String, List<String>> squared = new HashMap<String, List<String>>();
 		for (String p : getParameters()) {
@@ -140,10 +150,11 @@ public class QueryEntry {
 					r.add(s[1].replace(".","").trim());
 				squared.put(s[0], r);
 			} else {
-				query = query.replace(p, StringUtils.quote(webExchange.get(p).toString()));
+				query = query.replace(p, StringUtils.quote(String.valueOf(webExchange.get(p))));
 			}
 		}
 		
+		String[] parsedQuery = new String[] {query};
 		
 		// []
 		if (!squared.isEmpty()) {

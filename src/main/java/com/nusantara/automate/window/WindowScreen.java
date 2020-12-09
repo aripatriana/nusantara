@@ -56,6 +56,9 @@ public class WindowScreen {
 	private Scrolling scrolling;
 	private WebDriver webDriver;
 	
+	@Value("current_session_id")
+	private String sessionId;
+	
 	private String remark;
 	
 	public WindowScreen(WebDriver webDriver) {
@@ -123,7 +126,8 @@ public class WindowScreen {
 				outputFile = snapshot(WindowScreen.SNAPSHOT_FINAL);
 			}	
 			
-			ReportMonitor.logSnapshotEntry(targetFolder, prefixFileName, outputFile.getAbsolutePath(), (REMARK_FAILED.equals(remark) ? ReportManager.FAILED : ReportManager.PASSED));
+			ReportMonitor.logSnapshotEntry(targetFolder, prefixFileName, sessionId, outputFile.getAbsolutePath(), 
+					(REMARK_FAILED.equals(remark) ? ReportManager.FAILED : ReportManager.PASSED));
 		}
 		resetRemark();
 	}

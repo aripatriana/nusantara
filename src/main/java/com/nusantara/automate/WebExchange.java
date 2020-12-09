@@ -392,8 +392,9 @@ public class WebExchange {
 		return getLocalMap(session).get(key);
 	}
 
-	public void setCurrentSession(int index) {
+	public String setCurrentSession(int index) {
 		getSession().setCurrentSessionByIndex(index);
+		return getCurrentSession();
 	}
 
 	public void setCurrentSession(String sessionId) {
@@ -405,7 +406,9 @@ public class WebExchange {
 	}
 	
 	public String createSession(int index) {
-		return getSession().createSession(index);
+		String sessionId = getSession().createSession(index);
+		put("current_session_id", sessionId);
+		return sessionId;
 	}
 	
 	public String getCurrentSession() {

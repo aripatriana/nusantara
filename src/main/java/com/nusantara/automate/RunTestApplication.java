@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.exception.ScriptInvalidException;
 import com.nusantara.automate.io.FileIO;
+import com.nusantara.automate.query.QueryEntry;
 import com.nusantara.automate.reader.QueryReader;
 import com.nusantara.automate.reader.TemplateReader;
 import com.nusantara.automate.reader.WorkflowYReader;
@@ -311,10 +313,23 @@ public class RunTestApplication {
 						throw new ScriptInvalidException("Function not found for " + entry.getVariable());
 					}
 				} else if (entry.checkKeyword(BasicScript.ASSERT)) {
-					StringUtils.parseStatement(entry.getVariable(), Statement.MARK);
+					String[] params = StringUtils.parseStatement(entry.getVariable(), Statement.MARK);
+					for (String p : params) {
+						if (p.startsWith("@" + WebExchange.PREFIX_TYPE_DATA)
+								|| p.startsWith("@" + WebExchange.PREFIX_TYPE_ELEMENT)) {
+							moduleIdList.add(p.split("\\.")[1]);
+						}
+					}
 				} else if (entry.checkKeyword(BasicScript.ASSERT_QUERY)) {
 					QueryReader qr = new QueryReader(entry.getVariable());
-					qr.read();
+					QueryEntry qe = qr.read();
+					List<String> params = qe.getVariables();
+					for (String p : params) {
+						if (p.startsWith("@" + WebExchange.PREFIX_TYPE_DATA)
+								|| p.startsWith("@" + WebExchange.PREFIX_TYPE_ELEMENT)) {
+							moduleIdList.add(p.split("\\.")[1]);
+						}
+					}
 				}else if (entry.checkKeyword(BasicScript.ASSERT_AGGREGATE)) {
 					File file = workflowConfig.getWorkflowQuery(workflowConfig.getWorkflowMapKey(entryList.getKey()), entry.getVariable());
 					if (file == null) {
@@ -322,7 +337,14 @@ public class RunTestApplication {
 					}
 					TemplateReader tr = new TemplateReader(file);
 					QueryReader qr = new QueryReader(tr.read().toString());
-					qr.read();
+					QueryEntry qe = qr.read();
+					List<String> params = qe.getVariables();
+					for (String p : params) {
+						if (p.startsWith("@" + WebExchange.PREFIX_TYPE_DATA)
+								|| p.startsWith("@" + WebExchange.PREFIX_TYPE_ELEMENT)) {
+							moduleIdList.add(p.split("\\.")[1]);
+						}
+					}
 				} else if (entry.checkKeyword(BasicScript.LOGIN) || entry.checkKeyword(BasicScript.RELOGIN)) {
 					Map<String, Object> login = ConfigLoader.getLoginInfo(entry.getVariable());
 					if (login == null) {
@@ -337,7 +359,7 @@ public class RunTestApplication {
 					}
 				}
 			}
-			
+			workflowConfig.checkModule(moduleIdList);
 			workflowConfig.addWorkflowModule(entryList.getKey(), moduleIdList);
 		}
 	}

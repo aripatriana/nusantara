@@ -44,7 +44,6 @@ public class Checkpoint {
 	@Value("start_time_milis")
 	private String startTimeMilis;
 	
-	@Value("element.table.skipLastRow")
 	private String skipLastRow = "true";
 	
 	public Checkpoint() {
@@ -55,14 +54,6 @@ public class Checkpoint {
 	}
 
 	public void takeElements(WebElement wl, WebExchange we) {
-		putToSession(we, mapElements(new FindElement(wl), we.getElements(moduleId)));
-	}
-	
-	public void takeElements(WebDriver wd, WebExchange we, String moduleId) {
-		putToSession(we, mapElements(new FindElement(wd), we.getElements(moduleId)));
-	}
-
-	public void takeElements(WebElement wl, WebExchange we, String moduleId) {
 		putToSession(we, mapElements(new FindElement(wl), we.getElements(moduleId)));
 	}
 	
@@ -121,7 +112,8 @@ public class Checkpoint {
 		MapUtils.clearMapKey(moduleId + ".", values);
 		FileIO.write(filename, values);
 		
-		ReportMonitor.logSnapshotEntry(testcase, scen, SnapshotEntry.SNAPSHOT_AS_CHECKPOINT, values.toString(), filename, ReportManager.PASSED);
+		ReportMonitor.logSnapshotEntry(testcase, scen, we.getCurrentSession(), 
+				SnapshotEntry.SNAPSHOT_AS_CHECKPOINT, values.toString(), filename, ReportManager.PASSED);
 	}
 	
 	private String getOutputFile() {

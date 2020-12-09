@@ -221,7 +221,7 @@ public class ReportManager {
 					
 					for (SnapshotEntry snapshotEntry : imageEntries) {				
 						Map<String, Object> loopParam = new HashMap<String, Object>();
-						
+						loopParam.put(EL_SESSION_ID, (snapshotEntry.getSessionId() != null ? snapshotEntry.getSessionId() : "-") );
 						if (snapshotEntry.getSnapshotAs().equals(SnapshotEntry.SNAPSHOT_AS_IMAGE)) {
 							loopParam.put(EL_IMG_FILE, "." + snapshotEntry.getImgFile().replace(StringUtils.path(reportDir , reportDateFolder, testCaseEntry.getTestCaseId()), ""));
 							loopParam.put(EL_TYPE_IMAGE, true);
@@ -282,7 +282,7 @@ public class ReportManager {
 			String[] rows = text.split("\n");
 			boolean error = false;
 			for (String r : rows) {
-				if (r.contains("ERROR")) {
+				if (r.contains("ERROR") || (r.contains("Assert") && r.contains("FALSE"))) {
 					error=true;
 					sb.append("<p style=\"color:red\">");
 				} else {
@@ -392,7 +392,7 @@ public class ReportManager {
 					
 					// update param
 					for (Entry<String, Object> entry : loop.entrySet()) {
-						temp = StringUtils.replaceVar(temp, entry.getKey(), render.process(entry.getValue().toString()));
+						temp = StringUtils.replaceVar(temp, entry.getKey(), render.process(String.valueOf(entry.getValue())));
 					}
 					
 					// remove temp

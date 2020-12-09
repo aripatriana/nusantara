@@ -1,9 +1,13 @@
 package com.nusantara.automate.function;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +25,7 @@ import com.nusantara.automate.report.ReportMonitor;
 import com.nusantara.automate.report.SnapshotEntry;
 import com.nusantara.automate.util.DataTypeUtils;
 import com.nusantara.automate.util.MapUtils;
+import com.nusantara.automate.util.ReflectionUtils;
 import com.nusantara.automate.util.StringUtils;
 
 public class AssertQueryAction implements Actionable {
@@ -45,19 +50,41 @@ public class AssertQueryAction implements Actionable {
 	
 		boolean executeBatch = false;
 		for (String param : qe.getParameters()) {
-			if (param.startsWith("@" + WebExchange.PREFIX_TYPE_DATA))
+			if (DataTypeUtils.checkType(param, DataTypeUtils.TYPE_OF_VARIABLE))
 				executeBatch = true;
 		}
 		
 		if (executeBatch) {
+			// distinct module
+			Set<String> module = new HashSet<String>();
+			for (String variable : qe.getVariables()) {
+				if (variable.startsWith("@"+WebExchange.PREFIX_TYPE_DATA)) {
+					module.add(variable.split("\\.")[1]);
+				}
+			}
+			
 			for (int i=0; i<webExchange.getCountSession(); i++) {
 				try {
-					webExchange.setCurrentSession(i);
-					assertQuery(webExchange);
+					String sessionId = webExchange.createSession(i);
+					if (!webExchange.isSessionFailed(sessionId)) {
+						webExchange.setCurrentSession(sessionId);
+						
+						// log data monitor
+						for (String m : module) {
+							webExchange.setCurrentSession(i);
+							Map<String, Object> metadata = webExchange.getMetaData(m, i);
+							ReportMonitor.logDataEntry(webExchange.getCurrentSession(),webExchange.get("active_scen").toString(),
+									webExchange.get("active_workflow").toString(), null, metadata);
+						}
+						
+						assertQuery(webExchange);
+					}
 				} catch (FailedTransactionException e) {
 					webExchange.addFailedSession(webExchange.getCurrentSession());
-					ReportMonitor.logError(webExchange.get("active_scen").toString(),
-							webExchange.get("active_workflow").toString(), e.getMessage());
+
+					ReportMonitor.logDataEntry(webExchange.getCurrentSession(),webExchange.get("active_scen").toString(),
+							webExchange.get("active_workflow").toString(), null, null, 
+							e.getMessage(), ReportManager.FAILED);
 				}
 			}
 		} else {
@@ -72,7 +99,7 @@ public class AssertQueryAction implements Actionable {
 	}
 	
 	private void assertQuery(WebExchange webExchange) throws FailedTransactionException {
-		String[] columns = new String[qe.getStatements().size()];
+		String[] columns = new String[qe.getColumns().size()];
 		columns = qe.getColumns().toArray(columns);
 		
 		List<String[]> result = new ArrayList<String[]>();
@@ -98,14 +125,22 @@ public class AssertQueryAction implements Actionable {
 							if (statement.isArg1(DataTypeUtils.TYPE_OF_COLUMN)) {
 								statement.setVal1(resultMap.get(statement.getArg1()));
 							} else if (statement.isArg1(DataTypeUtils.TYPE_OF_VARIABLE)) {
-								statement.setVal1(StringUtils.nvl(webExchange.get(statement.getArg1()),"null"));
+								if (statement.getArg1().contains(QueryEntry.SQUARE_BRACKET)) {
+									statement.setVal1(StringUtils.nvl(parseExclusiveVariable(statement.getArg1(), webExchange), "null"));
+								} else {
+									statement.setVal1(StringUtils.nvl(webExchange.get(statement.getArg1()),"null"));
+								}
 							} else {
 								statement.setVal1(statement.getArg1());
 							}
 							if (statement.isArg2(DataTypeUtils.TYPE_OF_COLUMN)) {
 								statement.setVal2(resultMap.get(statement.getArg2()));
 							} else if (statement.isArg2(DataTypeUtils.TYPE_OF_VARIABLE)) {
-								statement.setVal2(StringUtils.nvl(webExchange.get(statement.getArg2()),"null"));
+								if (statement.getArg2().contains(QueryEntry.SQUARE_BRACKET)) {
+									statement.setVal2(StringUtils.nvl(parseExclusiveVariable(statement.getArg2(), webExchange), "null"));
+								} else {
+									statement.setVal2(StringUtils.nvl(webExchange.get(statement.getArg2()),"null"));
+								}
 							} else {
 								statement.setVal2(statement.getArg2());
 							}
@@ -131,16 +166,49 @@ public class AssertQueryAction implements Actionable {
 			if (status) status = e.isTrue();
 		}
 		
-		SnapshotEntry entry = new SnapshotEntry();
-		entry.setTscenId(scen);
-		entry.setTestCaseId(testcase);
-		entry.setSnapshotAs(SnapshotEntry.SNAPSHOT_AS_RAWTEXT);
-		entry.setRawText(rawText);
-		entry.setStatus((status ? ReportManager.PASSED : ReportManager.FAILED));
-		
-		ReportMonitor.logSnapshotEntry(entry);
+		ReportMonitor.logSnapshotEntry(testcase, scen, webExchange.getCurrentSession(), 
+				SnapshotEntry.SNAPSHOT_AS_RAWTEXT, rawText, null, (status ? ReportManager.PASSED : ReportManager.FAILED));
 		
 		if (!status)
-			throw new FailedTransactionException("Failed assertion", entry);
+			throw new FailedTransactionException("Failed assertion");
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String parseExclusiveVariable(String argument, WebExchange webExchange) throws Exception {
+		String result = null;
+		Map<String, List<String>> squared = new HashMap<String, List<String>>();
+		if(argument.contains(QueryEntry.SQUARE_BRACKET)) {
+			String[] s = argument.split("\\" + QueryEntry.SQUARE_BRACKET);
+			if (s.length > 2)
+				throw new Exception("Not valid argument for " + argument);
+			List<String> r = squared.get(s[0]);
+			if (r == null) r = new ArrayList<String>();
+			if (s.length == 2)
+				r.add(s[1].replace(".","").trim());
+			squared.put(s[0], r);
+		}
+		
+		// []
+		if (!squared.isEmpty()) {
+			for (Entry<String, List<String>> e : squared.entrySet()) {
+				Object o = webExchange.get(e.getKey()+QueryEntry.SQUARE_BRACKET);
+				if (o != null && !ReflectionUtils.checkAssignableFrom(o.getClass(), List.class))
+					throw new Exception("Argument value is not a list for " + e.getKey()+QueryEntry.SQUARE_BRACKET);
+				
+				if (o != null) {
+					List<Object> l = (List<Object>) o;
+					if (e.getValue() != null && !e.getValue().isEmpty()) {
+						for (String v : e.getValue()) {
+							List<Object> values = MapUtils.mapAsList((List<Map<String, Object>>) (List<?>)l, v);
+							result = MapUtils.listAsString(values, ",");
+						}
+					} else {
+						result = MapUtils.listAsString(l, ",");
+					}
+				}
+			}
+		}
+		
+		return result;
 	}
 }
