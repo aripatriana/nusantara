@@ -47,14 +47,14 @@ public class AssertQueryAction implements Actionable {
 	@Override
 	public void submit(WebExchange webExchange) throws FailedTransactionException {
 		log.info("Query -> " + qe.getQuery());
-	
-		boolean executeBatch = false;
-		for (String param : qe.getParameters()) {
-			if (DataTypeUtils.checkType(param, DataTypeUtils.TYPE_OF_VARIABLE))
-				executeBatch = true;
-		}
-		
-		if (executeBatch) {
+
+		if (qe.getVariables() != null && qe.getVariables().size() > 0) {
+			if (webExchange.getCountSession() == 0) {
+				ReportMonitor.logError(webExchange.get("active_scen").toString(),
+						webExchange.get("active_workflow").toString(), "The session is needed when executing the query using a variable, use loadFile()");
+				throw new FailedTransactionException("The session is needed when executing the query using a variable, use loadFile()");
+			}
+			
 			// distinct module
 			Set<String> module = new HashSet<String>();
 			for (String variable : qe.getVariables()) {

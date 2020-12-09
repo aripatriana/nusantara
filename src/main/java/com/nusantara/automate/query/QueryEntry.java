@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 
 import com.nusantara.automate.Statement;
 import com.nusantara.automate.WebExchange;
+import com.nusantara.automate.util.DataTypeUtils;
 import com.nusantara.automate.util.MapUtils;
 import com.nusantara.automate.util.ReflectionUtils;
 
@@ -56,9 +57,9 @@ public class QueryEntry {
 		else
 			statements.put(var1, null);
 		
-		if (var1 != null && var1.startsWith("@"))
+		if (var1 != null && DataTypeUtils.checkType(var1, DataTypeUtils.TYPE_OF_VARIABLE))
 			variables.add(var1);
-		if (var2 != null && var2.startsWith("@"))
+		if (var2 != null && DataTypeUtils.checkType(var2, DataTypeUtils.TYPE_OF_VARIABLE))
 			variables.add(var2);
 	}
 	

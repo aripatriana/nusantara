@@ -330,13 +330,23 @@ public class RunTestApplication {
 							moduleIdList.add(p.split("\\.")[1]);
 						}
 					}
-				}else if (entry.checkKeyword(BasicScript.ASSERT_AGGREGATE)) {
+				} else if (entry.checkKeyword(BasicScript.ASSERT_AGGREGATE)) {
 					File file = workflowConfig.getWorkflowQuery(workflowConfig.getWorkflowMapKey(entryList.getKey()), entry.getVariable());
 					if (file == null) {
 						throw new ScriptInvalidException("File not found for " + entry.getVariable());
 					}
 					TemplateReader tr = new TemplateReader(file);
 					QueryReader qr = new QueryReader(tr.read().toString());
+					QueryEntry qe = qr.read();
+					List<String> params = qe.getVariables();
+					for (String p : params) {
+						if (p.startsWith("@" + WebExchange.PREFIX_TYPE_DATA)
+								|| p.startsWith("@" + WebExchange.PREFIX_TYPE_ELEMENT)) {
+							moduleIdList.add(p.split("\\.")[1]);
+						}
+					}
+				} else if (entry.checkKeyword(BasicScript.EXECUTE_QUERY)) {
+					QueryReader qr = new QueryReader(entry.getVariable());
 					QueryEntry qe = qr.read();
 					List<String> params = qe.getVariables();
 					for (String p : params) {

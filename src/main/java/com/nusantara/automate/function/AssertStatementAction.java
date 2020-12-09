@@ -53,6 +53,12 @@ public class AssertStatementAction  implements Actionable {
 			variables.add(statement.getArg2());
 
 		if (variables.size() > 0) {
+			if (webExchange.getCountSession() == 0) {
+				ReportMonitor.logError(webExchange.get("active_scen").toString(),
+						webExchange.get("active_workflow").toString(), "The session is needed when executing the query using a variable, use loadFile()");
+				throw new FailedTransactionException("The session is needed when executing the query using a variable, use loadFile()");
+			}
+			
 			// distinct module
 			Set<String> module = new HashSet<String>();
 			for (String variable : variables) {
