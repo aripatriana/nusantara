@@ -1,6 +1,8 @@
 package com.nusantara.automate;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -11,6 +13,7 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -235,11 +238,17 @@ public class ContextLoader {
 	            	Class<?> c = field.getAnnotation(MapJoinList.class).clazz();
 	            	LinkedList<Object> list = new LinkedList<Object>();
 	            	if (metadata.get(field.getAnnotation(MapJoinList.class).name()) != null) {
-		            	for (LinkedHashMap<String, Object> md : (Collection<LinkedHashMap<String, Object>>)metadata.get(field.getAnnotation(MapJoinList.class).name())) {
-		            		Object d = c.newInstance();
-		            		setObjectWithCustom(d, md);
-		            		list.add(d);
-		            	};
+	            		Object obj = metadata.get(field.getAnnotation(MapJoinList.class).name());
+	            		
+	            		if (ReflectionUtils.checkAssignableFrom(c, String.class)) {
+	            			list = (LinkedList<Object>)obj;
+	            		} else {
+	            			for (LinkedHashMap<String, Object> md : (Collection<LinkedHashMap<String, Object>>)obj) {
+			            		Object d = c.newInstance();
+			            		setObjectWithCustom(d, md);
+			            		list.add(d);
+			            	};
+	            		}
 		            }
 		            ReflectionUtils.setProperty(object, field.getName(), list);
     			} catch (InstantiationException e) {

@@ -270,6 +270,7 @@ public abstract class Workflow {
 								metadata = webExchange.getMetaData(getActiveMenu().getModuleId(), i);
 								
 								if (actionable instanceof ManagedFormAction) {
+									ContextLoader.setObjectLocal(actionable);
 									((ManagedFormAction) actionable).setMetadata(metadata);
 								} else {
 									ContextLoader.setObjectLocal(actionable);	
@@ -322,6 +323,7 @@ public abstract class Workflow {
 							metadata = webExchange.getMetaData(getActiveMenu().getModuleId(),i, true);
 							
 							if (actionable instanceof ManagedFormAction) {
+								ContextLoader.setObject(actionable);
 								((ManagedFormAction) actionable).setMetadata(metadata);
 							} else {
 								ContextLoader.setObjectWithCustom(actionable, metadata);	

@@ -167,12 +167,16 @@ public class RunTestApplication {
 			log.warn("Failed to load defined elements");
 		}
 		
-		File workflowDir = new File(ConfigLoader.getConfig("{element_dir}").toString());
-		searchFile(workflowDir.listFiles(), "elements", mapFiles);
-		for (File file : MapUtils.combineValueAsList(mapFiles.values())) {
-			Map<String, Object> elements = FileIO.loadMapValueFile(file, "=");
-			MapUtils.concatMapKey(file.getName().replace(".element", "") + ".", elements);
-			ConfigLoader.setElementMap(file.getName().replace(".element", ""), elements);
+		try {
+			File workflowDir = new File(ConfigLoader.getConfig("{element_dir}").toString());
+			searchFile(workflowDir.listFiles(), "elements", mapFiles);
+			for (File file : MapUtils.combineValueAsList(mapFiles.values())) {
+				Map<String, Object> elements = FileIO.loadMapValueFile(file, "=");
+				MapUtils.concatMapKey(file.getName().replace(".element", "") + ".", elements);
+				ConfigLoader.setElementMap(file.getName().replace(".element", ""), elements);
+			}
+		} catch (Exception e) {
+			// do nothing
 		}
 		
 		// config

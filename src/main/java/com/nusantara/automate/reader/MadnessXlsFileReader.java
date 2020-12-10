@@ -97,7 +97,8 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 					String[] values = value.split("\\.");
 					LinkedList<Object> columns = removedMap.get(values[0]);
 					if (columns == null) columns = new LinkedList<Object>();
-					columns.add(values[1]);
+					if (values.length > 1)
+						columns.add(values[1]);
 					removedMap.put(values[0], columns);
 					removed.put(entry.getKey(), values[0]);
 				}					
@@ -173,6 +174,9 @@ public class MadnessXlsFileReader implements FileReader<Map<String, Object>> {
 								arraySize.put(removedMap.get(entry.getKey()), values.length);
 						}
 							
+						if (removedMapDetail.get(removedMap.get(entry.getKey()).toString()).isEmpty()) {
+							simpleList.put(entry.getKey(), removedMap.get(entry.getKey()));
+						}
 						list.add(values);
 					} else {
 						if (arraySize.get(removedMap.get(entry.getKey())) == null)

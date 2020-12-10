@@ -34,55 +34,82 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	}
 	
 	protected void setInputFieldLike(String id, String value) {
-		findElementByXpath("//input[contains(@id,'" + id + "')]").clear();
-		findElementByXpath("//input[contains(@id,'" + id + "')]").sendKeys(value);
-		Sleep.wait(200);
+		WebElement we = findElementByXpath("//input[contains(@id,'" + id + "')]"); 
+		if (we.isEnabled() && we.isDisplayed()) {
+			we.clear();
+			we.sendKeys(value);
+			Sleep.wait(200);
+		}
 	}
 	
 	protected void setInputField(String id, String value) {
-		findElementById(id).sendKeys(Keys.chord(Keys.CONTROL, "a"));
-		findElementById(id).clear();
-		findElementById(id).sendKeys(value);
-		Sleep.wait(200);
+		WebElement we = findElementById(id);
+		if (we.isEnabled() && we.isDisplayed()) {
+			we.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+			we.clear();
+			we.sendKeys(value);
+			Sleep.wait(200);
+		}
 	}
 	
 	protected void setDatepickerField(String id, String value) {
-		findElementById(id).sendKeys(value);
-		findElementByXpath("//td[contains(@class,'ui-datepicker-current-day')]").click();
-		Sleep.wait(200);
+		WebElement we = findElementById(id);
+		if (we.isEnabled() && we.isDisplayed()) {
+			we.sendKeys(value);
+			findElementByXpath("//td[contains(@class,'ui-datepicker-current-day')]").click();
+			Sleep.wait(200);
+		}
 	}
 	
 	protected void selectDropdown(String id, String textValue) {
-		findElementByXpath("//span[@id='select2-" + id + "-container']").click();;
-//		findElementByXpath("//div[contains(@id,'" + id + "')]//div//span").click();
-		Sleep.wait(100);
-		findElementByXpath("//ul[contains(@id,'" + id + "')]//li[text()='" + textValue + "']").click();
-		Sleep.wait(200);
+		WebElement we = findElementByXpath("//span[@id='select2-" + id + "-container']");
+		if (we.isEnabled() && we.isDisplayed()) {
+			we.click();
+			//findElementByXpath("//div[contains(@id,'" + id + "')]//div//span").click();
+			Sleep.wait(100);
+			findElementByXpath("//ul[contains(@id,'" + id + "')]//li[text()='" + textValue + "']").click();
+			Sleep.wait(200);
+		}
 	}
 	
 	protected void clickButtonLookup(String id) {
-		findElementById("buttonTo_" + id).click();
-		Sleep.wait(1000);
+		WebElement we = findElementById("buttonTo_" + id);
+		if (we.isEnabled() && we.isDisplayed()) {
+			we.click();
+			Sleep.wait(1000);
+		}
 	}
 	
 	protected void clickButtonLike(WebElement webElement, String id) {
-		findElementByXpath(webElement, "//button[contains(@id,'" + id + "')]").click();
-		Sleep.wait(1000);
+		WebElement we = findElementByXpath(webElement, "//button[contains(@id,'" + id + "')]");
+		if (we.isEnabled() && we.isDisplayed()) {
+			we.click();
+			Sleep.wait(1000);
+		}
 	}
 	
 	protected void clickButton(WebElement webElement, String id) {
-		findElementById(webElement, id).click();
-		Sleep.wait(1000);
+		WebElement we = findElementById(webElement, id);
+		if (we.isEnabled() && we.isDisplayed()) {
+			we.click();
+			Sleep.wait(1000);
+		}
 	}
 
 	protected void clickButtonLike(String id) {
-		findElementByXpath("//button[contains(@id,'" + id + "')]").click();
-		Sleep.wait(1000);
+		WebElement we = findElementByXpath("//button[contains(@id,'" + id + "')]");
+		if (we.isEnabled() && we.isDisplayed()) {
+			we.click();
+			Sleep.wait(1000);
+		}
 	}
 	
 	protected void clickButton(String id) {
-		findElementById(id).click();
-		Sleep.wait(1000);
+		WebElement we = findElementById(id);
+		if (we.isEnabled() && we.isDisplayed()) {
+			we.click();
+			Sleep.wait(1000);
+		}
 	}
 	
 	/**
@@ -100,25 +127,30 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	 * @param value
 	 */
 	protected void selectLookupSearch(String id, String value) {
-		clickButtonLookup(id);
-		Sleep.wait(1000);
-		findElementByXpath("//div[@id='myModal_" + id + "']//div//div//div[@class='modal-body']//div//div//div[contains(@class,'search')]//input").sendKeys(value);
-		Sleep.wait(1000);
-		
-		int index = 0;
-		
-		try {
-			WebElement webElement = findElementByXpath("//table[contains(@id, '" + id + "')]//tbody//tr[./td[2]/text()='" + value + "']");
-			index = Integer.valueOf(webElement.getAttribute("data-index"));
+		WebElement we = findElementById("buttonTo_" + id);
+		if (we.isEnabled() && we.isDisplayed()) {
+			we.click();
+			Sleep.wait(2000);
 			
-			findElementByXpath("//input[contains(@name, '" + id + "radio') and @type='radio' and @data-index='" + index + "']").click();	
-		} catch (StaleElementReferenceException e) {
-			Sleep.wait(3000);	
-			findElementByXpath("//input[contains(@name, '" + id + "radio') and @type='radio' and @data-index='" + index + "']").click();	
+			findElementByXpath("//div[@id='myModal_" + id + "']//div//div//div[@class='modal-body']//div//div//div[contains(@class,'search')]//input").sendKeys(value);
+			Sleep.wait(1000);
+			
+			int index = 0;
+			
+			try {
+				WebElement webElement = findElementByXpath("//table[contains(@id, '" + id + "')]//tbody//tr[./td[2]/text()='" + value + "']");
+				index = Integer.valueOf(webElement.getAttribute("data-index"));
+				
+				findElementByXpath("//input[contains(@name, '" + id + "radio') and @type='radio' and @data-index='" + index + "']").click();	
+			} catch (StaleElementReferenceException e) {
+				Sleep.wait(3000);	
+				findElementByXpath("//input[contains(@name, '" + id + "radio') and @type='radio' and @data-index='" + index + "']").click();	
+			}
+			
+			findElementById("buttonSave_" + id).click();
+			Sleep.wait(200);
 		}
 		
-		findElementById("buttonSave_" + id).click();
-		Sleep.wait(200);
 	}
 	
 	/**
