@@ -4,8 +4,11 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.util.Sleep;
+import com.telkomsigma.automate.action.earlyrepurchase.form.EarlyRepurchaseCreateFormAction;
 
 /**
  * Base class for any object that need the browser manager capabilities
@@ -15,6 +18,8 @@ import com.nusantara.automate.util.Sleep;
  */
 public abstract class WebElementWrapper extends AbstractBaseDriver {
 
+	Logger log = LoggerFactory.getLogger(WebElementWrapper.class);
+	
 	public static final String DEFAULT_MAIN = "main";
 	
 	public static final String DEFAULT_MODAL = "//div[@class='modal fade modal-wide in']";
@@ -39,6 +44,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			we.clear();
 			we.sendKeys(value);
 			Sleep.wait(200);
+		} else {
+			log.info("Element " + id + " is not enabled/not displayed");
 		}
 	}
 	
@@ -49,6 +56,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			we.clear();
 			we.sendKeys(value);
 			Sleep.wait(200);
+		} else {
+			log.info("Element " + id + " is not enabled/not displayed");
 		}
 	}
 	
@@ -58,6 +67,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			we.sendKeys(value);
 			findElementByXpath("//td[contains(@class,'ui-datepicker-current-day')]").click();
 			Sleep.wait(200);
+		} else {
+			log.info("Element " + id + " is not enabled/not displayed");
 		}
 	}
 	
@@ -69,6 +80,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			Sleep.wait(100);
 			findElementByXpath("//ul[contains(@id,'" + id + "')]//li[text()='" + textValue + "']").click();
 			Sleep.wait(200);
+		} else {
+			log.info("Element " + id + " is not enabled/not displayed");
 		}
 	}
 	
@@ -77,6 +90,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		if (we.isEnabled() && we.isDisplayed()) {
 			we.click();
 			Sleep.wait(1000);
+		} else {
+			log.info("Element buttonTo_" + id + " is not enabled/not displayed");
 		}
 	}
 	
@@ -85,6 +100,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		if (we.isEnabled() && we.isDisplayed()) {
 			we.click();
 			Sleep.wait(1000);
+		} else {
+			log.info("Element " + id + " is not enabled/not displayed");
 		}
 	}
 	
@@ -93,6 +110,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		if (we.isEnabled() && we.isDisplayed()) {
 			we.click();
 			Sleep.wait(1000);
+		} else {
+			log.info("Element " + id + " is not enabled/not displayed");
 		}
 	}
 
@@ -101,6 +120,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		if (we.isEnabled() && we.isDisplayed()) {
 			we.click();
 			Sleep.wait(1000);
+		} else {
+			log.info("Element " + id + " is not enabled/not displayed");
 		}
 	}
 	
@@ -109,6 +130,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		if (we.isEnabled() && we.isDisplayed()) {
 			we.click();
 			Sleep.wait(1000);
+		} else {
+			log.info("Element " + id + " is not enabled/not displayed");
 		}
 	}
 	
@@ -149,6 +172,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			
 			findElementById("buttonSave_" + id).click();
 			Sleep.wait(200);
+		} else {
+			log.info("Element buttonTo_" + id + " is not enabled/not displayed");
 		}
 		
 	}
