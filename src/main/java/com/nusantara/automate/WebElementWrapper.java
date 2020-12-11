@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nusantara.automate.util.Sleep;
-import com.telkomsigma.automate.action.earlyrepurchase.form.EarlyRepurchaseCreateFormAction;
 
 /**
  * Base class for any object that need the browser manager capabilities
