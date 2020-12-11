@@ -3,6 +3,7 @@ package com.nusantara.automate;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 
 	Logger log = LoggerFactory.getLogger(WebElementWrapper.class);
 	
+	private static int INPUT_TIMEOUT = 3;
+	
 	public static final String DEFAULT_MAIN = "main";
 	
 	public static final String DEFAULT_MODAL = "//div[@class='modal fade modal-wide in']";
@@ -28,109 +31,151 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	public static final String DEFAULT_TOOLTIP = "//div/div[contains(@id,'tooltip') and contains(@class,'tooltip')]";
 	
 	protected void setFocusOn(String id) {
-		WebElement element = findElementById(id);
-		if("input".equals(element.getTagName())) {
-			element.sendKeys("");
-		} else{
-			JavascriptExecutor jse = (JavascriptExecutor) getDriver();
-			jse.executeScript("document.getElementById('"+id+"').focus();");
+		try {
+			WebElement element = findElementById(id);
+				if (element.isEnabled() && element.isDisplayed()) {
+				if("input".equals(element.getTagName())) {
+					element.sendKeys("");
+				} else{
+					JavascriptExecutor jse = (JavascriptExecutor) getDriver();
+					jse.executeScript("document.getElementById('"+id+"').focus();");
+				}
+			}
+		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
 	protected void setInputFieldLike(String id, String value) {
-		WebElement we = findElementByXpath("//input[contains(@id,'" + id + "')]"); 
-		if (we.isEnabled() && we.isDisplayed()) {
-			we.clear();
-			we.sendKeys(value);
-			Sleep.wait(200);
-		} else {
-			log.info("Element " + id + " is not enabled/not displayed");
+		try {
+			WebElement we = findElementByXpath("//input[contains(@id,'" + id + "')]",INPUT_TIMEOUT); 
+			if (we.isEnabled() && we.isDisplayed()) {
+				we.clear();
+				we.sendKeys(value);
+				Sleep.wait(200);
+			} else {
+				log.info("Element " + id + " is not enabled/not displayed");
+			}
+		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
 	protected void setInputField(String id, String value) {
-		WebElement we = findElementById(id);
-		if (we.isEnabled() && we.isDisplayed()) {
-			we.sendKeys(Keys.chord(Keys.CONTROL, "a"));
-			we.clear();
-			we.sendKeys(value);
-			Sleep.wait(200);
-		} else {
-			log.info("Element " + id + " is not enabled/not displayed");
+		try {
+			WebElement we = findElementById(id,INPUT_TIMEOUT);
+			if (we.isEnabled() && we.isDisplayed()) {
+				we.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+				we.clear();
+				we.sendKeys(value);
+				Sleep.wait(200);
+			} else {
+				log.info("Element " + id + " is not enabled/not displayed");
+			}
+		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
 	protected void setDatepickerField(String id, String value) {
-		WebElement we = findElementById(id);
-		if (we.isEnabled() && we.isDisplayed()) {
-			we.sendKeys(value);
-			findElementByXpath("//td[contains(@class,'ui-datepicker-current-day')]").click();
-			Sleep.wait(200);
-		} else {
-			log.info("Element " + id + " is not enabled/not displayed");
+		try {
+			WebElement we = findElementById(id,INPUT_TIMEOUT);
+			if (we.isEnabled() && we.isDisplayed()) {
+				we.sendKeys(value);
+				findElementByXpath("//td[contains(@class,'ui-datepicker-current-day')]").click();
+				Sleep.wait(200);
+			} else {
+				log.info("Element " + id + " is not enabled/not displayed");
+			}		
+		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
 	protected void selectDropdown(String id, String textValue) {
-		WebElement we = findElementByXpath("//span[@id='select2-" + id + "-container']");
-		if (we.isEnabled() && we.isDisplayed()) {
-			we.click();
-			//findElementByXpath("//div[contains(@id,'" + id + "')]//div//span").click();
-			Sleep.wait(100);
-			findElementByXpath("//ul[contains(@id,'" + id + "')]//li[text()='" + textValue + "']").click();
-			Sleep.wait(200);
-		} else {
-			log.info("Element " + id + " is not enabled/not displayed");
+		try {
+			WebElement we = findElementByXpath("//span[@id='select2-" + id + "-container']",INPUT_TIMEOUT);
+			if (we.isEnabled() && we.isDisplayed()) {
+				we.click();
+				//findElementByXpath("//div[contains(@id,'" + id + "')]//div//span").click();
+				Sleep.wait(100);
+				findElementByXpath("//ul[contains(@id,'" + id + "')]//li[text()='" + textValue + "']", INPUT_TIMEOUT).click();
+				Sleep.wait(200);
+			} else {
+				log.info("Element " + id + " is not enabled/not displayed");
+			}
+		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
 	protected void clickButtonLookup(String id) {
-		WebElement we = findElementById("buttonTo_" + id);
-		if (we.isEnabled() && we.isDisplayed()) {
-			we.click();
-			Sleep.wait(1000);
-		} else {
-			log.info("Element buttonTo_" + id + " is not enabled/not displayed");
+		try {
+			WebElement we = findElementById("buttonTo_" + id,INPUT_TIMEOUT);
+			if (we.isEnabled() && we.isDisplayed()) {
+				we.click();
+				Sleep.wait(1000);
+			} else {
+				log.info("Element buttonTo_" + id + " is not enabled/not displayed");
+			}
+		} catch (TimeoutException e) {
+			log.info("Element buttonTo_" + id + " is not found");
 		}
 	}
 	
 	protected void clickButtonLike(WebElement webElement, String id) {
-		WebElement we = findElementByXpath(webElement, "//button[contains(@id,'" + id + "')]");
-		if (we.isEnabled() && we.isDisplayed()) {
-			we.click();
-			Sleep.wait(1000);
-		} else {
-			log.info("Element " + id + " is not enabled/not displayed");
+		try {
+			WebElement we = findElementByXpath(webElement, "//button[contains(@id,'" + id + "')]",INPUT_TIMEOUT);
+			if (we.isEnabled() && we.isDisplayed()) {
+				we.click();
+				Sleep.wait(1000);
+			} else {
+				log.info("Element " + id + " is not enabled/not displayed");
+			}
+		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
 	protected void clickButton(WebElement webElement, String id) {
-		WebElement we = findElementById(webElement, id);
-		if (we.isEnabled() && we.isDisplayed()) {
-			we.click();
-			Sleep.wait(1000);
-		} else {
-			log.info("Element " + id + " is not enabled/not displayed");
+		try {
+			WebElement we = findElementById(webElement, id,INPUT_TIMEOUT);
+			if (we.isEnabled() && we.isDisplayed()) {
+				we.click();
+				Sleep.wait(1000);
+			} else {
+				log.info("Element " + id + " is not enabled/not displayed");
+			}
+		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 
 	protected void clickButtonLike(String id) {
-		WebElement we = findElementByXpath("//button[contains(@id,'" + id + "')]");
-		if (we.isEnabled() && we.isDisplayed()) {
-			we.click();
-			Sleep.wait(1000);
-		} else {
-			log.info("Element " + id + " is not enabled/not displayed");
+		try {
+			WebElement we = findElementByXpath("//button[contains(@id,'" + id + "')]",INPUT_TIMEOUT);
+			if (we.isEnabled() && we.isDisplayed()) {
+				we.click();
+				Sleep.wait(1000);
+			} else {
+				log.info("Element " + id + " is not enabled/not displayed");
+			}
+		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
 	protected void clickButton(String id) {
-		WebElement we = findElementById(id);
-		if (we.isEnabled() && we.isDisplayed()) {
-			we.click();
-			Sleep.wait(1000);
-		} else {
-			log.info("Element " + id + " is not enabled/not displayed");
+		try {
+			WebElement we = findElementById(id,INPUT_TIMEOUT);
+			if (we.isEnabled() && we.isDisplayed()) {
+				findElementById(id).click();
+				Sleep.wait(1000);
+			} else {
+				log.info("Element " + id + " is not enabled/not displayed");
+			}
+		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
@@ -149,30 +194,34 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	 * @param value
 	 */
 	protected void selectLookupSearch(String id, String value) {
-		WebElement we = findElementById("buttonTo_" + id);
-		if (we.isEnabled() && we.isDisplayed()) {
-			we.click();
-			Sleep.wait(2000);
-			
-			findElementByXpath("//div[@id='myModal_" + id + "']//div//div//div[@class='modal-body']//div//div//div[contains(@class,'search')]//input").sendKeys(value);
-			Sleep.wait(1000);
-			
-			int index = 0;
-			
-			try {
-				WebElement webElement = findElementByXpath("//table[contains(@id, '" + id + "')]//tbody//tr[./td[2]/text()='" + value + "']");
-				index = Integer.valueOf(webElement.getAttribute("data-index"));
+		try {
+			WebElement we = findElementById("buttonTo_" + id,INPUT_TIMEOUT);
+			if (we.isEnabled() && we.isDisplayed()) {
+				we.click();
+				Sleep.wait(2000);
 				
-				findElementByXpath("//input[contains(@name, '" + id + "radio') and @type='radio' and @data-index='" + index + "']").click();	
-			} catch (StaleElementReferenceException e) {
-				Sleep.wait(3000);	
-				findElementByXpath("//input[contains(@name, '" + id + "radio') and @type='radio' and @data-index='" + index + "']").click();	
+				findElementByXpath("//div[@id='myModal_" + id + "']//div//div//div[@class='modal-body']//div//div//div[contains(@class,'search')]//input").sendKeys(value);
+				Sleep.wait(1000);
+				
+				int index = 0;
+				
+				try {
+					WebElement webElement = findElementByXpath("//table[contains(@id, '" + id + "')]//tbody//tr[./td[2]/text()='" + value + "']");
+					index = Integer.valueOf(webElement.getAttribute("data-index"));
+					
+					findElementByXpath("//input[contains(@name, '" + id + "radio') and @type='radio' and @data-index='" + index + "']").click();	
+				} catch (StaleElementReferenceException e) {
+					Sleep.wait(3000);	
+					findElementByXpath("//input[contains(@name, '" + id + "radio') and @type='radio' and @data-index='" + index + "']").click();	
+				}
+				
+				findElementById("buttonSave_" + id).click();
+				Sleep.wait(200);
+			} else {
+				log.info("Element buttonTo_" + id + " is not enabled/not displayed");
 			}
-			
-			findElementById("buttonSave_" + id).click();
-			Sleep.wait(200);
-		} else {
-			log.info("Element buttonTo_" + id + " is not enabled/not displayed");
+		} catch (TimeoutException e) {
+			log.info("Element buttonTo_" + id + " is not found");
 		}
 		
 	}
