@@ -56,9 +56,7 @@ public class OpenSubMenuAction extends WebElementWrapper implements Actionable {
 		Sleep.wait(500);
 		log.info("Open Sub Menu " + menuName);
 		try {
-			WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
-			WebElement webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//ul[@id='" + StringUtils.removeLastChar(menuId, "::") + "']//li//a//span[text()='" + getMenuName() + "']")));
-			webElement.click();
+			findElementByXpath("//ul[@id='" + StringUtils.removeLastChar(menuId, "::") + "']//li//a//span[text()='" + getMenuName() + "']", timeout).click();
 		} catch (TimeoutException e) {
 			if (prevMenu != null) {
 				prevMenu.setTimeout(1);

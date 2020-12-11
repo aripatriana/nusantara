@@ -49,17 +49,20 @@ public class OpenMenuAction extends WebElementWrapper implements Actionable {
 		Sleep.wait(500);
 		log.info("Open Menu " + menuName);
 		try {
-			WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
-			WebElement webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//ul//li//a//span[text()='" + getMenuName() + "']")));
-			webElement.click();
+			findElementByXpath("//ul//li//a//span[text()='" + getMenuName() + "']", timeout).click();
 		} catch (TimeoutException e) {
 			if (prevMenu != null) {
 				prevMenu.setTimeout(1);
 				prevMenu.submit(webExchange);
 				this.submit(webExchange);
 			} else {
-				getDriver().navigate().refresh();
-				submit(webExchange);				
+				findElementByXpath("//a[@title='Collapse Menu']").click();
+				try {
+					findElementByXpath("//ul//li//a//span[text()='" + getMenuName() + "']", 1);
+				} catch (TimeoutException e1) {
+					getDriver().navigate().refresh();
+					submit(webExchange);	
+				}			
 			}
 		}
 		
