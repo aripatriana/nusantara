@@ -1,7 +1,12 @@
 package com.nusantara.automate;
 
+import java.awt.Toolkit;
+
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
 /**
  * Manage the browser driver
@@ -15,15 +20,29 @@ public class DriverManager {
 	
 	private static String driverPath = "D:/System/WebDriver/bin/chromedriver.exe";
 
+	private static String headless;
+	
 	public static void setDriverPath(String driverPath) {
 		DriverManager.driverPath = driverPath;
+	}
+	
+	public static void setHeadlessMode(String headless) {
+		DriverManager.headless = headless;
 	}
 	
 	public static WebDriver getChromeDriver() {
 		if (wd == null) {
 			System.setProperty("webdriver.chrome.driver", driverPath);
-			wd =  new ChromeDriver();
-			wd.manage().window().maximize();
+			ChromeOptions option = new ChromeOptions();
+			if ("true".equalsIgnoreCase(headless)) {
+				option.addArguments("--headless");
+				wd =  new ChromeDriver(option);
+				wd.manage().window().setPosition(new Point(0,0));
+				wd.manage().window().setSize(new Dimension((int)Toolkit.getDefaultToolkit().getScreenSize().getWidth(),(int)Toolkit.getDefaultToolkit().getScreenSize().getHeight()));
+			} else {
+				wd =  new ChromeDriver(option);
+				wd.manage().window().maximize();
+			}
 		}
 			
 		return wd;
@@ -34,7 +53,7 @@ public class DriverManager {
 	}
 	
 	public static void close() {
-		getDefaultDriver().close();
+		getDefaultDriver().quit();
 		wd = null;
 	}
 }

@@ -94,9 +94,9 @@ public class RunTestApplication {
 	
 			cleanUpTempDir();
 			
-			setDriver(driverPathFile);
-			
 			setConfig(new String[] {configPathFile, userPathFile}, moduleName);
+
+			setDriver(driverPathFile);
 			
 			workflowConfig = new WorkflowConfig();
 			setWorkflowy(workflowConfig);
@@ -139,6 +139,13 @@ public class RunTestApplication {
 			log.info("Driver Path : " + driverPathFile);
 			
 			DriverManager.setDriverPath(driverPathFile);
+		}
+		
+		Object headless = ConfigLoader.getConfig("browser.headless");
+		if (headless != null) {
+			log.info("Headless mode : " + headless);
+			
+			DriverManager.setHeadlessMode(headless.toString());
 		}
 	}
 	
