@@ -266,6 +266,7 @@ public class RunTestApplication {
 						}
 						workflowConfig.addWorkflowEntry(workflowKey, workFlowEntries);
 						workflowConfig.addWorkflowScan(tscen.getKey(), workflowKey);
+						workflowConfig.addWorkflowFile(workflowKey, file);
 					} else if (file.getName().endsWith(".xlsx")
 							|| file.getName().endsWith(".xlx")) {
 						log.info("Load data file " + tscen.getKey() + " -> " + file.getName());
@@ -311,18 +312,19 @@ public class RunTestApplication {
 	
 	private static void verifyWorkflowy(WorkflowConfig workflowConfig) throws ScriptInvalidException {
 		for (Entry<String, LinkedList<WorkflowEntry>> entryList : workflowConfig.getWorkflowEntries().entrySet()) {
+			String fileName = workflowConfig.getWorkflowFile(entryList.getKey()).getName();
 			Set<String> moduleIdList = new LinkedHashSet<String>();
 			for (WorkflowEntry entry : entryList.getValue()) {
 				if (entry.checkKeyword(BasicScript.OPEN_MENU)) {
 					Menu menu = workflowConfig.getMenu(entry.getVariable());
 					if (menu == null) {
-						throw new ScriptInvalidException("Menu not found for " + entry.getVariable() + " in " + entryList.getKey());
+						throw new ScriptInvalidException("Menu not found for " + entry.getVariable() + " in " + fileName);
 					}
 					moduleIdList.add(menu.getModuleId());
 				} else if (entry.checkKeyword(BasicScript.EXECUTE)) {
 					SimpleEntry<Class<?>, Object[]> function = workflowConfig.getFunction(entry.getVariable());
 					if (function == null) {
-						throw new ScriptInvalidException("Function not found for " + entry.getVariable() + " in " + entryList.getKey());
+						throw new ScriptInvalidException("Function not found for " + entry.getVariable() + " in " + fileName);
 					}
 				} else if (entry.checkKeyword(BasicScript.ASSERT)) {
 					String[] params = StringUtils.parseStatement(entry.getVariable(), Statement.MARK);
@@ -345,7 +347,7 @@ public class RunTestApplication {
 				} else if (entry.checkKeyword(BasicScript.ASSERT_AGGREGATE)) {
 					File file = workflowConfig.getWorkflowQuery(workflowConfig.getWorkflowMapKey(entryList.getKey()), entry.getVariable());
 					if (file == null) {
-						throw new ScriptInvalidException("File not found for " + entry.getVariable() + " in " + entryList.getKey());
+						throw new ScriptInvalidException("File not found for " + entry.getVariable() + " in " + fileName);
 					}
 					TemplateReader tr = new TemplateReader(file);
 					QueryReader qr = new QueryReader(tr.read().toString());
@@ -371,17 +373,17 @@ public class RunTestApplication {
 					String variable = LoginInfo.parseVariable(entry.getVariable());
 					Map<String, Object> login = ConfigLoader.getLoginInfo(variable);
 					if (login == null) {
-						throw new ScriptInvalidException("Login info not found for " + entry.getVariable() + " in " + entryList.getKey());
+						throw new ScriptInvalidException("Login info not found for " + entry.getVariable() + " in " + fileName);
 					}
 					if (!StringUtils.match(LoginInfo.parsePrefixVariable(entry.getVariable()), new String[] {"it","cm"})) {
-						throw new ScriptInvalidException("Prefix login info not found for " + entry.getVariable() + " in " + entryList.getKey());
+						throw new ScriptInvalidException("Prefix login info not found for " + entry.getVariable() + " in " + fileName);
 					}
 					
 					if (login.get(variable + "." + PREFIX_MEMBER_CODE) == null
 							|| login.get(variable + "." + PREFIX_USERNAME) == null
 							|| login.get(variable + "." + PREFIX_PASSWORD) == null
 							|| login.get(variable + "." + PREFIX_KEYFILE) == null) {
-						throw new ScriptInvalidException("Login info not completed for " + entry.getVariable() + " in " + entryList.getKey());
+						throw new ScriptInvalidException("Login info not completed for " + entry.getVariable() + " in " + fileName);
 					}
 				}
 			}

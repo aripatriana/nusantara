@@ -35,6 +35,7 @@ public class WorkflowConfig {
 	private LinkedList<String> workflowScens = new LinkedList<String>();
 	private Map<String, LinkedList<String>> workflowMapScens = new HashMap<String, LinkedList<String>>();
 	private Map<String, String> workflowMapKeys = new HashMap<String, String>();
+	private Map<String, File> workflowFiles = new HashMap<String, File>();
 	
 	public Map<String, SimpleEntry<Class<?>, Object[]>> getFunctionMap() {
 		return functionMap;
@@ -181,6 +182,26 @@ public class WorkflowConfig {
 			throw new ScriptInvalidException("Module not exists for " + notExists.toString());
 	}
 	
+	public LinkedList<String> getWorkflowKeys() {
+		return workflowKeys;
+	}
+	
+	public void setWorkflowFiles(Map<String, File> workflowFiles) {
+		this.workflowFiles = workflowFiles;
+	}
+	
+	public void addWorkflowFile(String workflowKey, File file) {
+		this.workflowFiles.put(workflowKey, file);
+	}
+	
+	public Map<String, File> getWorkflowFiles() {
+		return workflowFiles;
+	}
+	
+	public File getWorkflowFile(String workflowKey) {
+		return workflowFiles.get(workflowKey);
+	}
+	
 	public void clear() {
 		functionMap.clear();
 		handlerMap.clear();
@@ -192,6 +213,7 @@ public class WorkflowConfig {
 		workflowScens.clear();
 		workflowMapScens.clear();
 		workflowQueries.clear();
+		workflowFiles.clear();
 		
 	}
 }

@@ -26,10 +26,11 @@ public class WorkflowYReader {
 	
 	private SimpleFileReader fileReader;
 	private TextCompiler compiler;
-	
+	private static String fileName;
 	public WorkflowYReader(File file) {
 		fileReader = new SimpleFileReader(file);
 		compiler = new TextCompiler();
+		fileName = file.getName();
 	}
 	
 	public static class TextCompiler {
@@ -46,7 +47,7 @@ public class WorkflowYReader {
 			} else if (rawText.endsWith("\"") || rawText.endsWith("+")) {
 				tmp.append("#");
 			} else {
-				throw new ScriptInvalidException("Invalid script for " + rawText);
+				throw new ScriptInvalidException("Invalid script for " + rawText + " in " + fileName);
 			}
 		}
 		
@@ -59,7 +60,7 @@ public class WorkflowYReader {
 			checked = StringUtils.replaceCharBackward(checked, '"', "");
 			
 			if (StringUtils.containsCharForward(checked, '"') > 0)
-				throw new ScriptInvalidException("Invalid script for " + script.replace("#", ""));
+				throw new ScriptInvalidException("Invalid script for " + script.replace("#", "") + " in " + fileName);
 
 			String[] parsed = script.split("#");
 			StringBuffer sb = new StringBuffer();
@@ -83,7 +84,7 @@ public class WorkflowYReader {
 		}
 
 		public List<String> getScripts() throws ScriptInvalidException {
-			if (!tmp.toString().isEmpty()) throw new ScriptInvalidException("Invalid script for " + tmp.toString().replace("#", ""));
+			if (!tmp.toString().isEmpty()) throw new ScriptInvalidException("Invalid script for " + tmp.toString().replace("#", "") + " in " + fileName);
 			return scripts;
 		}
 		
@@ -109,7 +110,7 @@ public class WorkflowYReader {
 		WorkflowEntry workflowEntry = new WorkflowEntry();
 		
 		// check semicolon
-		if (!script.endsWith(";")) throw new ScriptInvalidException("Missing semicolon " + script);
+		if (!script.endsWith(";")) throw new ScriptInvalidException("Missing semicolon " + script + " in " + fileName);
 		script = script.replace(";", "");
 		
 		// check variable
@@ -126,13 +127,13 @@ public class WorkflowYReader {
 		if (simpleScripts.length == 2) {
 			String actionType = simpleScripts[1].replace("()", "");
 			if (simpleScripts[1].equals(actionType)) 
-				throw new ScriptInvalidException("Missing or invalid bracket for " + script);
+				throw new ScriptInvalidException("Missing or invalid bracket for " + script + " in " + fileName);
 			setActionType(actionType, workflowEntry);
 		}
 		
 		String basicScript = simpleScripts[0].replace("()", "");
 		if (simpleScripts[0].equals(basicScript)) 
-			throw new ScriptInvalidException("Missing or invalid bracket for " + script);
+			throw new ScriptInvalidException("Missing or invalid bracket for " + script + " in " + fileName);
 		setBasicScript(basicScript, workflowEntry);
 	
 		return workflowEntry;
@@ -151,9 +152,9 @@ public class WorkflowYReader {
 				counter.put("sq", (counter.get("sq") == null ? -1 : counter.get("sq") + 1));
 		}
 		if (counter.get("c") != null && (counter.get("c") != 0))
-			throw new ScriptInvalidException("Missing or invalid bracket script for " + script);
+			throw new ScriptInvalidException("Missing or invalid bracket script for " + script + " in " + fileName);
 		if (counter.get("sq") != null && counter.get("sq") % 2 != 0)
-			throw new ScriptInvalidException("Invalid single quote for " + script);
+			throw new ScriptInvalidException("Invalid single quote for " + script + " in " + fileName);
 	}
 	
 	private String detectVariable(String script) throws ScriptInvalidException {
@@ -167,7 +168,7 @@ public class WorkflowYReader {
 					findout = true;
 				} else {
 					if (findout && end != 0) {
-						throw new ScriptInvalidException("Invalid quote variable for " + script);
+						throw new ScriptInvalidException("Invalid quote variable for " + script + " in " + fileName);
 					} 
 					end = i;
 				}
@@ -175,7 +176,7 @@ public class WorkflowYReader {
 		}
 		
 		if (start >0 && end == 0)
-			throw new ScriptInvalidException("Invalid quote variable for " + script);
+			throw new ScriptInvalidException("Invalid quote variable for " + script + " in " + fileName);
 		
 		if (start == 0 && end == 0) {
 			return null;
@@ -187,12 +188,12 @@ public class WorkflowYReader {
 	public void setBasicScript(String basicScript, WorkflowEntry workflowEntry) throws ScriptInvalidException {
 		workflowEntry.setKeyword(basicScript);
 		if (!workflowEntry.checkKeywords(BasicScript.BASIC_SCRIPT))
-			throw new ScriptInvalidException("Invalid script for " + basicScript);
+			throw new ScriptInvalidException("Invalid script for " + basicScript + " in " + fileName);
 	}
 	
 	private void setActionType(String actionType, WorkflowEntry workflowEntry) throws ScriptInvalidException {
 		workflowEntry.setActionType(actionType);
 		if (!workflowEntry.checkActionTypes(BasicScript.BASIC_FUNCTION))
-			throw new ScriptInvalidException("Invalid action type for " + actionType);
+			throw new ScriptInvalidException("Invalid action type for " + actionType + " in " + fileName);
 	}
 }
