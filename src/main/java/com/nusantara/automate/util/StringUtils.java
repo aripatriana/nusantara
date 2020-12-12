@@ -309,4 +309,28 @@ public class StringUtils {
 		}
 		return text;
 	}
+	
+	public static String substringUntil(String text, String[] vars) {
+		for (int i=0; i<text.length(); i++) {
+			for (String var : vars) {
+				String[] s = text.split(var);
+				if (s.length > 1) {
+					return s[0];
+				}
+			}
+		}
+		return null;
+	}
+	
+	public static boolean match(String text, String[] criteria) {
+		if (text == null) return false;
+		if (criteria == null || criteria.length == 0) return false;
+		
+		for (String c : criteria) {
+			if (text.equals(c)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

@@ -90,7 +90,7 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 						wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(successId)));
 						modalSuccess.put(Boolean.TRUE, successId);
 						countDownOk.countDown();	
-						log.info("Modal success open");
+						log.info("Modal success open - " + successId);
 					} catch (TimeoutException e) {
 						// do nothing
 					} finally {
@@ -109,7 +109,7 @@ public class ModalSuccessAction extends WebElementWrapper implements Actionable 
 							wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(failedModalId)));
 							modalSuccess.put(Boolean.FALSE, failedModalId);
 							countDownOk.countDown();	
-							log.info("Modal failed open");
+							log.info("Modal failed open - " + failedModalId);
 						} catch (TimeoutException e) {
 							// do nothing
 						} finally {

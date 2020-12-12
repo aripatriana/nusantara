@@ -29,6 +29,7 @@ import com.nusantara.automate.report.ReportManager;
 import com.nusantara.automate.report.ReportMonitor;
 import com.nusantara.automate.report.ScenEntry;
 import com.nusantara.automate.report.TestCaseEntry;
+import com.nusantara.automate.util.LoginInfo;
 import com.nusantara.automate.util.MapUtils;
 import com.nusantara.automate.util.ReflectionUtils;
 import com.nusantara.automate.util.SimpleEntry;
@@ -315,13 +316,13 @@ public class RunTestApplication {
 				if (entry.checkKeyword(BasicScript.OPEN_MENU)) {
 					Menu menu = workflowConfig.getMenu(entry.getVariable());
 					if (menu == null) {
-						throw new ScriptInvalidException("Menu not found for " + entry.getVariable());
+						throw new ScriptInvalidException("Menu not found for " + entry.getVariable() + " in " + entryList.getKey());
 					}
 					moduleIdList.add(menu.getModuleId());
 				} else if (entry.checkKeyword(BasicScript.EXECUTE)) {
 					SimpleEntry<Class<?>, Object[]> function = workflowConfig.getFunction(entry.getVariable());
 					if (function == null) {
-						throw new ScriptInvalidException("Function not found for " + entry.getVariable());
+						throw new ScriptInvalidException("Function not found for " + entry.getVariable() + " in " + entryList.getKey());
 					}
 				} else if (entry.checkKeyword(BasicScript.ASSERT)) {
 					String[] params = StringUtils.parseStatement(entry.getVariable(), Statement.MARK);
@@ -344,7 +345,7 @@ public class RunTestApplication {
 				} else if (entry.checkKeyword(BasicScript.ASSERT_AGGREGATE)) {
 					File file = workflowConfig.getWorkflowQuery(workflowConfig.getWorkflowMapKey(entryList.getKey()), entry.getVariable());
 					if (file == null) {
-						throw new ScriptInvalidException("File not found for " + entry.getVariable());
+						throw new ScriptInvalidException("File not found for " + entry.getVariable() + " in " + entryList.getKey());
 					}
 					TemplateReader tr = new TemplateReader(file);
 					QueryReader qr = new QueryReader(tr.read().toString());
@@ -367,16 +368,20 @@ public class RunTestApplication {
 						}
 					}
 				} else if (entry.checkKeyword(BasicScript.LOGIN) || entry.checkKeyword(BasicScript.RELOGIN)) {
-					Map<String, Object> login = ConfigLoader.getLoginInfo(entry.getVariable());
+					String variable = LoginInfo.parseVariable(entry.getVariable());
+					Map<String, Object> login = ConfigLoader.getLoginInfo(variable);
 					if (login == null) {
-						throw new ScriptInvalidException("Login info not found for " + entry.getVariable());
+						throw new ScriptInvalidException("Login info not found for " + entry.getVariable() + " in " + entryList.getKey());
+					}
+					if (!StringUtils.match(LoginInfo.parsePrefixVariable(entry.getVariable()), new String[] {"it","cm"})) {
+						throw new ScriptInvalidException("Prefix login info not found for " + entry.getVariable() + " in " + entryList.getKey());
 					}
 					
-					if (login.get(entry.getVariable() + "." + PREFIX_MEMBER_CODE) == null
-							|| login.get(entry.getVariable() + "." + PREFIX_USERNAME) == null
-							|| login.get(entry.getVariable() + "." + PREFIX_PASSWORD) == null
-							|| login.get(entry.getVariable() + "." + PREFIX_KEYFILE) == null) {
-						throw new ScriptInvalidException("Login info not completed for " + entry.getVariable());
+					if (login.get(variable + "." + PREFIX_MEMBER_CODE) == null
+							|| login.get(variable + "." + PREFIX_USERNAME) == null
+							|| login.get(variable + "." + PREFIX_PASSWORD) == null
+							|| login.get(variable + "." + PREFIX_KEYFILE) == null) {
+						throw new ScriptInvalidException("Login info not completed for " + entry.getVariable() + " in " + entryList.getKey());
 					}
 				}
 			}

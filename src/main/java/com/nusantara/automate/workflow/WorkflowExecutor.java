@@ -15,9 +15,12 @@ import com.nusantara.automate.DriverManager;
 import com.nusantara.automate.FileRetention;
 import com.nusantara.automate.RunTestApplication;
 import com.nusantara.automate.Statement;
+import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.action.common.LoginFormAction;
 import com.nusantara.automate.action.common.LogoutFormAction;
 import com.nusantara.automate.action.common.ProductSelectorAction;
+import com.nusantara.automate.exception.FailedTransactionException;
+import com.nusantara.automate.exception.ModalFailedException;
 import com.nusantara.automate.exception.ScriptInvalidException;
 import com.nusantara.automate.exception.XlsSheetStyleException;
 import com.nusantara.automate.function.AssertQueryAction;
@@ -44,8 +47,11 @@ public class WorkflowExecutor {
 
 	Logger log = LoggerFactory.getLogger(WorkflowExecutor.class);
 	
-	@Value("login.url")
+	@Value("login.url.it")
 	private String loginUrl;
+	
+	@Value("login.url.cm")
+	private String loginUrlCm;
 	
 	public void execute(String scen, Workflow workflow, WorkflowConfig config) throws Exception {
 		String productType = null;
@@ -110,8 +116,18 @@ public class WorkflowExecutor {
 	}
 	
 	private void relogin(WorkflowConfig wc, WorkflowEntry we, Workflow workflow, String productType) throws Exception {
+		String prefix = LoginInfo.parsePrefixVariable(we.getVariable());
+		final String loginUrl = ("cm".equals(prefix)) ? this.loginUrl : this.loginUrlCm;		
 		workflow
 			.action(new LogoutFormAction())
+			.action(new Actionable() {
+				
+				@Override
+				public void submit(WebExchange webExchange) throws FailedTransactionException, ModalFailedException {
+					workflow.openPage(loginUrl);
+					
+				}
+			})
 			.action(new LoginFormAction(getLoginInfo(we.getVariable())))
 			.action(new ProductSelectorAction(productType));
 	}
@@ -121,9 +137,12 @@ public class WorkflowExecutor {
 	}
 	
 	private void login(WorkflowConfig wc, WorkflowEntry we, Workflow workflow) throws Exception {
+		String prefix = LoginInfo.parsePrefixVariable(we.getVariable());
+		final String loginUrl = ("cm".equals(prefix)) ? this.loginUrl : this.loginUrlCm;	
+		
 		 workflow
 			.openPage(loginUrl)
-			.action(new LoginFormAction(getLoginInfo(we.getVariable())));
+			.action(new LoginFormAction(getLoginInfo(LoginInfo.parseVariable(we.getVariable()))));
 	}
 	
 	private void clearSession(WorkflowConfig wc, WorkflowEntry we, Workflow workflow) throws Exception {

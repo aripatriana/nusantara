@@ -49,6 +49,22 @@ public class LoginInfo {
 		this.keyFile = keyFile;
 	}
 	
+	public static String parseVariable(String variable) {
+		String prefix = StringUtils.substringUntil(variable, new String[] {"->"});
+		if (prefix != null) {
+			variable = variable.replace(prefix+"->", "");
+		}
+		return variable;
+	}
+	
+	public static String parsePrefixVariable(String variable) {
+		String prefix = StringUtils.substringUntil(variable, new String[] {"->"});
+		if (prefix != null) {
+			return prefix;
+		}
+		return "it";
+	}
+	
 	
 	
 }
