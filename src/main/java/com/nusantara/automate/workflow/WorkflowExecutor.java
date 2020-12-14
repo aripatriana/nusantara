@@ -117,7 +117,7 @@ public class WorkflowExecutor {
 	
 	private void relogin(WorkflowConfig wc, WorkflowEntry we, Workflow workflow, String productType) throws Exception {
 		String prefix = LoginInfo.parsePrefixVariable(we.getVariable());
-		final String loginUrl = ("cm".equals(prefix)) ? this.loginUrl : this.loginUrlCm;		
+		final String loginUrl = ("it".equals(prefix)) ? this.loginUrl : this.loginUrlCm;		
 		workflow
 			.action(new LogoutFormAction())
 			.action(new Actionable() {
@@ -138,7 +138,7 @@ public class WorkflowExecutor {
 	
 	private void login(WorkflowConfig wc, WorkflowEntry we, Workflow workflow) throws Exception {
 		String prefix = LoginInfo.parsePrefixVariable(we.getVariable());
-		final String loginUrl = ("cm".equals(prefix)) ? this.loginUrl : this.loginUrlCm;	
+		final String loginUrl = ("it".equals(prefix)) ? this.loginUrl : this.loginUrlCm;	
 		
 		 workflow
 			.openPage(loginUrl)
