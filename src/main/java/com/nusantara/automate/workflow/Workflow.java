@@ -251,7 +251,7 @@ public abstract class Workflow {
 								e.getMessage(), ReportManager.FAILED);
 					} catch (ModalFailedException e) {
 						log.info("Modal failed, skipped for further processes");
-						webExchange.addListFailedSession(webExchange.getSessionList());
+//						webExchange.addListFailedSession(webExchange.getSessionList());
 						
 						ReportMonitor.logDataEntry(getWebExchange().getSessionList(),getWebExchange().get("active_scen").toString(),
 								getWebExchange().get("active_workflow").toString(), null, null, 
@@ -294,7 +294,7 @@ public abstract class Workflow {
 										metadata, e.getMessage(), ReportManager.FAILED);
 							} catch (ModalFailedException e) {
 								log.info("Modal failed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
-								webExchange.addFailedSession(sessionId);
+//								webExchange.addFailedSession(sessionId);
 								
 								ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(),getWebExchange().get("active_scen").toString(),
 										getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(),
@@ -347,7 +347,7 @@ public abstract class Workflow {
 									metadata, e.getMessage(), ReportManager.FAILED);
 						} catch (ModalFailedException e) {
 							log.info("Modal failed, data-index " + i + " with session " + webExchange.getCurrentSession() + " skipped for further processes");
-							webExchange.addFailedSession(sessionId);
+//							webExchange.addFailedSession(sessionId);
 							
 							ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(), getWebExchange().get("active_scen").toString(),
 									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(),
