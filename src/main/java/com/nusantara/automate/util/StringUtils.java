@@ -1,8 +1,10 @@
 package com.nusantara.automate.util;
 
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.SystemUtils;
 
@@ -206,6 +208,16 @@ public class StringUtils {
 		}
 		return temp;
 	}
+	
+	public static boolean containLikes(String data, String key) {
+		for (String s : data.split(" ")) {
+			if (s.toLowerCase().equals(key.toLowerCase())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public static String findContains(String data, String[] key) {
 		for (int i=0; i<key.length; i++) {
 			if (data.contains(key[i]))
@@ -327,10 +339,107 @@ public class StringUtils {
 		if (criteria == null || criteria.length == 0) return false;
 		
 		for (String c : criteria) {
-			if (text.equals(c)) {
+			if (text.equals(c) || text.contains(c)) {
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	public static String hintExclude(String text, String regex, String regexExlude) {
+		boolean open=false;
+		int index=0;
+		Map<Character, Integer> counter = new HashMap<Character, Integer>();
+		Map<Integer, String> data = new HashMap<Integer, String>();
+		for (int i=0;i<text.length();i++) {
+			for (int j=0; j<regexExlude.length();j++) {
+				if (text.charAt(i)==regexExlude.charAt(j)) {
+					if (counter.isEmpty())
+						index++;
+					open = true;
+					Integer c = counter.get(text.charAt(i));
+					if (c==null)
+						c=0;
+					c++;
+					counter.put(text.charAt(i), c);
+					if (counter.size() == regexExlude.length() 
+							&& MapUtils.sumValue(counter)%counter.size()==0) {
+						open=false;
+						counter.clear();
+					}
+				}
+			}
+			if (open) {
+				String string = data.get(index);
+				if (string == null)
+					string = "";
+				string += text.charAt(i);
+				data.put(index, string);
+			}
+		}
+		
+		return replaceById(text, data.values().toArray(new String[data.size()]), new HashMap<String, String>());
+		
+	}
+	
+	public static String[] splitExclude(String text, String regex, String regexExlude) {
+		boolean open=false;
+		int index=0;
+		Map<Character, Integer> counter = new HashMap<Character, Integer>();
+		Map<Integer, String> data = new HashMap<Integer, String>();
+		for (int i=0;i<text.length();i++) {
+			for (int j=0; j<regexExlude.length();j++) {
+				if (text.charAt(i)==regexExlude.charAt(j)) {
+					if (counter.isEmpty())
+						index++;
+					open = true;
+					Integer c = counter.get(text.charAt(i));
+					if (c==null)
+						c=0;
+					c++;
+					counter.put(text.charAt(i), c);
+					if (counter.size() == regexExlude.length() 
+							&& MapUtils.sumValue(counter)%counter.size()==0) {
+						open=false;
+						counter.clear();
+					}
+				}
+			}
+			if (open) {
+				String string = data.get(index);
+				if (string == null)
+					string = "";
+				string += text.charAt(i);
+				data.put(index, string);
+			}
+		}
+		
+		Map<String, String> temp = new HashMap<String, String>();
+		String replaced = replaceById(text, data.values().toArray(new String[data.size()]), temp);
+		String[] split = replaced.split(regex);
+		for (int i=0; i<split.length; i++) {
+			for (Entry<String, String> id : temp.entrySet()) {
+				split[i] = split[i].replace(id.getKey(), id.getValue());
+			}
+		}
+		return split;
+	}
+	
+	public static String trimBackward(String text) {
+		while(text.endsWith(" ")) {
+			text = text.substring(0, text.length()-1);
+		}
+		return text;
+	}
+	
+	public static String trimForward(String text) {
+		while(text.startsWith(" ")) {
+			text = text.substring(1, text.length());
+		}
+		return text;
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(trimForward("     test     "));
 	}
 }

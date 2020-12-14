@@ -67,15 +67,15 @@ public class WorkflowYReader {
 			for (int i=0; i<parsed.length; i++) {
 				String temp = parsed[i].trim();
 				if (i==0) {
-					temp = StringUtils.replaceCharBackward(temp, '+', "", 0).trim();
+					temp = StringUtils.trimBackward(StringUtils.replaceCharBackward(temp, '+', "", 0));
 					temp = StringUtils.replaceCharBackward(temp, '"', "", 0);
 				} else if (i==parsed.length-1) {
-					temp = StringUtils.replaceCharForward(temp, '+', "", 0).trim();
+					temp = StringUtils.trimForward(StringUtils.replaceCharForward(temp, '+', "", 0));
 					temp = StringUtils.replaceCharForward(temp, '"', "", 0);
 				} else {
-					temp = StringUtils.replaceCharForward(temp, '+', "", 0).trim();
+					temp = StringUtils.trimForward(StringUtils.replaceCharForward(temp, '+', "", 0));
 					temp = StringUtils.replaceCharForward(temp, '"', "", 0);
-					temp = StringUtils.replaceCharBackward(temp, '+', "", 0).trim();
+					temp = StringUtils.trimBackward(StringUtils.replaceCharBackward(temp, '+', "", 0));
 					temp = StringUtils.replaceCharBackward(temp, '"', "", 0);
 				}
 				sb.append(temp);

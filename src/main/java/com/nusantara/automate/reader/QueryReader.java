@@ -64,28 +64,30 @@ public class QueryReader {
 	}
 	
 	
-	public static String parseSelect(QueryEntry qe, String query) throws ScriptInvalidException {
+	public String parseSelect(QueryEntry qe, String query) throws ScriptInvalidException {
 		if (query.contains("*"))
 			throw new ScriptInvalidException("Not allowed using an asterisk in a select query for " + query);
 		if (!query.startsWith(SELECT))
 			throw new ScriptInvalidException("Missing select statement for " + query);
-		if (StringUtils.containsCharFollowingBy(query, '=', '=') == -1)
+		String hintQuery = StringUtils.hintExclude(query, ",", "()");
+		if (StringUtils.containsCharFollowingBy(hintQuery, '=', '=') == -1)
 			throw new ScriptInvalidException("Missing equation of equality == for " + query);
-		if (StringUtils.containsCharFollowingBy(query, '<', '>') == -1)
+		if (StringUtils.containsCharFollowingBy(hintQuery, '<', '>') == -1)
 			throw new ScriptInvalidException("Missing equation of inequality <> for " + query);
-		if (StringUtils.containsCharBackwardFollowingBy(query, '>', '<') == -1)
+		if (StringUtils.containsCharBackwardFollowingBy(hintQuery, '>', '<') == -1)
 			throw new ScriptInvalidException("Missing equation of inequality <> for " + query);
 		
 		int index = StringUtils.containsCharForward(query, ' ');
 		query = query.substring(index, query.length());
-		String[] headers = query.split(",");
+		checkSubQuery(query);
+		String[] headers = StringUtils.splitExclude(query, ",", "()");
 		String returnQuery = "";
 		for (String header : headers) {
 			String mark = StringUtils.findContains(header, Statement.MARK);
 			if (mark != null) {
 				String[] sh = StringUtils.parseStatement(header.trim(), mark);
-				String var1 = DataTypeUtils.checkColumnPrefix(sh[0]);
-				String var2 = DataTypeUtils.checkColumnPrefix(sh[1]);
+				String var1 = getNormalizeColumn(sh[0]);
+				String var2 = getNormalizeColumn(sh[1]);
 				if (DataTypeUtils.checkIsColumn(var1) && DataTypeUtils.checkIsColumn(var2)) {
 					// two columns defined
 					returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
@@ -110,8 +112,8 @@ public class QueryReader {
 				}
 			} else {
 				returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
-				qe.addStatement(header.trim(), null, null);
-				qe.addColumn(header.trim());
+				qe.addStatement(getNormalizeColumn(header), null, null);
+				qe.addColumn(getNormalizeColumn(header));
 				returnQuery += header.trim() + " ";
 			}
 			
@@ -119,7 +121,43 @@ public class QueryReader {
 		return SELECT + " " + returnQuery;
 	}
 	
-	public String[] splitQuery(String query) {
+	private String getNormalizeColumn(String column) {
+		if (DataTypeUtils.checkIsColumn(column)) {
+			if (column.contains("(") && column.contains(")")) {
+				String[] c = StringUtils.splitExclude(column, " ", "()");
+				return checkColumnAlias(c[c.length-1]).trim();
+			} else {
+				return checkColumnAlias(DataTypeUtils.checkColumnPrefix(column)).trim();
+			}
+		}
+		return column.trim();
+	}
+	
+	private String checkColumnAlias(String column) {
+		if (StringUtils.containLikes(column, "as")) {
+			String[] c = column.split(" ");
+			return c[c.length-1];
+		}
+		String[] c = column.split(" "); 
+		return c[c.length-1];
+	}
+
+	private void checkSubQuery(String header) throws ScriptInvalidException {
+		String subQuery = "";
+		int c = 0;
+		for (int i=0; i<header.length(); i++) {
+			if (header.charAt(i) == '(')
+				c++;
+			if (header.charAt(i) == ')')
+				c--;
+			if (c>0)
+				subQuery+=header.charAt(i);
+		}
+		if (StringUtils.match(subQuery, new String[]{Statement.EQUAL,Statement.NOT_EQUAL})) 
+			throw new ScriptInvalidException("Equation not allowed inside subquery " + header);
+	}
+	
+	public String[] splitQuery(String query) throws ScriptInvalidException {
 		if (!query.startsWith(SELECT)) 
 			return new String[] {query};
 		
@@ -128,7 +166,7 @@ public class QueryReader {
 		if (strs.length > 0) {
 			int count=0;
 			int c = 0;
-			while((!strs[count].trim().startsWith(FROM)) || c>0) {
+			while(count<strs.length && ((!strs[count].trim().startsWith(FROM)) || c>0)) {
 				for (int i=0; i<strs[count].length(); i++) {
 					if (strs[count].charAt(i) == '(')
 						c++;
@@ -142,6 +180,9 @@ public class QueryReader {
 				result[1] += strs[count] + " ";
 				count++;
 			} 	
+
+			if (result[1].isEmpty())
+				throw new ScriptInvalidException("From keyword not found " + query);
 		}
 		return result;
 	}

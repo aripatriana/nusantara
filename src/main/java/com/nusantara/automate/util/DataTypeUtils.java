@@ -24,7 +24,7 @@ public class DataTypeUtils {
 	
 	public static String checkColumnPrefix(String var) {
 		if (checkIsColumn(var)) {
-			String[] c = var.split(".");
+			String[] c = var.split("\\.");
 			if (c.length> 1) {
 				var = c[1];
 			}

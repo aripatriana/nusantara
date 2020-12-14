@@ -76,7 +76,7 @@ public class WebExchange {
 	}
 	
 	public void initSession(int count) throws Exception {
-		if (getTotalMetaData()%modules.size()!=0)
+		if (modules.size() > 0 && getTotalMetaData()%modules.size()!=0)
 			throw new Exception("The number of row not balance for " + modules);
 		if (count == 0) count++;
 		for (int index=0; index<count; index++) {
@@ -117,6 +117,7 @@ public class WebExchange {
 	}
 	
 	public int getMetaDataSize() {
+		if (modules.size()==0) return 0;
 		return getMetaDataSize(modules.iterator().next());
 	}
 	

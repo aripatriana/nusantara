@@ -5,6 +5,7 @@ import java.util.Map;
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.ConfigLoader;
 import com.nusantara.automate.ContextLoader;
+import com.nusantara.automate.FormActionable;
 import com.nusantara.automate.MenuAwareness;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.report.ReportMonitor;
@@ -39,8 +40,11 @@ public class ParalelizedWorkflow extends Workflow {
 			throw new RuntimeException("Loop must be initialized");	
 		}
 		
+		if (!activeLoop)
+			return this;
+		
 		try {
-			if (webExchange.getTotalMetaData() > 0) {
+			if (webExchange.getTotalMetaData() > 0 || actionableForLoop.size() > 0) {
 				webExchange.initSession(webExchange.getMetaDataSize());
 
 				ReportMonitor.getScenEntry(webExchange.get("active_workflow").toString())
@@ -54,10 +58,14 @@ public class ParalelizedWorkflow extends Workflow {
 							setActiveMenu(((MenuAwareness) actionable).getMenu());
 						}
 						
-						// execute actionable if any session active, if all session failed no further process performed
-						if (!(webExchange.getSessionList().size() > 0
-								&& (webExchange.getSessionList().size() <= webExchange.getFailedSessionList().size()))) {
-							executeActionableWithSession(actionable);						
+						if (actionable instanceof FormActionable && webExchange.getMetaDataSize(getActiveMenu().getModuleId()) == 0) {
+							log.info("Skip to process action for " + getActiveMenu().getId() +" data size " + webExchange.getMetaDataSize(getActiveMenu().getModuleId()));
+						} else {
+							// execute actionable if any session active, if all session failed no further process performed
+							if (!(webExchange.getSessionList().size() > 0
+									&& (webExchange.getSessionList().size() <= webExchange.getFailedSessionList().size()))) {
+								executeActionableWithSession(actionable);						
+							}							
 						}
 					}
 				} catch (Exception e) { 

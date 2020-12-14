@@ -207,4 +207,12 @@ public class MapUtils {
 			}
 		}
 	}
+	
+	public static int sumValue(Map<?, Integer> map) {
+		int result = 0;
+		for (Integer i : map.values()) {
+			result += i;
+		}
+		return result;
+	}
 }

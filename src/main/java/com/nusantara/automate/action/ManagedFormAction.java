@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.nusantara.automate.Actionable;
 import com.nusantara.automate.ContextLoader;
+import com.nusantara.automate.FormActionable;
 import com.nusantara.automate.WebElementWrapper;
 import com.nusantara.automate.WebExchange;
 import com.nusantara.automate.exception.FailedTransactionException;
@@ -16,7 +17,7 @@ import com.nusantara.automate.exception.ModalFailedException;
  * @author ari.patriana
  *
  */
-public class ManagedFormAction extends WebElementWrapper implements Actionable {
+public class ManagedFormAction extends WebElementWrapper implements FormActionable {
 
 	private LinkedList<Actionable> actionableList = new LinkedList<Actionable>();
 	private Class<?> inheritClass;
