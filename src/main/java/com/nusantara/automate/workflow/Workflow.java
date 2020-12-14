@@ -351,7 +351,7 @@ public abstract class Workflow {
 							
 							ReportMonitor.logDataEntry(getWebExchange().getCurrentSession(), getWebExchange().get("active_scen").toString(),
 									getWebExchange().get("active_workflow").toString(), getWebExchange().getLocalSystemMap(),
-									metadata, e.getMessage(), ReportManager.FAILED);
+									metadata, e.getMessage(), ReportManager.PASSED);
 						}
 					}
 					i++;
