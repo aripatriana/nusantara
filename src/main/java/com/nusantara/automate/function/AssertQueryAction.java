@@ -109,6 +109,10 @@ public class AssertQueryAction implements Actionable {
 			int i = 0;
 			for (String query : qe.getParsedQuery(webExchange)) {
 
+				for (int j=0; j< columns.length; j++) {
+					columns[j] = parseParameter(columns[j], webExchange);
+				}
+				
 				log.info("Execute Query -> " + query);
 				result = DBConnection.selectSimpleQuery(query, columns);
 			
@@ -124,7 +128,7 @@ public class AssertQueryAction implements Actionable {
 						Statement statement = new Statement(state);
 						if (statement.getEquality() != null) {
 							if (statement.isArg1(DataTypeUtils.TYPE_OF_COLUMN)) {
-								statement.setVal1(resultMap.get(statement.getArg1()));
+								statement.setVal1(resultMap.get(parseParameter(statement.getArg1(), webExchange)));
 							} else if (statement.isArg1(DataTypeUtils.TYPE_OF_VARIABLE)) {
 								if (statement.getArg1().contains(QueryEntry.SQUARE_BRACKET)) {
 									statement.setVal1(StringUtils.nvl(parseExclusiveVariable(statement.getArg1(), webExchange), "null"));
@@ -135,7 +139,7 @@ public class AssertQueryAction implements Actionable {
 								statement.setVal1(statement.getArg1());
 							}
 							if (statement.isArg2(DataTypeUtils.TYPE_OF_COLUMN)) {
-								statement.setVal2(resultMap.get(statement.getArg2()));
+								statement.setVal2(resultMap.get(parseParameter(statement.getArg2(), webExchange)));
 							} else if (statement.isArg2(DataTypeUtils.TYPE_OF_VARIABLE)) {
 								if (statement.getArg2().contains(QueryEntry.SQUARE_BRACKET)) {
 									statement.setVal2(StringUtils.nvl(parseExclusiveVariable(statement.getArg2(), webExchange), "null"));
@@ -172,6 +176,20 @@ public class AssertQueryAction implements Actionable {
 		
 		if (!status)
 			throw new FailedTransactionException("Failed assertion");
+	}
+	
+	private String parseParameter(String argument, WebExchange webExchange) {
+		if (argument.startsWith("@")) {
+			return StringUtils.quote(StringUtils.nvl(webExchange.get(argument),"null").toString());
+		} else if (argument.contains("(") && argument.contains(")")) {
+			for (String p : qe.getParameters()) {
+				argument = argument.replace(p, StringUtils.quote(String.valueOf(webExchange.get(p))));	
+			}
+			return argument.replace(" ", "");
+		} else {
+			return argument;
+		}
+		
 	}
 	
 	@SuppressWarnings("unchecked")

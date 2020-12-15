@@ -91,29 +91,33 @@ public class QueryReader {
 				if (DataTypeUtils.checkIsColumn(var1) && DataTypeUtils.checkIsColumn(var2)) {
 					// two columns defined
 					returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
-					returnQuery += var1 + " ";
+					returnQuery += sh[0] + " ";
 					qe.addStatement(var1, var2, mark);
 					qe.addColumn(var1);
 				} else if (DataTypeUtils.checkIsColumn(var1)) {
 					// column defined in the left side
 					returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
-					returnQuery += var1 + " ";
+					returnQuery += sh[0] + " ";
 					qe.addStatement(var1, var2, mark);
 					qe.addColumn(var1);
 				} else if (DataTypeUtils.checkIsColumn(var2)) {
 					// column defined in the right side
 					returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
-					returnQuery += var2 + " ";
+					returnQuery += sh[1] + " ";
 					qe.addStatement(var2, var1, mark);
 					qe.addColumn(var2);
 				} else {
 					// no column defined
+					returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
+					qe.addColumn(var1);
 					qe.addStatement(var1, var2, mark);
+					returnQuery += sh[0] + " ";
 				}
 			} else {
+				String column = getNormalizeColumn(header.trim());
 				returnQuery = StringUtils.concatIfNotEmpty(returnQuery, ",");
-				qe.addStatement(getNormalizeColumn(header), null, null);
-				qe.addColumn(getNormalizeColumn(header));
+				qe.addStatement(column, null, null);
+				qe.addColumn(column);
 				returnQuery += header.trim() + " ";
 			}
 			
@@ -130,15 +134,16 @@ public class QueryReader {
 				return checkColumnAlias(DataTypeUtils.checkColumnPrefix(column)).trim();
 			}
 		}
-		return column.trim();
+		String[] c = column.split(" ");
+		return c[c.length-1];
 	}
 	
 	private String checkColumnAlias(String column) {
 		if (StringUtils.containLikes(column, "as")) {
-			String[] c = column.split(" ");
+			String[] c = StringUtils.splitExclude(column, " ", "()");
 			return c[c.length-1];
 		}
-		String[] c = column.split(" "); 
+		String[] c = StringUtils.splitExclude(column, " ", "()"); 
 		return c[c.length-1];
 	}
 
