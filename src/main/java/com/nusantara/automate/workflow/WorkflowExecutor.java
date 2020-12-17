@@ -128,7 +128,7 @@ public class WorkflowExecutor {
 					
 				}
 			})
-			.action(new LoginFormAction(getLoginInfo(we.getVariable())))
+			.action(new LoginFormAction(getLoginInfo(LoginInfo.parseVariable(we.getVariable()))))
 			.action(new ProductSelectorAction(productType));
 	}
 	
