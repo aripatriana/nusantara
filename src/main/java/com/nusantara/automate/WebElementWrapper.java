@@ -104,7 +104,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	
 	protected void selectDropdown(String id, String textValue) {
 		try {
-			WebElement we = findElementByXpath("//span[@id='select2-" + id + "-container']",INPUT_TIMEOUT);
+			WebElement we = findElementByXpath("//span[@aria-labelledby='select2-" + id + "-container']",INPUT_TIMEOUT);
 			if (we.isEnabled() && we.isDisplayed()) {
 				we.click();
 				//findElementByXpath("//div[contains(@id,'" + id + "')]//div//span").click();
