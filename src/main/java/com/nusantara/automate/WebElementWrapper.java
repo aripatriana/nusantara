@@ -82,7 +82,17 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			WebElement we = findElementById(id,INPUT_TIMEOUT);
 			if (we.isEnabled() && we.isDisplayed()) {
 				we.sendKeys(value);
-				findElementByXpath("//td[contains(@class,'ui-datepicker-current-day')]").click();
+				
+				try {
+					WebElement we1 = findElementByXpath("//td[contains(@class,'ui-datepicker-current-day')]", INPUT_TIMEOUT);
+					if (we1.isDisplayed() && we1.isEnabled()) {
+						we1.click();
+					} else {
+						log.info("Element " + id + " is not enabled/not displayed");
+					}
+				} catch (Exception e) {
+					log.info("Element " + id + " is not found");
+				}
 				Sleep.wait(200);
 			} else {
 				log.info("Element " + id + " is not enabled/not displayed");
@@ -99,7 +109,17 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 				we.click();
 				//findElementByXpath("//div[contains(@id,'" + id + "')]//div//span").click();
 				Sleep.wait(100);
-				findElementByXpath("//ul[contains(@id,'" + id + "')]//li[text()='" + textValue + "']", INPUT_TIMEOUT).click();
+				
+				try {
+					WebElement we1 = findElementByXpath("//ul[contains(@id,'" + id + "')]//li[text()='" + textValue + "']", INPUT_TIMEOUT);
+					if (we.isEnabled() && we.isDisplayed()) {
+						we1.click();
+					} else {
+						log.info("Element " + id + " is not enabled/not displayed");
+					}
+				} catch (TimeoutException e) {
+					log.info("Element " + id + " is not found");
+				}
 				Sleep.wait(200);
 			} else {
 				log.info("Element " + id + " is not enabled/not displayed");
