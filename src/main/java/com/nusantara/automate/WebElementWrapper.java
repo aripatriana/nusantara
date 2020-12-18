@@ -112,7 +112,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 				
 				try {
 					WebElement we1 = findElementByXpath("//ul[contains(@id,'" + id + "')]//li[text()='" + textValue + "']", INPUT_TIMEOUT);
-					if (we.isEnabled() && we.isDisplayed()) {
+					if (we1.isEnabled() && we1.isDisplayed()) {
 						we1.click();
 					} else {
 						log.info("Element " + id + " is not enabled/not displayed");
