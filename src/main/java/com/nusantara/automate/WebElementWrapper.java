@@ -81,6 +81,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		try {
 			WebElement we = findElementById(id,INPUT_TIMEOUT);
 			if (we.isEnabled() && we.isDisplayed()) {
+				we.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+				we.clear();
 				we.sendKeys(value);
 				
 				try {
