@@ -1,8 +1,6 @@
 package com.nusantara.automate;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,11 +11,12 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.framework.ReflectiveMethodInvocation;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.nusantara.automate.action.common.OpenFormAction;
+import com.nusantara.automate.action.common.OpenMenuAction;
+import com.nusantara.automate.action.common.OpenSubMenuAction;
 import com.nusantara.automate.annotation.FetchSession;
 import com.nusantara.automate.annotation.MapAction;
 import com.nusantara.automate.annotation.MapActionList;
@@ -333,6 +332,17 @@ public class ContextLoader {
 		if (getWebExchange() != null) {
 			getWebExchange().clear();
 		}
+	}
+	
+	public static void invokeMenu(Menu menu) {
+		OpenMenuAction menuAction = new OpenMenuAction(null, menu.getMenu());
+		OpenSubMenuAction subMenuAction = new OpenSubMenuAction(menuAction, menu.getSubMenu(), menu.getMenuId());
+		OpenFormAction formAction = new OpenFormAction((menu.getSubMenu() != null ? subMenuAction : menuAction), menu.getMenuId(), menu.getForm());
+		((MenuAwareness) formAction).setMenu(menu);
+		
+		menuAction.submit(webExchange);
+		subMenuAction.submit(webExchange);
+		formAction.submit(webExchange);
 	}
 	
 

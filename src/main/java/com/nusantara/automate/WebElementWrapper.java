@@ -1,5 +1,6 @@
 package com.nusantara.automate;
 
+import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -43,6 +44,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			}
 		} catch (TimeoutException e) {
 			log.info("Element " + id + " is not found");
+		} catch (InvalidElementStateException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
@@ -57,6 +60,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 				log.info("Element " + id + " is not enabled/not displayed");
 			}
 		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
+		} catch (InvalidElementStateException e) {
 			log.info("Element " + id + " is not found");
 		}
 	}
@@ -73,6 +78,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 				log.info("Element " + id + " is not enabled/not displayed");
 			}
 		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
+		} catch (InvalidElementStateException e) {
 			log.info("Element " + id + " is not found");
 		}
 	}
@@ -101,6 +108,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			}		
 		} catch (TimeoutException e) {
 			log.info("Element " + id + " is not found");
+		} catch (InvalidElementStateException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
@@ -128,6 +137,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			}
 		} catch (TimeoutException e) {
 			log.info("Element " + id + " is not found");
+		} catch (InvalidElementStateException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
@@ -142,6 +153,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			}
 		} catch (TimeoutException e) {
 			log.info("Element buttonTo_" + id + " is not found");
+		} catch (InvalidElementStateException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
@@ -155,6 +168,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 				log.info("Element " + id + " is not enabled/not displayed");
 			}
 		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
+		} catch (InvalidElementStateException e) {
 			log.info("Element " + id + " is not found");
 		}
 	}
@@ -170,6 +185,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			}
 		} catch (TimeoutException e) {
 			log.info("Element " + id + " is not found");
+		} catch (InvalidElementStateException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 
@@ -184,6 +201,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			}
 		} catch (TimeoutException e) {
 			log.info("Element " + id + " is not found");
+		} catch (InvalidElementStateException e) {
+			log.info("Element " + id + " is not found");
 		}
 	}
 	
@@ -197,6 +216,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 				log.info("Element " + id + " is not enabled/not displayed");
 			}
 		} catch (TimeoutException e) {
+			log.info("Element " + id + " is not found");
+		} catch (InvalidElementStateException e) {
 			log.info("Element " + id + " is not found");
 		}
 	}
@@ -244,6 +265,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			}
 		} catch (TimeoutException e) {
 			log.info("Element buttonTo_" + id + " is not found");
+		} catch (InvalidElementStateException e) {
+			log.info("Element " + id + " is not found");
 		}
 		
 	}
@@ -329,6 +352,37 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		clickTableSearch(id, Integer.valueOf(index));
 	}
 	
+	
+	/**
+	 * Digunakan untuk klik[action type] data row pertama pada tabel pencarian 
+	 * @param id
+	 */
+	protected void clickTableSearches(String id, int indexActionType) {
+		clickTableSearches(id, 0, indexActionType);
+	}
+	
+	/**
+	 * Digunakan untuk klik[action type] data row pada tabel pencarian sesuai dengan index yg dipassing
+	 * @param id
+	 * @param index
+	 */
+	protected void clickTableSearches(String id, int index, int indexActionType) {
+		findElementByXpath("//table[contains(@id,'" + id + "')]//tbody//tr[@data-index='" + index + "']//td//a["+indexActionType+"]").click();
+		Sleep.wait(2000);
+	}
+	
+	
+	/**
+	 * Digunakan untuk klik[action type] data row pada tabel pencarian sesuai dengan query yang match
+	 * @param id
+	 * @param index
+	 */
+	protected void clickTableSearches(String id, String query, int indexActionType) {
+		WebElement webElement = findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']");
+		String index = webElement.getAttribute("data-index");
+		clickTableSearches(id, Integer.valueOf(index), indexActionType);
+	}
+	
 	protected boolean searchOnTable(String id, String query) {
 		try {
 			findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']", 1);
@@ -348,6 +402,14 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		WebElement webElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-first')]//a");
 		if (webElement.isEnabled())
 			webElement.click();
+	}
+	
+	protected void clickPageLast() {
+		WebElement liElement = findElementByXpath("//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]");
+		if (!liElement.getAttribute("class").contains("disabled")) {
+			WebElement aElement = findElementByXpath("//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]//a");
+			aElement.click();		
+		}
 	}
 	
 	protected void clickPageLast(String formId) {
