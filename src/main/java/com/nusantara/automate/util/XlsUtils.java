@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -38,9 +39,9 @@ public class XlsUtils {
 	}
 	
 	@SuppressWarnings("resource")
-	public static void writeFile(File file, String[] headers, LinkedList<Map<String, Object>> data, int startRows, int startCols) {
+	public static void writeXls(File file, String[] headers, LinkedList<Map<String, Object>> data, int startRows, int startCols) {
 		try {
-			Workbook workbook = new XSSFWorkbook();
+			Workbook workbook = new HSSFWorkbook();
 			Sheet sheet = workbook.createSheet();
 			
 			// set header
@@ -70,7 +71,7 @@ public class XlsUtils {
 		}
 	}
 	
-	public static LinkedList<Map<String, Object>> readFile(File file) {
+	public static LinkedList<Map<String, Object>> readXls(File file) {
 		FileReader<Map<String, Object>> fileReader = new SimpleXlsFileReader(file);
 		LinkedList<Map<String, Object>> data = new LinkedList<Map<String,Object>>();
 

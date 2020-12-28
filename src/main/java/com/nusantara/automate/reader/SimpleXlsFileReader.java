@@ -9,9 +9,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public class SimpleXlsFileReader implements FileReader<Map<String, Object>> {
 	public SimpleXlsFileReader(File file) {
 		this.file = file;
 		try {
-			workbook = new XSSFWorkbook(new FileInputStream(file));
+			workbook = new HSSFWorkbook(new FileInputStream(file));
 			Sheet sheet = workbook.getSheetAt(0);
 			XlsSheetReader<LinkedHashMap<String, Object>> dataSheet = new XlsSheetReader<LinkedHashMap<String, Object>>(new XlsCustomRowReader(sheet));
 			LinkedHashMap<Integer, LinkedHashMap<String, Object>> dataPerSheet = dataSheet.readSheet(skipHeader());
