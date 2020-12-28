@@ -63,6 +63,8 @@ public class OpenFormAction extends WebElementWrapper implements Actionable, Men
 			WebDriverWait wait = new WebDriverWait(getDriver(),timeout);
 			WebElement webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//ul[@id='" + getMenuId() + "']//li//a[./span[text()='" + getForm() + "']]")));
 			webElement.click();
+			
+			Sleep.wait(3000);
 		} catch (TimeoutException e) {
 			if (prevMenu != null) {
 				if (prevMenu instanceof OpenMenuAction 

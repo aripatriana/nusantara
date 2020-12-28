@@ -372,10 +372,6 @@ public abstract class Workflow {
 	public void executeSafeActionable(Actionable actionable) throws FailedTransactionException, ModalFailedException {
 		int retry = 1;
 		try {
-			if (actionable instanceof FormActionable
-					|| actionable instanceof MultipleFormActionable) {
-				Sleep.wait(3000);
-			}
 			actionable.submit(webExchange);
 		} catch (StaleElementReferenceException | ElementNotInteractableException | TimeoutException  | NoSuchElementException | IllegalArgumentException e) {
 			retryWhenException(actionable, ++retry);
