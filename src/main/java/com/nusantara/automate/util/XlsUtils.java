@@ -59,6 +59,7 @@ public class XlsUtils {
 				
 				for (int j=startCols; j<headers.length; j++) {
 					Cell cell = rb.createCell(j);
+					cell.setCellType(Cell.CELL_TYPE_STRING);
 					cell.setCellValue(String.valueOf(map.get(j-startCols+"")));
 				}
 			}
