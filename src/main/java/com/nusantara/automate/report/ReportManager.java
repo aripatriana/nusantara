@@ -13,9 +13,11 @@ import java.util.Map.Entry;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.nusantara.automate.io.FileIO;
 import com.nusantara.automate.reader.TemplateReader;
 import com.nusantara.automate.util.DateUtils;
 import com.nusantara.automate.util.IDUtils;
+import com.nusantara.automate.util.MapUtils;
 import com.nusantara.automate.util.StringUtils;
 
 public class ReportManager {
@@ -112,6 +114,15 @@ public class ReportManager {
 		for (String banner : banners) {
 			FileUtils.copyFile(new File(StringUtils.path(templateDir, banner)), new File(StringUtils.path(reportDir, reportDateFolder, banner)));			
 		}
+
+		Map<String , LinkedList<File>> mapFiles = new HashMap<String, LinkedList<File>>();
+		FileIO.searchFile(new File(StringUtils.path(tmpDir)).listFiles(), "tmp", mapFiles, new String[]{"xls"});
+		for (File file : MapUtils.combineValueAsList(mapFiles.values())) {
+			String targetFilename = file.getAbsolutePath().replace(tmpDir, "");
+			// copy xlsx file
+			FileUtils.copyFile(file, new File(StringUtils.path(reportDir, reportDateFolder, targetFilename)));
+		}
+
 	}
 	
 	public void createReportHtml(String template) throws IOException {

@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -77,6 +78,23 @@ public class FileIO {
 		} catch (IOException e) {
 			log.error("Error writer file ", e);
 			e.printStackTrace();
+		}
+	}
+	
+	public static void searchFile(File[] files, String dir, Map<String, LinkedList<File>> mapFiles, String[] extensions) {
+		for (File file : files) {
+			if (file.isDirectory()) {
+				searchFile(file.listFiles(), file.getName(), mapFiles, extensions);
+			}
+			
+			if (file.isFile()) {
+				if (StringUtils.endsWith(file.getName(), extensions)) {
+					LinkedList<File> fileList = mapFiles.get(dir);
+					if (fileList == null) fileList = new LinkedList<File>();
+					fileList.add(file);
+					mapFiles.put(dir, fileList);
+				};
+			}
 		}
 	}
 }
