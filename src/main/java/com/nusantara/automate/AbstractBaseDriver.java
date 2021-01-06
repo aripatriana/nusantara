@@ -10,8 +10,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Function;
+import com.nusantara.automate.util.Sleep;
 import com.nusantara.automate.window.WindowScreen;
 
 /**
@@ -34,6 +36,9 @@ public abstract class AbstractBaseDriver {
 	@Autowired
 	protected Checkpoint cp;
 	
+	@Value("delay")
+	private static String delay;
+	
 	public AbstractBaseDriver() {
 		this(DriverManager.getDefaultDriver());
 	}
@@ -52,6 +57,7 @@ public abstract class AbstractBaseDriver {
 	}
 
 	public void captureFullWindow() {
+		delayInput();
 		try {
 			ws.capture(WindowScreen.CAPTURE_FULL_WINDOW);
 		} catch (IOException e) {
@@ -60,6 +66,7 @@ public abstract class AbstractBaseDriver {
 	}
 	
 	public void captureWindow() {
+		delayInput();
 		try {
 			ws.capture(WindowScreen.CAPTURE_CURRENT_WINDOW);
 		} catch (IOException e) {
@@ -68,6 +75,7 @@ public abstract class AbstractBaseDriver {
 	}
 	
 	public void captureFullModal(String elementId) {
+		delayInput();
 		try {
 			ws.capture(WindowScreen.CAPTURE_FULL_WINDOW, elementId);
 		} catch (IOException e) {
@@ -76,6 +84,7 @@ public abstract class AbstractBaseDriver {
 	}
 	
 	public void captureFailedFullWindow() {
+		delayInput();
 		try {
 			ws.setRemark("failed");
 			ws.capture(WindowScreen.CAPTURE_FULL_WINDOW);
@@ -85,6 +94,7 @@ public abstract class AbstractBaseDriver {
 	}
 	
 	public void captureFailedWindow() {
+		delayInput();
 		try {
 			ws.setRemark("failed");
 			ws.capture(WindowScreen.CAPTURE_CURRENT_WINDOW);
@@ -94,6 +104,7 @@ public abstract class AbstractBaseDriver {
 	}
 	
 	public void captureFailedFullModal(String elementId) {
+		delayInput();
 		try {
 			ws.setRemark("failed");
 			ws.capture(WindowScreen.CAPTURE_FULL_WINDOW, elementId);
@@ -195,5 +206,10 @@ public abstract class AbstractBaseDriver {
 		});
 	}
 
+
+	protected void delayInput() {
+		if (delay != null)
+			Sleep.wait(Float.valueOf((Float.valueOf(delay) * 1000)).intValue());
+	}
 	
 }

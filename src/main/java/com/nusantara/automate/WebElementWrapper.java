@@ -8,6 +8,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.nusantara.automate.util.Sleep;
 
@@ -34,7 +35,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	protected void setFocusOn(String id) {
 		try {
 			WebElement element = findElementById(id);
-				if (element.isEnabled() && element.isDisplayed()) {
+			if (element.isEnabled() && element.isDisplayed()) {
+				delayInput();
 				if("input".equals(element.getTagName())) {
 					element.sendKeys("");
 				} else{
@@ -53,6 +55,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		try {
 			WebElement we = findElementByXpath("//input[contains(@id,'" + id + "')]",INPUT_TIMEOUT); 
 			if (we.isEnabled() && we.isDisplayed()) {
+				delayInput();
 				we.clear();
 				we.sendKeys(value);
 				Sleep.wait(200);
@@ -70,6 +73,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		try {
 			WebElement we = findElementById(id,INPUT_TIMEOUT);
 			if (we.isEnabled() && we.isDisplayed()) {
+				delayInput();
 				we.sendKeys(Keys.chord(Keys.CONTROL, "a"));
 				we.clear();
 				we.sendKeys(value);
@@ -88,6 +92,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		try {
 			WebElement we = findElementById(id,INPUT_TIMEOUT);
 			if (we.isEnabled() && we.isDisplayed()) {
+				delayInput();
 				we.sendKeys(Keys.chord(Keys.CONTROL, "a"));
 				we.clear();
 				we.sendKeys(value);
@@ -97,10 +102,10 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 					if (we1.isDisplayed() && we1.isEnabled()) {
 						we1.click();
 					} else {
-						log.info("Element " + id + " is not enabled/not displayed");
+						log.info("Element " + id + " is not enabled/not displayed for value " + value);
 					}
 				} catch (Exception e) {
-					log.info("Element " + id + " is not found");
+					log.info("Element " + id + " is not found for value " + value);
 				}
 				Sleep.wait(200);
 			} else {
@@ -117,6 +122,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		try {
 			WebElement we = findElementByXpath("//span[@aria-labelledby='select2-" + id + "-container']",INPUT_TIMEOUT);
 			if (we.isEnabled() && we.isDisplayed()) {
+				delayInput();
+				
 				we.click();
 				//findElementByXpath("//div[contains(@id,'" + id + "')]//div//span").click();
 				Sleep.wait(100);
@@ -126,10 +133,10 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 					if (we1.isEnabled() && we1.isDisplayed()) {
 						we1.click();
 					} else {
-						log.info("Element " + id + " is not enabled/not displayed");
+						log.info("Element " + id + " is not enabled/not displayed for value " + textValue);
 					}
 				} catch (TimeoutException e) {
-					log.info("Element " + id + " is not found");
+					log.info("Element " + id + " is not found for value " + textValue);
 				}
 				Sleep.wait(200);
 			} else {
@@ -146,6 +153,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		try {
 			WebElement we = findElementById("buttonTo_" + id,INPUT_TIMEOUT);
 			if (we.isEnabled() && we.isDisplayed()) {
+				delayInput();
 				we.click();
 				Sleep.wait(1000);
 			} else {
@@ -162,6 +170,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		try {
 			WebElement we = findElementByXpath(webElement, "//button[contains(@id,'" + id + "')]",INPUT_TIMEOUT);
 			if (we.isEnabled() && we.isDisplayed()) {
+				delayInput();
 				we.click();
 				Sleep.wait(1000);
 			} else {
@@ -178,6 +187,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		try {
 			WebElement we = findElementById(webElement, id,INPUT_TIMEOUT);
 			if (we.isEnabled() && we.isDisplayed()) {
+				delayInput();
 				we.click();
 				Sleep.wait(1000);
 			} else {
@@ -194,6 +204,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		try {
 			WebElement we = findElementByXpath("//button[contains(@id,'" + id + "')]",INPUT_TIMEOUT);
 			if (we.isEnabled() && we.isDisplayed()) {
+				delayInput();
 				we.click();
 				Sleep.wait(1000);
 			} else {
@@ -210,6 +221,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		try {
 			WebElement we = findElementById(id,INPUT_TIMEOUT);
 			if (we.isEnabled() && we.isDisplayed()) {
+				delayInput();
 				findElementById(id).click();
 				Sleep.wait(1000);
 			} else {
@@ -240,6 +252,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		try {
 			WebElement we = findElementById("buttonTo_" + id,INPUT_TIMEOUT);
 			if (we.isEnabled() && we.isDisplayed()) {
+				delayInput();
 				we.click();
 				Sleep.wait(2000);
 				
@@ -278,6 +291,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	 * @param value
 	 */
 	protected void clickCustomTableSearch(String modalId, String tableId, String value) {
+		delayInput();
+		
 		findElementByXpath("//div[@id='" + modalId + "']//div//div//div//div//div[contains(@class,'search')]//input").sendKeys(value);
 		Sleep.wait(3000);
 		
@@ -307,6 +322,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	 * @param index
 	 */
 	protected void clickCheckBoxTableSearch(String id, int index) {
+		delayInput();
 		findElementByXpath("//table[@id='" + id + "']/tbody/tr[@data-index='" + index +"']/td/input[@type='checkbox']").click();
 		Sleep.wait(2000);
 	}
@@ -327,6 +343,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	 * @param id
 	 */
 	protected void clickTableSearch(String id) {
+		delayInput();
 		clickTableSearch(id, 0);
 	}
 	
@@ -336,6 +353,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	 * @param index
 	 */
 	protected void clickTableSearch(String id, int index) {
+		delayInput();
 		findElementByXpath("//table[contains(@id,'" + id + "')]//tbody//tr[@data-index='" + index + "']//td//a").click();
 		Sleep.wait(2000);
 	}
@@ -347,6 +365,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	 * @param index
 	 */
 	protected void clickTableSearch(String id, String query) {
+		delayInput();
 		WebElement webElement = findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']");
 		String index = webElement.getAttribute("data-index");
 		clickTableSearch(id, Integer.valueOf(index));
@@ -358,6 +377,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	 * @param id
 	 */
 	protected void clickTableSearches(String id, int indexActionType) {
+		delayInput();
 		clickTableSearches(id, 0, indexActionType);
 	}
 	
@@ -367,6 +387,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	 * @param index
 	 */
 	protected void clickTableSearches(String id, int index, int indexActionType) {
+		delayInput();
 		findElementByXpath("//table[contains(@id,'" + id + "')]//tbody//tr[@data-index='" + index + "']//td//a["+indexActionType+"]").click();
 		Sleep.wait(2000);
 	}
@@ -378,6 +399,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	 * @param index
 	 */
 	protected void clickTableSearches(String id, String query, int indexActionType) {
+		delayInput();
 		WebElement webElement = findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']");
 		String index = webElement.getAttribute("data-index");
 		clickTableSearches(id, Integer.valueOf(index), indexActionType);
@@ -394,19 +416,23 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	}
 	
 	protected void clickPageNo(String formId, String value) {
+		delayInput();
 		findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//span[@class='page-list']//span//button").click();
 		findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//span[@class='page-list']//span//ul//li//a[text()='" + value + "']").click();
 	}
 	
 	protected void clickPageFirst(String formId) {
 		WebElement webElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-first')]//a");
-		if (webElement.isEnabled())
+		if (webElement.isEnabled()) {
+			delayInput();
 			webElement.click();
+		}
 	}
 	
 	protected void clickPageLast() {
 		WebElement liElement = findElementByXpath("//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]");
 		if (!liElement.getAttribute("class").contains("disabled")) {
+			delayInput();
 			WebElement aElement = findElementByXpath("//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]//a");
 			aElement.click();		
 		}
@@ -415,6 +441,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	protected void clickPageLast(String formId) {
 		WebElement liElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]");
 		if (!liElement.getAttribute("class").contains("disabled")) {
+			delayInput();
 			WebElement aElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]//a");
 			aElement.click();		
 		}
@@ -491,6 +518,5 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	public String getModalId() {
 		return getModalElement().getAttribute("id");
 	}
-	
 	
 }
