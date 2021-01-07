@@ -23,6 +23,8 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	
 	private static int INPUT_TIMEOUT = 3;
 	
+	public static int SEARCH_TIMEOUT_IN_MILIS = 3000; 
+	
 	public static final String DEFAULT_MAIN = "main";
 	
 	public static final String DEFAULT_MODAL = "//div[@class='modal fade modal-wide in']";
@@ -293,7 +295,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		delayInput();
 		
 		findElementByXpath("//div[@id='" + modalId + "']//div//div//div//div//div[contains(@class,'search')]//input").sendKeys(value);
-		Sleep.wait(3000);
+		Sleep.wait(SEARCH_TIMEOUT_IN_MILIS);
 		
 		int index = 0;
 		try {
@@ -302,7 +304,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 			
 			findElementByXpath("//table[contains(@id,'" + tableId + "')]//tbody//tr[@data-index='" + index + "']//td//input[@type='checkbox' and @data-index='" + index + "']").click();
 		} catch (StaleElementReferenceException e) {
-			Sleep.wait(3000);	
+			Sleep.wait(SEARCH_TIMEOUT_IN_MILIS);	
 			findElementByXpath("//table[contains(@id,'" + tableId + "')]//tbody//tr[@data-index='" + index + "']//td//input[@type='checkbox' and @data-index='" + index + "']").click();
 		}
 	}
@@ -312,6 +314,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	 * @param id
 	 */
 	protected void clickCheckBoxTableSearch(String id) {
+		delayInput();
 		clickCheckBoxTableSearch(id, 0);
 	}
 	
@@ -323,7 +326,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	protected void clickCheckBoxTableSearch(String id, int index) {
 		delayInput();
 		findElementByXpath("//table[@id='" + id + "']/tbody/tr[@data-index='" + index +"']/td/input[@type='checkbox']").click();
-		Sleep.wait(2000);
+		Sleep.wait(SEARCH_TIMEOUT_IN_MILIS);
 	}
 	
 	/**
@@ -332,6 +335,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	 * @param query
 	 */
 	protected void clickCheckBoxTableSearch(String id, String query) {
+		delayInput();
 		WebElement webElement = findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']");
 		String index = webElement.getAttribute("data-index");
 		clickCheckBoxTableSearch(id, Integer.valueOf(index));
@@ -354,7 +358,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	protected void clickTableSearch(String id, int index) {
 		delayInput();
 		findElementByXpath("//table[contains(@id,'" + id + "')]//tbody//tr[@data-index='" + index + "']//td//a").click();
-		Sleep.wait(2000);
+		Sleep.wait(SEARCH_TIMEOUT_IN_MILIS);
 	}
 	
 	
@@ -388,7 +392,7 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 	protected void clickTableSearches(String id, int index, int indexActionType) {
 		delayInput();
 		findElementByXpath("//table[contains(@id,'" + id + "')]//tbody//tr[@data-index='" + index + "']//td//a["+indexActionType+"]").click();
-		Sleep.wait(2000);
+		Sleep.wait(SEARCH_TIMEOUT_IN_MILIS);
 	}
 	
 	
@@ -427,31 +431,53 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		delayInput();
 		findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//span[@class='page-list']//span//button").click();
 		findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//span[@class='page-list']//span//ul//li//a[text()='" + value + "']").click();
+		Sleep.wait(SEARCH_TIMEOUT_IN_MILIS);
 	}
 	
 	protected void clickPageFirst(String formId) {
-		WebElement webElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-first')]//a");
-		if (webElement.isEnabled()) {
-			delayInput();
-			webElement.click();
+		try {
+			WebElement webElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-first')]//a");
+			if (webElement.isEnabled()) {
+				delayInput();
+				webElement.click();
+				Sleep.wait(SEARCH_TIMEOUT_IN_MILIS);
+			}
+		} catch (TimeoutException e) {
+			log.info("Element page-first is not found");
+		} catch (InvalidElementStateException e) {
+			log.info("Element page-first is not found");
 		}
 	}
 	
 	protected void clickPageLast() {
-		WebElement liElement = findElementByXpath("//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]");
-		if (!liElement.getAttribute("class").contains("disabled")) {
-			delayInput();
-			WebElement aElement = findElementByXpath("//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]//a");
-			aElement.click();		
+		try {
+			WebElement liElement = findElementByXpath("//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]");
+			if (!liElement.getAttribute("class").contains("disabled")) {
+				delayInput();
+				WebElement aElement = findElementByXpath("//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]//a");
+				aElement.click();
+				Sleep.wait(SEARCH_TIMEOUT_IN_MILIS);
+			}
+		} catch (TimeoutException e) {
+			log.info("Element page-last is not found");
+		} catch (InvalidElementStateException e) {
+			log.info("Element page-last is not found");
 		}
 	}
 	
 	protected void clickPageLast(String formId) {
-		WebElement liElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]");
-		if (!liElement.getAttribute("class").contains("disabled")) {
-			delayInput();
-			WebElement aElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]//a");
-			aElement.click();		
+		try {
+			WebElement liElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]");
+			if (!liElement.getAttribute("class").contains("disabled")) {
+				delayInput();
+				WebElement aElement = findElementByXpath("//form[@id='" + formId + "']//div[@class='row']//div[not(@id)]//div[1]//div[4]//ul[@class='pagination']//li[contains(@class,'page-last')]//a");
+				aElement.click();		
+				Sleep.wait(SEARCH_TIMEOUT_IN_MILIS);
+			}
+		} catch (TimeoutException e) {
+			log.info("Element page-last is not found");
+		} catch (InvalidElementStateException e) {
+			log.info("Element page-last is not found");
 		}
 	}
 
