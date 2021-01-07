@@ -8,7 +8,6 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.nusantara.automate.util.Sleep;
 
@@ -403,6 +402,15 @@ public abstract class WebElementWrapper extends AbstractBaseDriver {
 		WebElement webElement = findElementByXpath("//table[@id='" + id + "']/tbody/tr[./td/text()='" + query+ "']");
 		String index = webElement.getAttribute("data-index");
 		clickTableSearches(id, Integer.valueOf(index), indexActionType);
+	}
+	
+	protected boolean isElementExist(String id) {
+		try {
+			findElementById(id);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 	
 	protected boolean searchOnTable(String id, String query) {
