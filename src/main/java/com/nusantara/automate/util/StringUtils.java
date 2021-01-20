@@ -378,6 +378,8 @@ public class StringUtils {
 			}
 		}
 		
+		MapUtils.removeMapIfOnlyContains(data, regexExlude);
+		
 		return replaceById(text, data.values().toArray(new String[data.size()]), new HashMap<String, String>());
 		
 	}
@@ -437,9 +439,5 @@ public class StringUtils {
 			text = text.substring(1, text.length());
 		}
 		return text;
-	}
-	
-	public static void main(String[] args) {
-		System.out.println(trimForward("     test     "));
 	}
 }

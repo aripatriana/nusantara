@@ -215,4 +215,16 @@ public class MapUtils {
 		}
 		return result;
 	}
+	
+	public static <K, V> void removeMapIfOnlyContains(Map<K, V> data, String regex) {
+		Map<K, V> newData  = new HashMap<K, V>(data);
+		for (Entry<K, V> e : data.entrySet()) {
+			if (e.getValue().toString().length()==1
+					&& regex.contains(e.getValue().toString())) {
+				newData.remove(e.getKey());
+			}	
+		}
+		data.clear();
+		data.putAll(newData);
+	}
 }

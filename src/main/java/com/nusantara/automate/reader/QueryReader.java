@@ -134,6 +134,8 @@ public class QueryReader {
 				return checkColumnAlias(DataTypeUtils.checkColumnPrefix(column)).trim();
 			}
 		}
+		if (DataTypeUtils.checkType(column, DataTypeUtils.TYPE_OF_ARGUMENT))
+			return column;
 		String[] c = column.split(" ");
 		return c[c.length-1];
 	}
