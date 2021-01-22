@@ -16,6 +16,7 @@ import com.nusantara.automate.FileRetention;
 import com.nusantara.automate.RunTestApplication;
 import com.nusantara.automate.Statement;
 import com.nusantara.automate.WebExchange;
+import com.nusantara.automate.action.common.DelayAction;
 import com.nusantara.automate.action.common.LoginFormAction;
 import com.nusantara.automate.action.common.LogoutFormAction;
 import com.nusantara.automate.action.common.ProductSelectorAction;
@@ -90,6 +91,8 @@ public class WorkflowExecutor {
 						assertAggregate(config, entry, workflow, scen);
 					} else if (entry.checkKeyword(BasicScript.CLEAR_SESSION)) {
 						clearSession(config, entry, workflow);
+					} else if (entry.checkKeyword(BasicScript.DELAY)) {
+						delay(config, entry, workflow);
 					}
 				}
 				
@@ -158,6 +161,11 @@ public class WorkflowExecutor {
 	private void selectProduct(WorkflowConfig wc, WorkflowEntry we, Workflow workflow) {
 		workflow
 			.action(new ProductSelectorAction(we.getVariable()));
+	}
+	
+	private void delay(WorkflowConfig wc, WorkflowEntry we, Workflow workflow) {
+		workflow
+			.action(new DelayAction(we.getVariable()));
 	}
 	
 	private void loadFile(WorkflowConfig wc, WorkflowEntry we, Workflow workflow, String workflowKey) throws Exception {

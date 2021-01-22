@@ -22,6 +22,7 @@ public class BasicScript {
 	public final static String ASSERT = "assert";
 	public final static String ASSERT_QUERY = "assertQuery";
 	public final static String ASSERT_AGGREGATE = "assertAggregate";
+	public final static String DELAY = "delay";
 	
 	public final static String REJECT = "reject";
 	public final static String REJECT_DETAIL = "rejectDetail";
@@ -66,5 +67,6 @@ public class BasicScript {
 		BASIC_SCRIPT.add(ASSERT);
 		BASIC_SCRIPT.add(ASSERT_QUERY);
 		BASIC_SCRIPT.add(ASSERT_AGGREGATE);
+		BASIC_SCRIPT.add(DELAY);
 	}
 }
